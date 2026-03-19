@@ -1,0 +1,150 @@
+.map-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f4f4f4;
+  overflow: hidden;
+}
+
+.map-header {
+  padding: 15px;
+  background: white;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 20;
+}
+
+.mobile-hint {
+  font-size: 11px;
+  color: #888;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
+.map-viewport {
+  flex: 1;
+  overflow: auto; 
+  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.merged-grid-container {
+  display: grid;
+  gap: 2px;
+  background-color: #ccc;
+  border: 2px solid #333;
+  margin: 0 auto;
+  width: max-content;
+  min-width: fit-content;
+}
+
+.grid-cell {
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border: 1px solid #eee;
+  padding: 5px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.merged-block {
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc; 
+}
+
+.clickable-block {
+  background: #e8f5e9 !important; 
+  color: #2e7d32;
+  cursor: pointer;
+}
+
+.clickable-block:hover {
+  background: #c8e6c9 !important; 
+  transform: scale(1.01);
+  z-index: 5;
+}
+
+.clickable-block.selected {
+  background: #bbdefb !important;
+  color: #1565c0 !important;
+  border: 2px solid #1976d2 !important;
+  z-index: 10;
+}
+
+.static-block {
+  background: #f0f0f0 !important; 
+  cursor: default;
+  border: 1px solid #ddd;
+}
+
+.static-block:hover {
+  background: #f0f0f0 !important; 
+  transform: none;
+}
+
+.empty {
+  color: #bbb;
+  background: #fafafa;
+}
+
+.report-mini-modal {
+  position: fixed;
+  bottom: 0; 
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 20px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  border-radius: 20px 20px 0 0;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+}
+
+@media (min-width: 768px) {
+  .report-mini-modal {
+    bottom: 20px;
+    right: 20px;
+    left: auto;
+    width: 300px;
+    border-radius: 12px;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-submit {
+  flex: 1;
+  background: #2e7d32;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: #eee;
+  color: #333;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
