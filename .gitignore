@@ -7,7 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-frontend/node_modules
+# Dependency folders
+node_modules/
+# Look inside every folder for this folder
+**/node_modules/
+
+.env
+**/.env
+
 dist
 dist-ssr
 *.local
