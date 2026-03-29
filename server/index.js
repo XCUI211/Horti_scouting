@@ -121,3 +121,26 @@ app.post('/api/createaccount', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+app.post('/api/sectionreports', async (req, res) => {
+    const {sid, uid, floor, pests_found, pest_type, pest_severity, biology, trap_number, bug_count} = req.body;  // get data from the frontend
+
+    try {
+        const newReport = await pool.query(
+            `INSERT INTO section_reports
+            (sid, uid, floor, pests_found, pest_type, pest_severity, biology, trap_number, bug_count, approval_status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
+            RETURNING *`,
+            [sid, uid, floor, pests_found, pest_type, pest_severity, biology || null, trap_number || null, bug_count ?? null]
+        );
+
+        // Sends success message back to frontend
+        res.status(201).json({
+            message: 'Account created successfully!'
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});

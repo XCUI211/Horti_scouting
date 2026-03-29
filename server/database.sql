@@ -29,7 +29,8 @@ CREATE TABLE section_reports (
 
     floor           VARCHAR(50) NOT NULL,                                                                -- floor of the section
     pests_found     BOOLEAN     NOT NULL,                                                                -- whether pests were found in the section
-    health_score    INT         NOT NULL CHECK (health_score BETWEEN 1 AND 5),                           -- health status of the plant (1-5)
+    pest_type       VARCHAR(50),                                                                         -- type of pest found (if applicable)
+    pest_severity   INT,                                                                                 -- pest status of the plant (1-5) (if applicable)
     biology         TEXT,                                                                                -- biology used to treat plants (if applicable)
 
     trap_number     VARCHAR(50),                                                                         -- trap number used for pest control (if applicable)

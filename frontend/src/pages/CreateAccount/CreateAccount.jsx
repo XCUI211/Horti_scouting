@@ -28,7 +28,7 @@ function CreateAccount() {
 
             // if successful
             console.log("Account created:", response.data);
-            alert(`Account creation succesfull! Please log in with your new credentials.`);
+            alert("Account creation succesfull! Please log in with your new credentials.");
             navigate("/");
 
           // if error
