@@ -1,6 +1,6 @@
 import "./Login.css";
 
-function Login({ onAdminClick, onScoutClick }) {
+function Login({ onAdminClick, onScoutClick, onCreateAccountClick}) {
   return (
     <div className="container">
       <img src="/logo.png" alt="Vireo logo" />
@@ -8,6 +8,7 @@ function Login({ onAdminClick, onScoutClick }) {
 
       <button className="admin" onClick={onAdminClick}>Log in as an Administrator</button>
       <button className="scout" onClick={onScoutClick}>Log in as a Scout</button>
+      <button className="create-account" onClick={onCreateAccountClick}>Create Account</button>
 
       <button className="help">Help</button>
     </div>

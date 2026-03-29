@@ -76,3 +76,48 @@ app.post('/api/login', async (req, res) => {
 app.listen(PORT, () => {  // start the server
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+
+// GET request from database to get all users; for testing purposes only
+app.get('/api/users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM users ORDER BY uid');
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+// POST request for creating a new account; checks if the username already exists, and if not, creates a new user
+// with the "Scout" role (admin accounts should NOT be created this way)
+app.post('/api/createaccount', async (req, res) => {
+    const { username, email, password } = req.body;  // get data from the frontend
+
+    try {
+        // Get all usernames
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+
+        // Throw error if the user already exist
+        if (result.rows.length > 0) {
+            return res.status(409).json({ message: 'Username already exists' });
+        }
+
+        // Creating new user; ALWAYS hardcode "Scout" role; admin accounts should NOT be created this way
+        const newUser = await pool.query(
+            "INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, 'scout') RETURNING *",
+            [username, email, password]
+        );
+
+        // Sends success message back to frontend
+        res.status(201).json({
+            message: 'Account created successfully!'
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});

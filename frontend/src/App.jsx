@@ -2,6 +2,7 @@ import { useState } from "react"; // 1. Import the state hook
 import Login from "./pages/Login/Login";
 import LoginAdmin from "./pages/LoginAdmin/LoginAdmin"; // 2. Import the new page
 import LoginScout from "./pages/LoginScout/LoginScout"; // 2. Import the new page
+import CreateAccount from "./pages/CreateAccount/CreateAccount";
 
 function App() {
   // 3. Create a state called 'view'. Default is 'home'
@@ -14,10 +15,14 @@ function App() {
   if (view === "scout") {
       return <LoginScout onBack={() => setView("home")} />;
   }
+  if (view === "create") {
+    return <CreateAccount onBack={() => setView("home")} />;
+  }
+
   return <Login
   onAdminClick={() => setView("admin")}
   onScoutClick={() => setView("scout")}
-
+  onCreateAccountClick={() => setView("create")}
    />;
 }
 
