@@ -1,14 +1,18 @@
 import React, { useState } from 'react';  //useState keep track of user input
 import axios from 'axios';  //carries data to the server
 import "./LoginAdmin.css";
+import {useNavigate} from "react-router-dom";
 
-function LoginAdmin({ onBack }) {
+function LoginAdmin() {
 
     //Keeping track of user input [variable, function]
     //all initialized as empty strings
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');  //error to be shown to the user through interface (e.g.wrong password)
+
+    //  use navigate (for back button) to redirect button back to routed main page
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {  //waiting for the server
     e.preventDefault();  //prevents page refresh
@@ -69,8 +73,8 @@ function LoginAdmin({ onBack }) {
 
             <a href="#" className="forgot-password">I forgot my password</a>
 
-            {/* This button uses the onBack function from App.js */}
-            <button className="back-btn" onClick={onBack}>Back</button>
+            {/* This button uses navigate to return the previous page */}
+            <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
         </div>
     );
 }

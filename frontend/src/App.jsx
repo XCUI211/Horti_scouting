@@ -1,29 +1,18 @@
-import { useState } from "react"; // 1. Import the state hook
+import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login/Login";
-import LoginAdmin from "./pages/LoginAdmin/LoginAdmin"; // 2. Import the new page
-import LoginScout from "./pages/LoginScout/LoginScout"; // 2. Import the new page
+import LoginAdmin from "./pages/LoginAdmin/LoginAdmin";
+import LoginScout from "./pages/LoginScout/LoginScout";
 import CreateAccount from "./pages/CreateAccount/CreateAccount";
 
 function App() {
-  // 3. Create a state called 'view'. Default is 'home'
-  const [view, setView] = useState("home");
-
-  // 4. Logic to decide which component to show
-  if (view === "admin") {
-    return <LoginAdmin onBack={() => setView("home")} />;
-  }
-  if (view === "scout") {
-      return <LoginScout onBack={() => setView("home")} />;
-  }
-  if (view === "create") {
-    return <CreateAccount onBack={() => setView("home")} />;
-  }
-
-  return <Login
-  onAdminClick={() => setView("admin")}
-  onScoutClick={() => setView("scout")}
-  onCreateAccountClick={() => setView("create")}
-   />;
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/admin" element={<LoginAdmin />} />
+      <Route path="/scout" element={<LoginScout />} />
+      <Route path="/create" element={<CreateAccount />} />
+    </Routes>
+  );
 }
 
 export default App;

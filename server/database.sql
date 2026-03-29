@@ -26,8 +26,15 @@ CREATE TABLE section_reports (
     rid             SERIAL      PRIMARY KEY,                                                             -- unique report ID number
     sid             INT         NOT NULL REFERENCES sections (sid) ON DELETE CASCADE,                    -- foreign key
     uid             INT         NOT NULL REFERENCES users (uid),                                         -- foreign key to users table; one user can have many reports
+
+    floor           VARCHAR(50) NOT NULL,                                                                -- floor of the section
     pests_found     BOOLEAN     NOT NULL,                                                                -- whether pests were found in the section
     health_score    INT         NOT NULL CHECK (health_score BETWEEN 1 AND 5),                           -- health status of the plant (1-5)
+    biology         TEXT,                                                                                -- biology used to treat plants (if applicable)
+
+    trap_number     VARCHAR(50),                                                                         -- trap number used for pest control (if applicable)
+    bug_count       INT,                                                                                 -- number of bugs found in the trap (if applicable)
+
     report_time     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,                                      -- timestamp of the report
     approval_status VARCHAR(50) NOT NULL CHECK (approval_status IN ('pending', 'approved', 'rejected')), -- approval status of the report
     reviewed_at     TIMESTAMP                                                                            -- timestamp of when the report was reviewed (approved/rejected)
