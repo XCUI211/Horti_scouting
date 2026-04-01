@@ -26,9 +26,16 @@ function LoginAdmin() {
             });
 
             // if successful
-            console.log("Success:", response.data);
-            alert(`Welcome, ${response.data.user.username}!`);
+            // console.log("Success:", response.data);
+            // alert(`Welcome, ${response.data.user.username}!`);
+            if (response.data) {
+                console.log("Success:", response.data);
 
+                // Optional: store user info in localStorage if you need it for other pages
+                // localStorage.setItem('user', JSON.stringify(response.data.user));
+
+                navigate("/admin_home");
+            }
           // if error
         }  catch (err) {
             console.error("Login failed:", err.response?.data);
