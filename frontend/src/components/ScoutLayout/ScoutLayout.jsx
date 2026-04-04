@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, MapPin, Bell, ClipboardList, UserCircle } from 'lucide-react';
 import "./ScoutLayout.css";
 
+// Defines the general in-app layout for the Scout view
+// that includes top header and bottom navigation bar
+
 const ScoutLayout = ({ children, title }) => {
   const navigate = useNavigate();
   const location = useLocation();

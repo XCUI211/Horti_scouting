@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, MapPin, Bell, Users, BarChart3, UserCircle } from 'lucide-react';
 import "./AdminLayout.css";
 
+// Defines the general in-app layout for the Admin view
+// that includes top header and bottom navigation bar
+
 const AdminLayout = ({ children, title }) => {
   const navigate = useNavigate();
   const location = useLocation();
