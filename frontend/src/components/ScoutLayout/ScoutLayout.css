@@ -1,3 +1,6 @@
+/* Defines the general in-app layout for the Scout view */
+/* that includes top header and bottom navigation bar */
+
 /* Base Structural Wrappers */
 .scout-mobile-wrapper {
   display: flex;

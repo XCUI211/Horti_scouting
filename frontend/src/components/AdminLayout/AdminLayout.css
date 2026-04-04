@@ -1,3 +1,6 @@
+/* Defines the general in-app layout for the Admin view */
+/* that includes top header and bottom navigation bar */
+
 /* Base Structural Wrappers */
 .admin-mobile-wrapper {
   display: flex;
