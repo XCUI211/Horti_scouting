@@ -1,4 +1,4 @@
-import React, { useState } from 'react';  //useState keep track of user input
+import React, { useState, useEffect } from 'react';  //useState keep track of user input
 import axios from 'axios';  //carries data to the server
 import "./LoginScout.css";
 import {useNavigate} from "react-router-dom";
@@ -10,8 +10,19 @@ function LoginScout() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');  //error to be shown to the user through interface (e.g.wrong password)
 
-    //  use navigate (for back button) to redirect button back to routed main page
     const navigate = useNavigate();
+
+    // Logging the user out if they hit back arrow right after logging in
+    // Ensures each user logs in using their credentials and does not use somebody else's account by accident
+    useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        // If they land on login page while a session is active, delete it
+        localStorage.removeItem('user');
+        console.log("Shared Device Security: Session cleared.");
+    }
+}, []);  // no navigating away, just the log in page for the next person to log in
+
 
     const handleLogin = async (e) => {  //waiting for the server
     e.preventDefault();  //prevents page refresh
@@ -25,9 +36,19 @@ function LoginScout() {
             });
 
             // if successful
-            console.log("Success:", response.data);
-            alert(`Welcome, ${response.data.user.username}!`);
+            if (response.data && response.data.user) {
+                const user = response.data.user;
 
+                // Saving the user first
+                localStorage.setItem('user', JSON.stringify(user));
+
+                // Deciding where to send them based on the flag
+                if (user.mustChangePassword) {  // if they are using a One Time Password
+                    navigate("/force_password_change", { replace: true });
+                } else {  // if they are normally logging in
+                    navigate("/scout_home");
+                }
+            }
           // if error
         }  catch (err) {
             console.error("Login failed:", err.response?.data);
@@ -36,7 +57,7 @@ function LoginScout() {
     };
 
     return (
-        <div className="scout-container">
+        <div className="scout-login-container">
             <img src="/logo.png" alt="Vireo logo" className="scout-logo" />
             <h1>Log in as a Scout</h1>
 
@@ -73,7 +94,14 @@ function LoginScout() {
             <a href="#" className="forgot-password">I forgot my password</a>
 
             {/* This button uses navigate to return the previous page */}
-            <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
+            <button
+                className="back-btn"
+                onClick={(e) => {
+                    e.preventDefault(); // Stops the '#' from being added to the URL
+                    navigate('/');      // sends back to the first page
+                }}
+                >
+                Back</button>
         </div>
     );
 }

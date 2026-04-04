@@ -22,14 +22,15 @@ function CreateAccount() {
             //Sending the request to the backend
             const response = await axios.post('http://localhost:5000/api/createaccount', {  //sends POST request for sensitive data
                 username: username,
-                email: email,
+                email: email || null,  //sends null if email is empty (makes email optional for scouts)
                 password: password,
+                mustChangePassword: true  // makes the password only temporary (to be changed at first login by the scout)
             });
 
             // if successful
             console.log("Account created:", response.data);
-            alert("Account creation succesfull! Please log in with your new credentials.");
-            navigate("/");
+            alert("You successfully created a new scout account with a temporary password!");
+            navigate("/account_management_admin");
 
           // if error
         }  catch (err) {
@@ -39,7 +40,7 @@ function CreateAccount() {
     };
 
     return (
-        <div className="scout-container">
+        <div className="account-creation-container">
             <img src="/logo.png" alt="Vireo logo" className="scout-logo" />
             <h1>Create Scout Account</h1>
 
@@ -60,12 +61,11 @@ function CreateAccount() {
                 </div>
 
                 <div className="input-group">
-                    <label>Email</label>
+                    <label>Email (optional)</label>
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        required
                     />
                 </div>
 

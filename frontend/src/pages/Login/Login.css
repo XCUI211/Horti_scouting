@@ -8,7 +8,7 @@ body {
   min-height: 100vh;
 }
 
-.container {
+.login-container {
   width: 100%;
   max-width: 400px;
 
@@ -20,7 +20,7 @@ body {
 }
 
 /* buttons */
-button {
+.login-container button {
   width: 100%;
   max-width: 300px;
 
@@ -34,25 +34,26 @@ button {
 }
 
 /* header (for the 'Plant quality control app')*/
-h2 {
+.login-container h2 {
 font-size: 32px;
 font-weight: 770;
 margin-bottom: 30px;
+padding: 0 20px;
 }
 
 /*Controlling button design*/
 
-.admin {
+.login-container .admin {
   background-color: #152974 !important; /* Company's dark blue */
   color: white;              /* White text */
 }
 
-.scout {
+.login-container .scout {
   background-color: #57b021; /* Company's green */
   color: white;            /* White text */
 }
 
-.help {
+.login-container .help {
   background-color: #89898b;
   color: white;
   max-width: 120px;
@@ -62,7 +63,7 @@ margin-bottom: 30px;
 }
 
 /* Hover effect to make it interactive */
-button:hover {
+.login-container button:hover {
   opacity: 0.9;
   transform: scale(1.02);
   transition: 0.2s;

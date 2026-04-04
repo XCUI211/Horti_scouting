@@ -5,6 +5,7 @@ CREATE TABLE users (
     role            VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'scout')),   -- 'admin' or 'scout'
 	email           VARCHAR(50),                                               -- optional
     is_employed     BOOLEAN NOT NULL DEFAULT TRUE                              -- if a user is fired/deleted, their reports should still exist
+    must_change_password BOOLEAN NOT NULL DEFAULT FALSE                        -- after admin resets scout password they NEED to change it
 );
 
 CREATE TABLE maps (

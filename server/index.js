@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');  // For password hashing
 const express = require('express');  // Express framework allows server to respond to internet requests
 const cors = require('cors');  // CORS (Cross-Origin Resource Sharing)
 const { Pool } = require('pg');  // Imports PostgreSQL driver
@@ -36,7 +37,7 @@ app.get('/', (req, res) => {
 // Starting the server
 const PORT = process.env.PORT || 5000;  // use port from .env file, or use port 5000 if the other one is unavailable
 
-// Matching the axios address used in the frontend
+// POST request for logging in
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;  // get data from the frontend
 
@@ -51,17 +52,18 @@ app.post('/api/login', async (req, res) => {
 
         // Otherwise choosing the user
         const user = result.rows[0];
+        const isMatch = await bcrypt.compare(password, user.password_hash);  // compare password to hashed password
 
-        // Checking if the password matches (for now plain text, needs to be hashed later!!!)
-        if (user.password_hash === password) {
+        if (isMatch) {
             // If correct; sending back the user info (without the password)
             res.json({
                 message: 'Login successful!',
                 user: {
-                    id: user.uid,
+                    uid: user.uid,
                     username: user.username,
                     role: user.role,
-                    name: user.name
+                    email: user.email,
+                    mustChangePassword: user.must_change_password
                 }
             });
         } else {
@@ -73,10 +75,45 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+
+// Get all scouts (for the Admin's dropdown list)
+app.get('/api/users/scouts', async (req, res) => {
+    try {
+        const result = await pool.query(
+            "SELECT uid, username FROM users WHERE role = 'scout' ORDER BY username ASC"
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error fetching scouts' });
+    }
+});
+
+
+// Get a specific user by UID
+app.get('/api/users/:uid', async (req, res) => {
+    const { uid } = req.params;
+    try {
+        const result = await pool.query(
+            'SELECT uid, username, role, email FROM users WHERE uid = $1',
+            [uid]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 app.listen(PORT, () => {  // start the server
     console.log(`Server is running on http://localhost:${PORT}`);
 });
-
 
 
 // GET request from database to get all users; for testing purposes only
@@ -94,7 +131,7 @@ app.get('/api/users', async (req, res) => {
 // POST request for creating a new account; checks if the username already exists, and if not, creates a new user
 // with the "Scout" role (admin accounts should NOT be created this way)
 app.post('/api/createaccount', async (req, res) => {
-    const { username, email, password } = req.body;  // get data from the frontend
+    const { username, email, password, mustChangePassword } = req.body;  // get data from the frontend
 
     try {
         // Get all usernames
@@ -105,10 +142,14 @@ app.post('/api/createaccount', async (req, res) => {
             return res.status(409).json({ message: 'Username already exists' });
         }
 
+        // Hashing the password before inserting it into the database
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
         // Creating new user; ALWAYS hardcode "Scout" role; admin accounts should NOT be created this way
-        const newUser = await pool.query(
-            "INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, 'scout') RETURNING *",
-            [username, email, password]
+        await pool.query(
+            "INSERT INTO users (username, email, password_hash, role, must_change_password) VALUES ($1, $2, $3, 'scout', $4) RETURNING *",
+            [username, email, hashedPassword, mustChangePassword || false]
         );
 
         // Sends success message back to frontend
@@ -121,6 +162,7 @@ app.post('/api/createaccount', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
 
 app.post('/api/sectionreports', async (req, res) => {
     const {sid, uid, floor, pests_found, pest_type, pest_severity, biology, trap_number, bug_count} = req.body;  // get data from the frontend
@@ -139,6 +181,95 @@ app.post('/api/sectionreports', async (req, res) => {
             message: 'Account created successfully!'
         });
 
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+// POST request for changing user password (if the user remembers the old one!)
+app.post('/api/users/change-password', async (req, res) => {
+    const { uid, currentPassword, newPassword } = req.body;
+
+    try {
+        // Finding the user
+        const userResult = await pool.query('SELECT * FROM users WHERE uid = $1', [uid]);
+        if (userResult.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+
+        const user = userResult.rows[0];
+
+        // Verifying current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isMatch) return res.status(401).json({ message: 'Current password incorrect' });
+
+        // Hashing the new password and updating it in the database
+        const saltRounds = 10;
+        const newHashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        await pool.query('UPDATE users SET password_hash = $1 WHERE uid = $2', [newHashedPassword, uid]);
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+// POST request for changing user email
+app.post('/api/users/change-email', async (req, res) => {
+    const { uid, password, newEmail } = req.body;
+
+    try {
+        const userResult = await pool.query('SELECT * FROM users WHERE uid = $1', [uid]);
+        if (userResult.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+
+        const user = userResult.rows[0];
+
+        // Verifying password to ensure the person changing the email is the owner
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+        if (!isMatch) return res.status(401).json({ message: 'Incorrect password' });
+
+        // Updating the email (new email can be empty for the Scout)
+        await pool.query('UPDATE users SET email = $1 WHERE uid = $2', [newEmail, uid]);
+
+        res.json({ message: 'Email updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+// POST request to reset a scout's password (Admin only)
+app.post('/api/admin/reset-scout-password', async (req, res) => {
+    const { scoutUid, newPassword } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        // Updating the password and setting the flag to true
+        await pool.query(
+            "UPDATE users SET password_hash = $1, must_change_password = true WHERE uid = $2",
+            [hashedPassword, scoutUid]
+        );
+        res.json({ message: 'Password reset and flag set successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Failed to reset password' });
+    }
+});
+
+// POST request to complete the force change (Scout finishing the reset)
+app.post('/api/users/complete-force-change', async (req, res) => {
+    const { uid, newPassword } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        // Updating the password and clearing the flag
+        await pool.query(
+            "UPDATE users SET password_hash = $1, must_change_password = false WHERE uid = $2",
+            [hashedPassword, uid]
+        );
+        res.json({ message: 'Password updated successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';  //useState keep track of user input
+import React, { useState, useEffect } from 'react';  //useState keep track of user input
 import axios from 'axios';  //carries data to the server
 import "./LoginAdmin.css";
 import {useNavigate} from "react-router-dom";
@@ -14,6 +14,18 @@ function LoginAdmin() {
     //  use navigate (for back button) to redirect button back to routed main page
     const navigate = useNavigate();
 
+    // Logging the user out if they hit back arrow right after logging in
+    // Ensures each user logs in using their credentials and does not use somebody else's account by accident
+    useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        // If they land on login page while a session is active, delete it
+        localStorage.removeItem('user');
+        console.log("Shared Device Security: Session cleared.");
+    }
+}, []);  // no navigating away, just the log in page for the next person to log in
+
+
     const handleLogin = async (e) => {  //waiting for the server
     e.preventDefault();  //prevents page refresh
     setError('');       //resets error message from any previous attempts
@@ -26,14 +38,13 @@ function LoginAdmin() {
             });
 
             // if successful
-            // console.log("Success:", response.data);
             // alert(`Welcome, ${response.data.user.username}!`);
             if (response.data) {
                 console.log("Success:", response.data);
 
-                // Optional: store user info in localStorage if you need it for other pages
-                // localStorage.setItem('user', JSON.stringify(response.data.user));
-
+                // Storing user info in localStorage for other pages
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                console.log("Data saved to localStorage:", response.data.user);
                 navigate("/admin_home");
             }
           // if error
@@ -44,7 +55,7 @@ function LoginAdmin() {
     };
 
     return (
-        <div className="admin-container">
+        <div className="admin-login-container">
             <img src="/logo.png" alt="Vireo logo" className="admin-logo" />
             <h1>Log in as an Administrator</h1>
 
@@ -81,7 +92,14 @@ function LoginAdmin() {
             <a href="#" className="forgot-password">I forgot my password</a>
 
             {/* This button uses navigate to return the previous page */}
-            <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
+            <button
+                className="back-btn"
+                onClick={(e) => {
+                    e.preventDefault(); // Stops the '#' from being added to the URL
+                    navigate('/');      // sends back to the first page
+                }}
+            >
+                Back</button>
         </div>
     );
 }
