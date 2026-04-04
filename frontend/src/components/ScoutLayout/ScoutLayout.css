@@ -1,0 +1,168 @@
+/* Defines the general in-app layout for the Scout view */
+/* that includes top header and bottom navigation bar */
+
+/* Base Structural Wrappers */
+.scout-mobile-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f0f2f5;  /* light grey */
+}
+
+.scout-mobile-wrapper .pwa-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;  /* forces full width (on phones) */
+  min-width: 100%;
+  height: 100dvh;
+  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;  /* prevents the whole screen from scrolling */
+
+  /* Removing borders/shadows for mobile views */
+  border-left: none;
+  border-right: none;
+  box-shadow: none;
+}
+
+/* Applies the phony look on Desktop/Tablets (good while we're developing phone view first) */
+@media (min-width: 600px) {  /* only gets triggered for big screens */
+  .scout-mobile-wrapper .pwa-shell {
+    width: 100%;
+    max-width: 500px;
+    height: 100vh; /* stretches to full browser height */
+    margin-top: 0;   /* removes any top margin */
+
+    /* Adding boarders for the phony look */
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+  }
+}
+
+/* Top Header */
+.scout-mobile-wrapper .pwa-header {
+  display: flex;
+  justify-content: space-between;  /* pushes logo+title to left and user icon to the right */
+  align-items: center;
+  height: 70px;
+  border-bottom: 1px solid #666666;
+  background-color: #ffffff;
+  padding: 0 15px;  /* no top-bottom padding, adds left-right padding */
+  z-index: 10;  /* keeps the header above the scrolling content so it is always visible */
+}
+
+/* Logo + title text */
+.scout-mobile-wrapper .header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scout-mobile-wrapper .header-logo {
+  height: 40px;
+  width: auto;
+}
+
+.scout-mobile-wrapper .header-title {
+  color: #152974; /* Vireo Blue */
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* Circular User Profile Button (top right) */
+.scout-mobile-wrapper .profile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Fixed dimensions for a perfect circle */
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+
+  /* Making the click effect look natural */
+  transition: all 0.2s ease-in-out;
+  padding: 0;
+  color: #333;
+}
+
+.scout-mobile-wrapper .profile-btn:hover {
+  background-color: #f5f5f5;
+}
+
+/* Active Profile State */
+.scout-mobile-wrapper .profile-btn.active-profile {
+  background-color: #dcedc8;
+  color: #57b021; /* Green icon when active */
+}
+
+/* Main Content Area */
+.scout-mobile-wrapper .pwa-main {
+  flex-grow: 1;  /* makes the section take all the available space between header and bottom navigation bar */
+  overflow-y: auto;  /* makes it scrollable */
+  background-color: #fdfdfd;
+  padding-bottom: 20px;  /* adds padding on the bottom to ensure content doesn't get cut off by navigation bar */
+}
+
+/* Bottom Navigation Bar */
+.scout-mobile-wrapper .pwa-nav {
+  display: flex;
+  height: 80px;
+  background-color: #f7f7f7;
+  border-top: 1px solid #666666;
+  padding: 0 4px;
+  padding-bottom: env(safe-area-inset-bottom);  /* adds safe space at the bottom for iphones swipe up bar */
+  align-items: center;
+}
+
+.scout-mobile-wrapper .nav-item {
+  flex: 1;  /* makes each button the same width */
+  min-width: 0; /* allows buttons to shrink on small screens */
+  display: flex;
+  flex-direction: column;  /* puts icon + text vertically */
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 70px;  /* makes each button the same height */
+  border-radius: 12px; /* adds subtle rounding for inactive state */
+  gap: 3px; /* adds gap between icon and text */
+}
+
+/* Active icon state */
+.scout-mobile-wrapper .nav-item.active {
+  background-color: #dcedc8;
+  color: #57b021;
+  border-radius: 40px;  /* adding the round active effect */
+}
+
+/* Text labels */
+.scout-mobile-wrapper .nav-item span {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 0;  /* removes any spacing above text */
+  white-space: nowrap;
+}
+
+/* Scaling SVG icons */
+.scout-mobile-wrapper .nav-item svg {
+  /* Controlling icon size */
+  width: 28px !important;
+  height: 28px !important;
+  stroke-width: 2.5px;  /* makes the small icon look clearer and fuller */
+  display: block;
+}
+
+.scout-mobile-wrapper .nav-item.active svg {
+  color: #57b021;
+}

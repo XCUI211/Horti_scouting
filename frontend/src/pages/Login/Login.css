@@ -1,0 +1,70 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+
+  display: flex;
+  justify-content: center;   /* center horizontally */
+  align-items: center;       /* center vertically */
+  min-height: 100vh;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+/* buttons */
+.login-container button {
+  width: 100%;
+  max-width: 300px;
+
+  border-radius: 40px;
+  padding: 16px;
+  font-size: 18px;
+  border: none;
+
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+/* header (for the 'Plant quality control app')*/
+.login-container h2 {
+font-size: 32px;
+font-weight: 770;
+margin-bottom: 30px;
+padding: 0 20px;
+}
+
+/*Controlling button design*/
+
+.login-container .admin {
+  background-color: #152974 !important; /* Company's dark blue */
+  color: white;              /* White text */
+}
+
+.login-container .scout {
+  background-color: #57b021; /* Company's green */
+  color: white;            /* White text */
+}
+
+.login-container .help {
+  background-color: #89898b;
+  color: white;
+  max-width: 120px;
+  font-size: 14px;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+/* Hover effect to make it interactive */
+.login-container button:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+  transition: 0.2s;
+}
