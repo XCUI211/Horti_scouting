@@ -25,7 +25,7 @@ h1 {
   margin-bottom: 20px;
 }
 
-.input-group label {
+.input-group > label {
   display: block;
   color: #666;
   margin-bottom: 5px;
@@ -69,4 +69,30 @@ h1 {
   cursor: pointer;
   max-width: 120px;
   margin-top: 20px;
+}
+
+.pest-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.pest-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.pest-checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.pest-checkbox-item span {
+    white-space: nowrap;
 }

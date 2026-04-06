@@ -164,17 +164,35 @@ app.post('/api/createaccount', async (req, res) => {
 });
 
 
-app.post('/api/sectionreports', async (req, res) => {
-    const {sid, uid, floor, pests_found, pest_type, pest_severity, biology, trap_number, bug_count} = req.body;  // get data from the frontend
+app.post('/api/floorreports', async (req, res) => {
+    const {fid, uid,
+           pests_found, pest_types, pest_severity,
+           biology_used, biology_types,
+           chemicals_used, chemicals_types,
+           behandelaar,
+           potmaat, oppotweek, teelduur_weeks,
+           trap_number, bug_count
+          } = req.body;  // get data from the frontend
 
-    try {
-        const newReport = await pool.query(
-            `INSERT INTO section_reports
-            (sid, uid, floor, pests_found, pest_type, pest_severity, biology, trap_number, bug_count, approval_status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
+    try {const newReport = await pool.query(
+            `INSERT INTO floor_reports
+            (fid, uid, pests_found, pest_types, pest_severity, biology_used, biology_types, chemicals_used, chemicals_types, behandelaar, potmaat, oppotweek, teelduur_weeks, trap_number, bug_count, approval_status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending')
             RETURNING *`,
-            [sid, uid, floor, pests_found, pest_type, pest_severity, biology || null, trap_number || null, bug_count ?? null]
-        );
+            [fid, uid,
+                pests_found,
+                pest_types || null,
+                pest_severity ?? null,
+                biology_used,
+                biology_types || null,
+                chemicals_used,
+                chemicals_types || null,
+                behandelaar || null,
+                potmaat || null,
+                oppotweek ?? null,
+                teelduur_weeks ?? null,
+                trap_number || null,
+                bug_count ?? null]);
 
         // Sends success message back to frontend
         res.status(201).json({

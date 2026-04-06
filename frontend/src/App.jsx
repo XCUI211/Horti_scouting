@@ -3,7 +3,7 @@ import Login from "./pages/Login/Login";
 import LoginAdmin from "./pages/LoginAdmin/LoginAdmin";
 import LoginScout from "./pages/LoginScout/LoginScout";
 import CreateAccount from "./pages/CreateAccount/CreateAccount";
-import SectionReport from "./pages/SectionReport/SectionReport";
+import FloorReport from "./pages/FloorReport/FloorReport.jsx";
 import HomeAdmin from "./pages/HomeAdmin/HomeAdmin";
 import HomeScout from "./pages/HomeScout/HomeScout";
 import AccountAdmin from "./pages/AccountAdmin/AccountAdmin";
@@ -22,7 +22,7 @@ function App() {
       <Route path="/scout_home" element={<HomeScout />} />
       <Route path="/login_scout" element={<LoginScout />} />
       <Route path="/create" element={<CreateAccount />} />
-      <Route path="/report" element={<SectionReport />} />
+      <Route path="/report" element={<FloorReport />} />
       <Route path="/account_management_admin" element={<AccountAdmin />} />
       <Route path="/account_management_scout" element={<AccountScout />} />
       <Route path="/change_password" element={<PasswordChange />} />

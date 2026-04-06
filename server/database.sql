@@ -4,7 +4,7 @@ CREATE TABLE users (
     password_hash   TEXT        NOT NULL,                                      -- hashed password
     role            VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'scout')),   -- 'admin' or 'scout'
 	email           VARCHAR(50),                                               -- optional
-    is_employed     BOOLEAN NOT NULL DEFAULT TRUE                              -- if a user is fired/deleted, their reports should still exist
+    is_employed     BOOLEAN NOT NULL DEFAULT TRUE,                             -- if a user is fired/deleted, their reports should still exist
     must_change_password BOOLEAN NOT NULL DEFAULT FALSE                        -- after admin resets scout password they NEED to change it
 );
 
@@ -16,25 +16,38 @@ CREATE TABLE maps (
     json_map    JSONB       NOT NULL       -- JSON representation of the map data; JSONB allows for JSON queries if needed
 );
 
-CREATE TABLE sections (
-    sid         SERIAL      PRIMARY KEY,                                        -- unique section ID number
-    mid         INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,    -- foreign key to maps table; one map has many sections
-    name        VARCHAR(50) NOT NULL,                                           -- name of the section
-    plant_name  VARCHAR(50) NOT NULL                                            -- name of the plant in the section
+CREATE TABLE user_maps (
+    uid INT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+    mid INT NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,
+    PRIMARY KEY (uid, mid)
 );
 
-CREATE TABLE section_reports (
+CREATE TABLE floors (
+    fid         SERIAL      PRIMARY KEY,                                        -- unique floor ID number
+    mid         INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,    -- foreign key to maps table; one section has many floors
+    name        VARCHAR(50) NOT NULL,                                           -- name of the floor
+    plant_name  VARCHAR(50) NOT NULL                                            -- name of the plant in the floor
+);
+
+CREATE TABLE floor_reports (
     rid             SERIAL      PRIMARY KEY,                                                             -- unique report ID number
-    sid             INT         NOT NULL REFERENCES sections (sid) ON DELETE CASCADE,                    -- foreign key
+    fid             INT         NOT NULL REFERENCES floors (fid) ON DELETE CASCADE,                      -- foreign key
     uid             INT         NOT NULL REFERENCES users (uid),                                         -- foreign key to users table; one user can have many reports
 
-    floor           VARCHAR(50) NOT NULL,                                                                -- floor of the section
-    pests_found     BOOLEAN     NOT NULL,                                                                -- whether pests were found in the section
-    pest_type       VARCHAR(50),                                                                         -- type of pest found (if applicable)
+    pests_found     BOOLEAN     NOT NULL,                                                                -- whether pests were found in the floor
+    pest_types      TEXT[],                                                                              -- type of pest found (if applicable)
     pest_severity   INT,                                                                                 -- pest status of the plant (1-5) (if applicable)
-    biology         TEXT,                                                                                -- biology used to treat plants (if applicable)
+    biology_used    BOOLEAN     NOT NULL,                                                                -- if biology is used
+    biology_types   TEXT[],                                                                              -- type of biology used to treat plants (if applicable)
+    chemicals_used  BOOLEAN     NOT NULL,                                                                -- if chemicals are used
+    chemicals_types TEXT[],                                                                              -- type of chemicals used to treat plants (if applicable)
+    behandelaar     VARCHAR(50),                                                                         -- name of the person who treated the plants (if applicable)
 
-    trap_number     VARCHAR(50),                                                                         -- trap number used for pest control (if applicable)
+    potmaat         VARCHAR(50),                                                                         -- pot size
+    oppotweek       INT,                                                                                 -- potting week
+    teelduur_weeks  INT,                                                                                 -- cultivation duration in weeks
+
+    trap_number     DATE,                                                                                -- trap number used for pest control (if applicable)
     bug_count       INT,                                                                                 -- number of bugs found in the trap (if applicable)
 
     report_time     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,                                      -- timestamp of the report
