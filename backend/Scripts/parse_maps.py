@@ -17,10 +17,9 @@ def parse_all_nursery_maps(excel_path, output_dir):
         if sheet_name in ['Blad1', 'Blad2', 'Pesticides', 'Legenda plagen']: 
             continue
         
-        print(f"🔄 Processing: {sheet_name}...")
+        print(f"Processing: {sheet_name}...")
         ws = wb[sheet_name]
         
-        # --- FLEXIBLE DIMENSION LOGIC ---
         temp_max_r = ws.max_row
         temp_max_c = ws.max_column
 
@@ -52,7 +51,7 @@ def parse_all_nursery_maps(excel_path, output_dir):
             actual_max_r -= 1
 
         if actual_max_r == 0 or actual_max_c == 0:
-            print(f"⚠️  Skipping {sheet_name}: Sheet appears empty.")
+            print(f"Skipping {sheet_name}: Sheet appears empty.")
             continue
 
         # Create the grid based on detected boundaries
@@ -102,9 +101,8 @@ def parse_all_nursery_maps(excel_path, output_dir):
             print(f"Save Failed: {e}")
         finally:
             db.close()
-        # ==============================================================
             
-    print(f"\n✅ All maps cleaned and saved to: {output_dir}")
+    print(f"\n All maps cleaned and saved to: {output_dir}")
 
 if __name__ == "__main__":
     # Setup Paths
