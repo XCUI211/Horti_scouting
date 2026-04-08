@@ -5,7 +5,7 @@ from api import SessionLocal, Map
 
 def parse_all_nursery_maps(excel_path, output_dir):
     if not os.path.exists(excel_path):
-        print(f"❌ Error: Could not find {excel_path}")
+        print(f"Could not find {excel_path}")
         return
 
     # Load the workbook
@@ -17,7 +17,6 @@ def parse_all_nursery_maps(excel_path, output_dir):
         if sheet_name in ['Blad1', 'Blad2', 'Pesticides', 'Legenda plagen']: 
             continue
         
-        print(f"Processing: {sheet_name}...")
         ws = wb[sheet_name]
         
         temp_max_r = ws.max_row
@@ -51,7 +50,6 @@ def parse_all_nursery_maps(excel_path, output_dir):
             actual_max_r -= 1
 
         if actual_max_r == 0 or actual_max_c == 0:
-            print(f"Skipping {sheet_name}: Sheet appears empty.")
             continue
 
         # Create the grid based on detected boundaries
@@ -87,27 +85,13 @@ def parse_all_nursery_maps(excel_path, output_dir):
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(grid, f, indent=2)
         
-        # Save data in database
-        db = SessionLocal()
-        try:
-            existing_map = db.query(Map).filter(Map.name == sheet_name).first()
-            if existing_map:
-                existing_map.grid_data = grid
-            else:
-                new_map = Map(name=sheet_name, grid_data=grid)
-                db.add(new_map) 
-            db.commit()
-        except Exception as e:
-            print(f"Save Failed: {e}")
-        finally:
-            db.close()
             
     print(f"\n All maps cleaned and saved to: {output_dir}")
 
 if __name__ == "__main__":
     # Setup Paths
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    excel_path = os.path.normpath(os.path.join(script_dir, '..', 'Maps', 'Plattegrond Rijsenhout.xlsx'))
+    excel_path = os.path.normpath(os.path.join(script_dir, '..', 'Maps', 'Plattegrond HW 13.xlsx'))
     output_dir = os.path.normpath(os.path.join(script_dir, '..', '..', 'frontend', 'src', 'components', 'AllMaps'))
     
     parse_all_nursery_maps(excel_path, output_dir)
