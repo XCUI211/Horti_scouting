@@ -1,0 +1,174 @@
+{
+  "test.translation": "Dit is een test vertaling",
+  
+
+  "AdminLayout.Home" : "Thuis",
+  "AdminLayout.Maps" : "Kaarten",
+  "AdminLayout.Notifications" : "Notificaties",
+  "AdminLayout.Scouts" : "Scouts",
+  "AdminLayout.History" : "Geschiedenis",
+
+  
+  "ScoutLayout.Home" : "Thuis",
+  "ScoutLayout.Maps" : "Kaarten",
+  "ScoutLayout.Notifications" : "Notificaties",
+  "ScoutLayout.Tasks" : "Taken",
+
+
+	"AccountAdmin.YourAccount" : "Jouw account",
+	"AccountAdmin.manYour" : "Beheer je account",
+	"AccountAdmin.Username" : "Gebruikersnaam",
+	"AccountAdmin.Role" : "Rol",
+	"AccountAdmin.Password" : "Wachtwoord",
+	"AccountAdmin.ChangePassword" : "Wijzig",
+	"AccountAdmin.Email" : "E-mail:",
+	"AccountAdmin.ChangeEmail" : "Wijzig",
+	"AccountAdmin.Language" : "Huidige taal: ",
+	"AccountAdmin.ChangeLanguage" : "Wijzig",
+	"AccountAdmin.manScout" : "Beheer scoutaccounts",
+	"AccountAdmin.newScout" : "Nieuwe scout toevoegen",
+	"AccountAdmin.newScoutAcc" : "Aanmaken",
+	"AccountAdmin.EditScoutInfo" : "Scoutinformatie bewerken:",
+	"AccountAdmin.EditScout" : "Bewerken",
+	"AccountAdmin.ResPass" : "Wachtwoord resetten:",
+	"AccountAdmin.ResScoutPass" : "Resetten",
+	"AccountAdmin.LogOut" : "Uitloggen",
+
+
+  "AccountScout.YourAccount": "Jouw account",
+  "AccountScout.manYour": "Beheer je account",
+  "AccountScout.Username": "Gebruikersnaam",
+  "AccountScout.Role": "Rol",
+  "AccountScout.Password": "Wachtwoord",
+  "AccountScout.ChangePassword": "Wijzig",
+  "AccountScout.Email": "E-mail:",
+  "AccountScout.ChangeEmail": "Wijzig",
+  "AccountScout.Language" : "Huidige language: ",
+	"AccountScout.ChangeLanguage" : "Wijzig",
+  "AccountScout.LogOut": "Uitloggen",
+  "AccountScout.Loading": "laden...",
+  "AccountScout.NotSet": "niet ingesteld",
+
+	
+  "CreateAccount.Title": "Scoutaccount aanmaken",
+  "CreateAccount.Username": "Gebruikersnaam",
+  "CreateAccount.EmailOptional": "E-mail (optioneel)",
+  "CreateAccount.Password": "Wachtwoord",
+  "CreateAccount.CreateButton": "Account aanmaken",
+  "CreateAccount.Back": "Terug",
+  "CreateAccount.SuccessMessage": "Je hebt succesvol een nieuw scoutaccount aangemaakt met een tijdelijk wachtwoord!",
+  "CreateAccount.InvalidCredentials": "Ongeldige gegevens",
+
+
+  "EmailChange.Title": "E-mail bijwerken",
+  "EmailChange.Current": "Huidig:",
+  "EmailChange.NoEmailSet": "Geen e-mailadres ingesteld",
+  "EmailChange.NewEmailAddress": "Nieuw e-mailadres",
+  "EmailChange.EmailPlaceholder": "example@vireo.nl",
+  "EmailChange.ConfirmWithPassword": "Bevestig met wachtwoord",
+  "EmailChange.UpdateEmail": "Bijwerken",
+  "EmailChange.Back": "Terug",
+  "EmailChange.AdminMustHaveValidEmail": "Admins moeten een geldig e-mailadres hebben.",
+  "EmailChange.UpdateSuccess": "E-mailadres succesvol bijgewerkt!",
+  "EmailChange.UpdateError": "Fout bij het bijwerken van het e-mailadres",
+
+
+  "ForcePasswordChange.Title": "Wachtwoord bijwerken",
+  "ForcePasswordChange.Description": "Je wachtwoord is gereset door de administrator. Je moet een nieuw wachtwoord kiezen om verder te gaan.",
+  "ForcePasswordChange.NewPassword": "Nieuw wachtwoord",
+  "ForcePasswordChange.ConfirmNewPassword": "Bevestig nieuw wachtwoord",
+  "ForcePasswordChange.SaveContinue": "Opslaan en doorgaan",
+  "ForcePasswordChange.PasswordsDoNotMatch": "Wachtwoorden komen niet overeen.",
+  "ForcePasswordChange.UpdateFailed": "Het bijwerken van het wachtwoord is mislukt. Probeer opnieuw.",
+
+	
+  "HomeAdmin.Title": "Home",
+  "HomeAdmin.Dashboard": "Admin dashboard",
+  "HomeAdmin.Description": "Inhoud voor kwaliteitscontrole van planten verschijnt hier.",
+
+
+  "HomeScout.Title": "Home",
+  "HomeScout.Dashboard": "Scout dashboard",
+  "HomeScout.Description": "Inhoud voor kwaliteitscontrole van planten verschijnt hier.",
+
+	
+  "Login.Title": "Plant kwaliteitscontrole app",
+  "Login.Admin": "Inloggen als administrator",
+  "Login.Scout": "Inloggen als scout",
+  "Login.Help": "Help",
+
+
+	"LoginAdmin.Title": "Inloggen als administrator",
+	"LoginAdmin.Username": "Gebruikersnaam",
+	"LoginAdmin.Password": "Wachtwoord",
+	"LoginAdmin.LoginButton": "Inloggen",
+	"LoginAdmin.ForgotPassword": "Ik ben mijn wachtwoord vergeten",
+	"LoginAdmin.Back": "Terug",
+	"LoginAdmin.InvalidCredentials": "Ongeldige inloggegevens",
+
+
+	"LoginScout.Title": "Inloggen als scout",
+	"LoginScout.Username": "Gebruikersnaam",
+	"LoginScout.Password": "Wachtwoord",
+	"LoginScout.LoginButton": "Inloggen",
+	"LoginScout.ForgotPassword": "Ik ben mijn wachtwoord vergeten",
+	"LoginScout.Back": "Terug",
+	"LoginScout.InvalidCredentials": "Ongeldige inloggegevens",
+
+
+	"PasswordChange.Title": "Wachtwoord wijzigen",
+	"PasswordChange.CurrentPassword": "Huidig wachtwoord",
+	"PasswordChange.NewPassword": "Nieuw wachtwoord",
+	"PasswordChange.ConfirmNewPassword": "Bevestig nieuw wachtwoord",
+	"PasswordChange.ChangePassword": "Wachtwoord wijzigen",
+	"PasswordChange.NewPasswordsDoNotMatch": "Nieuwe wachtwoorden komen niet overeen.",
+	"PasswordChange.UpdateSuccess": "Wachtwoord succesvol bijgewerkt!",
+	"PasswordChange.UpdateError": "Fout bij het bijwerken van het wachtwoord",
+	"PasswordChange.Back": "Terug",
+
+	
+  "ScoutPasswordReset.PageTitle": "Scout-wachtwoord resetten",
+  "ScoutPasswordReset.SelectScout": "Selecteer scout",
+  "ScoutPasswordReset.StartTyping": "Gebruikersnaam...",
+  "ScoutPasswordReset.TemporaryPassword": "Tijdelijk wachtwoord",
+  "ScoutPasswordReset.ResetPassword": "Wachtwoord resetten",
+  "ScoutPasswordReset.SelectValidScout": "Selecteer een geldige scout.",
+  "ScoutPasswordReset.ResetSuccess": "Wachtwoord voor {{username}} is succesvol gereset!",
+  "ScoutPasswordReset.ResetFailed": "Wachtwoord resetten mislukt",
+	
+	
+  "SectionReport.Title": "Sectierapport aanmaken",
+  "SectionReport.SectionID": "Sectie-ID",
+  "SectionReport.UserID": "Gebruikers-ID",
+  "SectionReport.Floor": "Verdieping",
+  "SectionReport.PestsType": "Type plaag",
+  "SectionReport.SelectOption": "Selecteer optie",
+  "SectionReport.NoPestsFound": "Geen plagen gevonden",
+  "SectionReport.RedSpiderMite": "Rode spintmijt",
+  "SectionReport.Thrips": "Trips",
+  "SectionReport.GreenLouse": "Groene luis",
+  "SectionReport.BlackLouse": "Zwarte luis",
+  "SectionReport.Mealybug": "Wolluis",
+  "SectionReport.Pythium": "Pythium",
+  "SectionReport.Mite": "Mijt",
+  "SectionReport.Cycada": "Cicade",
+  "SectionReport.Weed": "Onkruid",
+  "SectionReport.Caterpillar": "Rups",
+  "SectionReport.PestSeverity": "Ernst van de plaag (1-5)",
+  "SectionReport.SelectScore": "Selecteer score",
+  "SectionReport.Severity1": "1 (laag)",
+  "SectionReport.Severity2": "2",
+  "SectionReport.Severity3": "3",
+  "SectionReport.Severity4": "4",
+  "SectionReport.Severity5": "5 (hoog)",
+  "SectionReport.Biology": "Biologie",
+  "SectionReport.TrapNumber": "Valnummer",
+  "SectionReport.BugCount": "Aantal insecten",
+  "SectionReport.SubmitReport": "Rapport indienen",
+  "SectionReport.Back": "Terug",
+  "SectionReport.SubmitSuccess": "Sectierapport succesvol ingediend.",
+  "SectionReport.AlertSuccess": "Rapport succesvol ingediend!",
+  "SectionReport.SubmitFailed": "Sectierapport kon niet worden ingediend"
+
+
+}

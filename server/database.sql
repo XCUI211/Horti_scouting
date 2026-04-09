@@ -6,6 +6,7 @@ CREATE TABLE users (
 	email           VARCHAR(50),                                               -- optional
     is_employed     BOOLEAN NOT NULL DEFAULT TRUE,                             -- if a user is fired/deleted, their reports should still exist
     must_change_password BOOLEAN NOT NULL DEFAULT FALSE                        -- after admin resets scout password they NEED to change it
+    language VARCHAR(10) NOT NULL DEFAULT 'nl'                                 -- user language (ISO code, e.g. 'en', 'nl')
 );
 
 CREATE TABLE maps (

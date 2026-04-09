@@ -1,15 +1,17 @@
 import React from 'react';
 import ScoutLayout from '../../components/ScoutLayout/ScoutLayout';
 import "./HomeScout.css";
+import { useTranslation } from "react-i18next";
 
 const HomeScout = () => {
+  const { t } = useTranslation();
+
   return (
-    <ScoutLayout title="Home">
-      {/* Everything inside here becomes the 'children' prop in ScoutLayout */}
+    <ScoutLayout title={t("HomeScout.Title")}>
       <div className="scout-home-content">
         <div className="empty-state">
-          <p>Scout Dashboard</p>
-          <span>Content for plant quality control will appear here.</span>
+          <p>{t("HomeScout.Dashboard")}</p>
+          <span>{t("HomeScout.Description")}</span>
         </div>
       </div>
     </ScoutLayout>

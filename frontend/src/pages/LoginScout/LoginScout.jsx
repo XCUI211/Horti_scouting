@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';  //useState keep track of us
 import axios from 'axios';  //carries data to the server
 import "./LoginScout.css";
 import {useNavigate} from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function LoginScout() {
     //Keeping track of user input [variable, function]
@@ -11,6 +12,7 @@ function LoginScout() {
     const [error, setError] = useState('');  //error to be shown to the user through interface (e.g.wrong password)
 
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // Logging the user out if they hit back arrow right after logging in
     // Ensures each user logs in using their credentials and does not use somebody else's account by accident
@@ -52,14 +54,14 @@ function LoginScout() {
           // if error
         }  catch (err) {
             console.error("Login failed:", err.response?.data);
-            setError(err.response?.data?.message || "Invalid credentials");
+            setError(err.response?.data?.message || t("LoginScout.InvalidCredentials"));
         }
     };
 
     return (
         <div className="scout-login-container">
             <img src="/logo.png" alt="Vireo logo" className="scout-logo" />
-            <h1>Log in as a Scout</h1>
+            <h1>{t("LoginScout.Title")}</h1>
 
             {/* Shows red error message if login fails */}
             {error && <p style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
@@ -67,7 +69,7 @@ function LoginScout() {
             {/*Login triggers when Enter or the Login button are pressed*/}
             <form onSubmit={handleLogin}>
                 <div className="input-group">
-                    <label>Username</label>
+                    <label>{t("LoginScout.Username")}</label>
                     <input
                         type="text"
                         value={username}
@@ -78,7 +80,7 @@ function LoginScout() {
                 </div>
 
                 <div className="input-group">
-                    <label>Password</label>
+                    <label>{t("LoginScout.Password")}</label>
                     <input
                         type="password"
                         value={password}
@@ -88,10 +90,10 @@ function LoginScout() {
                 </div>
 
                 {/*Button working as well when Enter clicked (type="submit")*/}
-                <button type="submit" className="login-submit">Log in</button>
+                <button type="submit" className="login-submit">{t("LoginScout.LoginButton")}</button>
             </form>
 
-            <a href="#" className="forgot-password">I forgot my password</a>
+            <a href="#" className="forgot-password">{t("LoginScout.ForgotPassword")}</a>
 
             {/* This button uses navigate to return the previous page */}
             <button
@@ -101,7 +103,8 @@ function LoginScout() {
                     navigate('/');      // sends back to the first page
                 }}
                 >
-                Back</button>
+                {t("LoginScout.Back")}
+            </button>
         </div>
     );
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "./ForcePasswordChange.css";
+import { useTranslation } from "react-i18next";
 
 const ForcePasswordChange = () => {
   const navigate = useNavigate();
@@ -9,14 +10,19 @@ const ForcePasswordChange = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
 
+  const { t } = useTranslation();
+
   const handleForceChange = async (e) => {
-    e.preventDefault();  // stops browser from refreshing
-    if (newPassword !== confirmPassword) return setError("Passwords do not match.");
+    e.preventDefault(); // stops browser from refreshing
+
+    if (newPassword !== confirmPassword) {
+      return setError(t("ForcePasswordChange.PasswordsDoNotMatch"));
+    }
 
     try {
-      const user = JSON.parse(localStorage.getItem('user'));  // gets user info
+      const user = JSON.parse(localStorage.getItem('user')); // gets user info
 
-      await axios.post('http://localhost:5000/api/users/complete-force-change', {  // sends the new password to backend
+      await axios.post('http://localhost:5000/api/users/complete-force-change', {
         uid: user.uid,
         newPassword
       });
@@ -27,21 +33,21 @@ const ForcePasswordChange = () => {
 
       navigate("/scout_home");
     } catch (err) {
-      setError("Failed to update password. Try again.");
+      setError(t("ForcePasswordChange.UpdateFailed"));
     }
   };
 
   return (
     <div className="force-change-wrapper">
       <div className="force-change-card">
-        <h2 className="force-title">Update Password</h2>
+        <h2 className="force-title">{t("ForcePasswordChange.Title")}</h2>
         <p className="force-description">
-          Your password was reset by the Administrator. You must choose a new one to continue.
+          {t("ForcePasswordChange.Description")}
         </p>
 
         <form onSubmit={handleForceChange}>
           <div className="force-input-group">
-            <label>New Password</label>
+            <label>{t("ForcePasswordChange.NewPassword")}</label>
             <input
               type="password"
               value={newPassword}
@@ -51,7 +57,7 @@ const ForcePasswordChange = () => {
           </div>
 
           <div className="force-input-group">
-            <label>Confirm New Password</label>
+            <label>{t("ForcePasswordChange.ConfirmNewPassword")}</label>
             <input
               type="password"
               value={confirmPassword}
@@ -63,7 +69,7 @@ const ForcePasswordChange = () => {
           {error && <p className="force-error-text">{error}</p>}
 
           <button type="submit" className="force-submit-btn">
-            Save & Continue
+            {t("ForcePasswordChange.SaveContinue")}
           </button>
         </form>
       </div>

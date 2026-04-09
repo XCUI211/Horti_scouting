@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "./EmailChange.css";
+import { useTranslation } from "react-i18next";
 
 const EmailChange = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ const EmailChange = () => {
   const [error, setError] = useState('');  // holds error messages
   const [success, setSuccess] = useState('');
   const [currentUser, setCurrentUser] = useState(null);  // holds user basic info
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -26,11 +29,11 @@ const EmailChange = () => {
     // Prevents Admins from clearing the email (they always need a valid email!)
     const isAdmin = currentUser?.role === 'admin' || window.location.pathname.includes('admin');
     if (isAdmin && !newEmail.trim()) {
-      setError("Admins must have a valid email address.");
+      setError(t("EmailChange.AdminMustHaveValidEmail"));
       return;
     }
 
-    try {
+    try { 
       const response = await axios.post('http://localhost:5000/api/users/change-email', {
         uid: currentUser.uid,
         password: password,
@@ -41,21 +44,21 @@ const EmailChange = () => {
       const updatedUser = { ...currentUser, email: newEmail };
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      setSuccess("Email updated successfully!");
+      setSuccess(t("EmailChange.UpdateSuccess"));
       setTimeout(() => navigate(-1), 800);  // goes back to previous page after a moment
 
     } catch (err) {
-      setError(err.response?.data?.message || "Error updating email");
+      setError(err.response?.data?.message || t("EmailChange.UpdateError"));
     }
   };
 
   return (
     <div className="email-change-container">
       <img src="/logo.png" alt="Vireo logo" className="scout-logo" />
-      <h1>Update Email</h1>
+      <h1>{t("EmailChange.Title")}</h1>
 
       <p className="current-email-hint">
-        Current: {currentUser?.email || "No email set"}
+        {t("EmailChange.Current")} {currentUser?.email || t("EmailChange.NoEmailSet")}
       </p>
 
       {error && <p className="error-msg">{error}</p>}
@@ -63,17 +66,17 @@ const EmailChange = () => {
 
       <form onSubmit={handleUpdateEmail}>
         <div className="input-group">
-          <label>New Email Address</label>
+          <label>{t("EmailChange.NewEmailAddress")}</label>
           <input
             type="email"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
-            placeholder="example@vireo.nl"
+            placeholder={t("EmailChange.EmailPlaceholder")}
           />
         </div>
 
         <div className="input-group">
-          <label>Confirm with Password</label>
+          <label>{t("EmailChange.ConfirmWithPassword")}</label>
           <input
             type="password"
             value={password}
@@ -82,10 +85,10 @@ const EmailChange = () => {
           />
         </div>
 
-        <button type="submit" className="email-submit">Update Email</button>
+        <button type="submit" className="email-submit">{t("EmailChange.UpdateEmail")}</button>
       </form>
 
-      <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
+      <button className="back-btn" onClick={() => navigate(-1)}>{t("EmailChange.Back")}</button>
     </div>
   );
 };

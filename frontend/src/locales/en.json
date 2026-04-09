@@ -1,0 +1,173 @@
+{
+  "test.translation": "This is a test translation",
+
+  
+  "AdminLayout.Home" : "Home",
+  "AdminLayout.Maps" : "Maps",
+  "AdminLayout.Notifications" : "Notifications",
+  "AdminLayout.Scouts" : "Scouts",
+  "AdminLayout.History" : "History",
+
+
+  "ScoutLayout.Home" : "Home",
+  "ScoutLayout.Maps" : "Maps",
+  "ScoutLayout.Notifications" : "Notifications",
+  "ScoutLayout.Tasks" : "Tasks",
+
+
+	"AccountAdmin.YourAccount" : "Your account",
+	"AccountAdmin.manYour" : "Manage your account",
+	"AccountAdmin.Username" : "Username",
+	"AccountAdmin.Role" : "Role",
+	"AccountAdmin.Password" : "Password",
+	"AccountAdmin.ChangePassword" : "Change",
+	"AccountAdmin.Email" : "Email:",
+	"AccountAdmin.ChangeEmail" : "Change",
+	"AccountAdmin.Language" : "Current language: ",
+	"AccountAdmin.ChangeLanguage" : "Change",
+	"AccountAdmin.manScout" : "Manage scout accounts",
+	"AccountAdmin.newScout" : "Add new scout",
+	"AccountAdmin.newScoutAcc" : "Create",
+	"AccountAdmin.EditScoutInfo" : "Edit scout information:",
+	"AccountAdmin.EditScout" : "Edit",
+	"AccountAdmin.ResPass" : "Reset password:",
+	"AccountAdmin.ResScoutPass" : "Reset",
+	"AccountAdmin.LogOut" : "Log out",
+
+
+  "AccountScout.YourAccount": "Your account",
+  "AccountScout.manYour": "Manage your account",
+  "AccountScout.Username": "Username",
+  "AccountScout.Role": "Role",
+  "AccountScout.Password": "Password",
+  "AccountScout.ChangePassword": "Change",
+  "AccountScout.Email": "Email:",
+  "AccountScout.ChangeEmail": "Change",
+  "AccountScout.Language" : "Current language: ",
+	"AccountScout.ChangeLanguage" : "Change",
+  "AccountScout.LogOut": "Log out",
+  "AccountScout.Loading": "Loading...",
+  "AccountScout.NotSet": "Not set",
+
+	
+  "CreateAccount.Title": "Create scout account",
+  "CreateAccount.Username": "Username",
+  "CreateAccount.EmailOptional": "Email (optional)",
+  "CreateAccount.Password": "Password",
+  "CreateAccount.CreateButton": "Create account",
+  "CreateAccount.Back": "Back",
+  "CreateAccount.SuccessMessage": "You have successfully created a new scout account with a temporary password!",
+  "CreateAccount.InvalidCredentials": "Invalid credentials",
+
+
+  "EmailChange.Title": "Update email",
+  "EmailChange.Current": "Current:",
+  "EmailChange.NoEmailSet": "No email set",
+  "EmailChange.NewEmailAddress": "New email address",
+  "EmailChange.EmailPlaceholder": "example@vireo.nl",
+  "EmailChange.ConfirmWithPassword": "Confirm with password",
+  "EmailChange.UpdateEmail": "Update",
+  "EmailChange.Back": "Back",
+  "EmailChange.AdminMustHaveValidEmail": "Admins must have a valid email address.",
+  "EmailChange.UpdateSuccess": "Email successfully updated!",
+  "EmailChange.UpdateError": "Error updating email",
+
+
+  "ForcePasswordChange.Title": "Update password",
+  "ForcePasswordChange.Description": "Your password was reset by the administrator. You must choose a new one to continue.",
+  "ForcePasswordChange.NewPassword": "New password",
+  "ForcePasswordChange.ConfirmNewPassword": "Confirm new password",
+  "ForcePasswordChange.SaveContinue": "Save & continue",
+  "ForcePasswordChange.PasswordsDoNotMatch": "Passwords do not match.",
+  "ForcePasswordChange.UpdateFailed": "Failed to update password. Try again.",
+
+	
+  "HomeAdmin.Title": "Home",
+  "HomeAdmin.Dashboard": "Admin dashboard",
+  "HomeAdmin.Description": "Content for plant quality control will appear here.",
+
+
+  "HomeScout.Title": "Home",
+  "HomeScout.Dashboard": "Scout dashboard",
+  "HomeScout.Description": "Content for plant quality control will appear here.",
+
+	
+  "Login.Title": "Plant quality control app",
+  "Login.Admin": "Login as administrator",
+  "Login.Scout": "Login as scout",
+  "Login.Help": "Help",
+
+
+	"LoginAdmin.Title": "Login as administrator",
+	"LoginAdmin.Username": "Username",
+	"LoginAdmin.Password": "Password",
+	"LoginAdmin.LoginButton": "Login",
+	"LoginAdmin.ForgotPassword": "I forgot my password",
+	"LoginAdmin.Back": "Back",
+	"LoginAdmin.InvalidCredentials": "Invalid credentials",
+
+
+	"LoginScout.Title": "Login as scout",
+	"LoginScout.Username": "Username",
+	"LoginScout.Password": "Password",
+	"LoginScout.LoginButton": "Login",
+	"LoginScout.ForgotPassword": "I forgot my password",
+	"LoginScout.Back": "Back",
+	"LoginScout.InvalidCredentials": "Invalid credentials",
+
+
+	"PasswordChange.Title": "Change password",
+	"PasswordChange.CurrentPassword": "Current password",
+	"PasswordChange.NewPassword": "New password",
+	"PasswordChange.ConfirmNewPassword": "Confirm new password",
+	"PasswordChange.ChangePassword": "Change password",
+	"PasswordChange.NewPasswordsDoNotMatch": "New passwords do not match.",
+	"PasswordChange.UpdateSuccess": "Password successfully updated!",
+	"PasswordChange.UpdateError": "Error updating password",
+	"PasswordChange.Back": "Back",
+
+	
+  "ScoutPasswordReset.PageTitle": "Reset scout password",
+  "ScoutPasswordReset.SelectScout": "Select scout",
+  "ScoutPasswordReset.StartTyping": "Username...",
+  "ScoutPasswordReset.TemporaryPassword": "Temporary password",
+  "ScoutPasswordReset.ResetPassword": "Reset password",
+  "ScoutPasswordReset.SelectValidScout": "Please select a valid scout.",
+  "ScoutPasswordReset.ResetSuccess": "Password for {{username}} has been reset successfully!",
+  "ScoutPasswordReset.ResetFailed": "Failed to reset password",
+	
+	
+  "SectionReport.Title": "Create section report",
+  "SectionReport.SectionID": "Section ID",
+  "SectionReport.UserID": "User ID",
+  "SectionReport.Floor": "Floor",
+  "SectionReport.PestsType": "Pest type",
+  "SectionReport.SelectOption": "Select option",
+  "SectionReport.NoPestsFound": "No pests found",
+  "SectionReport.RedSpiderMite": "Red spider mite",
+  "SectionReport.Thrips": "Thrips",
+  "SectionReport.GreenLouse": "Green louse",
+  "SectionReport.BlackLouse": "Black louse",
+  "SectionReport.Mealybug": "Mealybug",
+  "SectionReport.Pythium": "Pythium",
+  "SectionReport.Mite": "Mite",
+  "SectionReport.Cycada": "Cycada",
+  "SectionReport.Weed": "Weed",
+  "SectionReport.Caterpillar": "Caterpillar",
+  "SectionReport.PestSeverity": "Pest severity (1-5)",
+  "SectionReport.SelectScore": "Select score",
+  "SectionReport.Severity1": "1 (low)",
+  "SectionReport.Severity2": "2",
+  "SectionReport.Severity3": "3",
+  "SectionReport.Severity4": "4",
+  "SectionReport.Severity5": "5 (high)",
+  "SectionReport.Biology": "Biology",
+  "SectionReport.TrapNumber": "Trap number",
+  "SectionReport.BugCount": "Bug count",
+  "SectionReport.SubmitReport": "Submit report",
+  "SectionReport.Back": "Back",
+  "SectionReport.SubmitSuccess": "Section report submitted successfully.",
+  "SectionReport.AlertSuccess": "Report successfully submitted!",
+  "SectionReport.SubmitFailed": "Could not submit section report"
+
+}

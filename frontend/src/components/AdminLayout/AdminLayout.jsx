@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, MapPin, Bell, Users, BarChart3, UserCircle } from 'lucide-react';
 import "./AdminLayout.css";
+import { useTranslation } from "react-i18next";
 
 // Defines the general in-app layout for the Admin view
 // that includes top header and bottom navigation bar
@@ -11,6 +12,7 @@ const AdminLayout = ({ children, title }) => {
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
+  const { t } = useTranslation();
 
   return (
     <div className="admin-mobile-wrapper">
@@ -40,23 +42,23 @@ const AdminLayout = ({ children, title }) => {
         <nav className="pwa-nav">
           <button className={`nav-item ${isActive('/admin_home') ? 'active' : ''}`} onClick={() => navigate('/admin_home')}>
             <Home size={22} />
-            <span>Home</span>
+            <span>{t("AdminLayout.Home")}</span>
           </button>
           <button className={`nav-item ${isActive('/map_admin') ? 'active' : ''}`} onClick={() => navigate('/map_admin')}>
             <MapPin size={22} />
-            <span>Map</span>
+            <span>{t("AdminLayout.Maps")}</span>
           </button>
           <button className={`nav-item ${isActive('/notifications_admin') ? 'active' : ''}`} onClick={() => navigate('/notifications_admin')}>
             <Bell size={22} />
-            <span>Notifications</span>
+            <span>{t("AdminLayout.Notifications")}</span>
           </button>
           <button className={`nav-item ${isActive('/scouts_overview') ? 'active' : ''}`} onClick={() => navigate('/scouts_overview')}>
             <Users size={22} />
-            <span>Scouts</span>
+            <span>{t("AdminLayout.Scouts")}</span>
           </button>
           <button className={`nav-item ${isActive('/history') ? 'active' : ''}`} onClick={() => navigate('/history')}>
             <BarChart3 size={22} />
-            <span>History</span>
+            <span>{t("AdminLayout.History")}</span>
           </button>
         </nav>
       </div>
