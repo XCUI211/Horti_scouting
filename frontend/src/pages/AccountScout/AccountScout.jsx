@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ScoutLayout from '../../components/ScoutLayout/ScoutLayout';
 import "../AccountAdmin/Account.css";  // only one css file defined for user account page layout to keep it consistent
+import { useTranslation } from "react-i18next";
 
 const AccountScout = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user')); // gets user info
@@ -27,40 +29,44 @@ const AccountScout = () => {
   };
 
   return (
-    <ScoutLayout title="Your Account">
+    <ScoutLayout title={t("AccountScout.YourAccount")}>
       <div className="account-container">
 
         {/* Manage your account */}
         <section className="account-section">
-          <h2 className="section-title">Manage your account</h2>
+          <h2 className="section-title">{t("AccountScout.manYour")}</h2>
 
           <div className="info-row">
-            <span className="label">Username:</span>
-            <span className="value">{userData?.username || "loading..."}</span>
+            <span className="label">{t("AccountScout.Username")}:</span>
+            <span className="value">{userData?.username || t("AccountScout.Loading")}</span>
           </div>
 
           <div className="info-row">
-            <span className="label">Role:</span>
-            <span className="value">{userData?.role || "loading..."}</span>
+            <span className="label">{t("AccountScout.Role")}:</span>
+            <span className="value">{userData?.role || t("AccountScout.Loading")}</span>
           </div>
 
           <div className="info-row stackable">
-            <span className="label">Password:</span>
-            <button className="grey-pill-btn" onClick={() => navigate("/change_password")}>Change password</button>
+            <span className="label">{t("AccountScout.Password")}:</span>
+            <button className="grey-pill-btn" onClick={() => navigate("/change_password")}>
+              {t("AccountScout.ChangePassword")}
+            </button>
           </div>
 
           <div className="info-row email-row">
             <div className="email-top">
-              <span className="label">Email:</span>
-              <span className="value">{userData?.email || "not set"}</span>
+              <span className="label">{t("AccountScout.Email")}:</span>
+              <span className="value">{userData?.email || t("AccountScout.NotSet")}</span>
             </div>
-            <button className="grey-pill-btn align-right" onClick={() => navigate("/change_email")}>Change email</button>
+            <button className="grey-pill-btn align-right" onClick={() => navigate("/change_email")}>
+              {t("AccountScout.ChangeEmail")}
+            </button>
           </div>
         </section>
 
         {/* Log out */}
         <button className="temp-logout" onClick={handleLogout}>
-          Log out
+          {t("AccountScout.LogOut")}
         </button>
       </div>
     </ScoutLayout>

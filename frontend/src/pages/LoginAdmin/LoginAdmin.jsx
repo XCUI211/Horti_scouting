@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';  //useState keep track of us
 import axios from 'axios';  //carries data to the server
 import "./LoginAdmin.css";
 import {useNavigate} from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function LoginAdmin() {
 
@@ -13,6 +14,7 @@ function LoginAdmin() {
 
     //  use navigate (for back button) to redirect button back to routed main page
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // Logging the user out if they hit back arrow right after logging in
     // Ensures each user logs in using their credentials and does not use somebody else's account by accident
@@ -50,14 +52,14 @@ function LoginAdmin() {
           // if error
         }  catch (err) {
             console.error("Login failed:", err.response?.data);
-            setError(err.response?.data?.message || "Invalid credentials");
+            setError(err.response?.data?.message || t("LoginAdmin.InvalidCredentials"));
         }
     };
 
     return (
         <div className="admin-login-container">
             <img src="/logo.png" alt="Vireo logo" className="admin-logo" />
-            <h1>Log in as an Administrator</h1>
+            <h1>{t("LoginAdmin.Title")}</h1>
 
             {/* Shows red error message if login fails */}
             {error && <p style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
@@ -65,7 +67,7 @@ function LoginAdmin() {
             {/*Login triggers when Enter or the Login button are pressed*/}
             <form onSubmit={handleLogin}>
                 <div className="input-group">
-                    <label>Username</label>
+                    <label>{t("LoginAdmin.Username")}</label>
                     <input
                         type="text"
                         value={username}
@@ -76,7 +78,7 @@ function LoginAdmin() {
                 </div>
 
                 <div className="input-group">
-                    <label>Password</label>
+                    <label>{t("LoginAdmin.Password")}</label>
                     <input
                         type="password"
                         value={password}
@@ -86,10 +88,10 @@ function LoginAdmin() {
                 </div>
 
                 {/*Button working as well when Enter clicked (type="submit")*/}
-                <button type="submit" className="login-submit">Log in</button>
+                <button type="submit" className="login-submit">{t("LoginAdmin.LoginButton")}</button>
             </form>
 
-            <a href="#" className="forgot-password">I forgot my password</a>
+            <a href="#" className="forgot-password">{t("LoginAdmin.ForgotPassword")}</a>
 
             {/* This button uses navigate to return the previous page */}
             <button
@@ -99,7 +101,8 @@ function LoginAdmin() {
                     navigate('/');      // sends back to the first page
                 }}
             >
-                Back</button>
+                {t("LoginAdmin.Back")}
+            </button>
         </div>
     );
 }

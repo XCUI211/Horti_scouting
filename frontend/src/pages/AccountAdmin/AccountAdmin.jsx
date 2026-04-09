@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminLayout from '../../components/AdminLayout/AdminLayout';
 import "./Account.css";
+import { useTranslation } from "react-i18next";
 
 const AccountAdmin = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
+	const { t } = useTranslation();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user')); // gets user info
@@ -27,60 +29,68 @@ const AccountAdmin = () => {
   };
 
   return (
-    <AdminLayout title="Your Account">
+    <AdminLayout title={t("AccountAdmin.YourAccount")}>
       <div className="account-container">
 
         {/* Manage your account */}
         <section className="account-section">
-          <h2 className="section-title">Manage your account</h2>
+          <h2 className="section-title">{t("AccountAdmin.manYour")}</h2>
 
           <div className="info-row">
-            <span className="label">Username:</span>
+            <span className="label">{t("AccountAdmin.Username")}:</span>
             <span className="value">{userData?.username || "loading..."}</span>
           </div>
 
           <div className="info-row">
-            <span className="label">Role:</span>
+            <span className="label">{t("AccountAdmin.Role")}:</span>
             <span className="value">{userData?.role || "loading..."}</span>
           </div>
 
           <div className="info-row stackable">
-            <span className="label">Password:</span>
-            <button className="grey-pill-btn" onClick={() => navigate("/change_password")}>Change password</button>
+            <span className="label">{t("AccountAdmin.Password")}:</span>
+            <button className="grey-pill-btn" onClick={() => navigate("/change_password")}>{t("AccountAdmin.ChangePassword")}</button>
           </div>
 
           <div className="info-row email-row">
             <div className="email-top">
-              <span className="label">Email:</span>
+              <span className="label">{t("AccountAdmin.Email")}:</span>
               <span className="value">{userData?.email || "not set"}</span>
             </div>
-            <button className="grey-pill-btn align-right" onClick={() => navigate("/change_email")}>Change email</button>
+            <button className="grey-pill-btn align-right" onClick={() => navigate("/change_email")}>{t("AccountAdmin.ChangeEmail")}</button>
+          </div>
+
+          <div className="info-row email-row">
+            <div className="email-top">
+              <span className="label">{t("AccountAdmin.Language")}</span>
+              <span className="value">{userData?.language}</span>
+            </div>
+            <button className="grey-pill-btn align-right" onClick={() => navigate("/change_language")}>{t("AccountAdmin.ChangeLanguage")}</button> {/* Change to dropdown, dont know how to change into db without adding page like email */}
           </div>
         </section>
 
         {/* Manage scout accounts */}
         <section className="account-section">
-          <h2 className="section-title">Manage scout accounts</h2>
+          <h2 className="section-title">{t("AccountAdmin.manScout")}</h2>
 
           <div className="info-row stackable">
-            <span className="label">Add a new scout:</span>
-            <button className="green-pill-btn" onClick={() => navigate("/create")}>Create a new Scout account</button>
+            <span className="label">{t("AccountAdmin.newScout")}:</span>
+            <button className="green-pill-btn" onClick={() => navigate("/create")}>{t("AccountAdmin.newScoutAcc")}</button>
           </div>
 
           <div className="info-row stackable">
-            <span className="label">Edit scout information:</span>
-            <button className="grey-pill-btn">Edit Scout account</button>
+            <span className="label">{t("AccountAdmin.EditScoutInfo")}</span>
+            <button className="grey-pill-btn">{t("AccountAdmin.EditScout")}</button>
           </div>
 
           <div className="info-row stackable">
-            <span className="label">Reset password:</span>
-            <button className="grey-pill-btn" onClick={() => navigate("/reset_scout_password")}>Reset Scout password</button>
+            <span className="label">{t("AccountAdmin.ResPass")}</span>
+            <button className="grey-pill-btn" onClick={() => navigate("/reset_scout_password")}>{t("AccountAdmin.ResScoutPass")}</button>
           </div>
         </section>
 
         {/* Log out */}
         <button className="temp-logout" onClick={handleLogout}>
-          Log out
+          {t("AccountAdmin.LogOut")}
         </button>
         
       </div>

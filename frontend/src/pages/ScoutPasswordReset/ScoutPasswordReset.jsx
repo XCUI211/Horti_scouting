@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminLayout from '../../components/AdminLayout/AdminLayout';
 import "./ScoutPasswordReset.css";
+import { useTranslation } from "react-i18next";
 
 const ScoutPasswordReset = () => {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ const ScoutPasswordReset = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const { t } = useTranslation();
 
   // Loading all scouts for the dropdown list
   useEffect(() => {
@@ -36,29 +39,29 @@ const ScoutPasswordReset = () => {
   // Handling the password reset
   const handleReset = async (e) => {
     e.preventDefault();
-    if (!selectedScout) return setError("Please select a valid scout.");
+    if (!selectedScout) return setError(t("ScoutPasswordReset.SelectValidScout"));
 
     try {
       await axios.post('http://localhost:5000/api/admin/reset-scout-password', {
         scoutUid: selectedScout.uid,
         newPassword: newPassword
       });
-      setSuccess(`Password for ${selectedScout.username} reset successfully!`);
+      setSuccess(t("ScoutPasswordReset.ResetSuccess", { username: selectedScout.username }));
       setTimeout(() => navigate(-1), 2000);  // waits a moment before navigating away
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to reset password");
+      setError(err.response?.data?.message || t("ScoutPasswordReset.ResetFailed"));
     }
   };
 
   return (
-    <AdminLayout title="Reset Scout Password">
+    <AdminLayout title={t("ScoutPasswordReset.PageTitle")}>
       <div className="scout-password-reset-container">
         <form className="reset-card" onSubmit={handleReset}>
           <div className="input-group">
-            <label>Select Scout (Username)</label>
+            <label>{t("ScoutPasswordReset.SelectScout")}</label>
             <input
               type="text"
-              placeholder="Start typing username..."
+              placeholder={t("ScoutPasswordReset.StartTyping")}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -78,7 +81,7 @@ const ScoutPasswordReset = () => {
           </div>
 
           <div className="input-group">
-            <label>Temporary Password</label>
+            <label>{t("ScoutPasswordReset.TemporaryPassword")}</label>
             <input
               type="password"
               value={newPassword}
@@ -90,7 +93,9 @@ const ScoutPasswordReset = () => {
           {error && <p className="error-msg">{error}</p>}
           {success && <p className="success-msg">{success}</p>}
 
-          <button type="submit" className="reset-btn" disabled={!!success}>{success ? "Reset Password" : "Reset Password"}</button>
+          <button type="submit" className="reset-btn" disabled={!!success}>
+            {t("ScoutPasswordReset.ResetPassword")}
+          </button>
         </form>
       </div>
     </AdminLayout>

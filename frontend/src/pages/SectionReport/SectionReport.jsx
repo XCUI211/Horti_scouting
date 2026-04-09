@@ -2,6 +2,7 @@ import React, { useState } from 'react';  //useState keep track of user input
 import axios from 'axios';  //carries data to the server
 import "./SectionReport.css";
 import {useNavigate} from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function SectionReport() {
     // Keeping track of user input [variable, function]
@@ -19,6 +20,7 @@ function SectionReport() {
 
     // use navigate (for back button) to redirect button back to routed main page
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const handleSectionReport  = async (e) => {  //waiting for the server
     e.preventDefault();  // prevents page refresh
@@ -41,21 +43,21 @@ function SectionReport() {
 
             // if successful
             console.log("Section report created:", response.data);
-            setSuccess("Section report submitted successfully.");
-            alert("Report succesfully submitted!");
+            setSuccess(t("SectionReport.SubmitSuccess"));
+            alert(t("SectionReport.AlertSuccess"));
             navigate("/");
 
           // if error
         }  catch (err) {
             console.error("Section report failed:", err.response?.data);
-            setError(err.response?.data?.message || "Could not submit section report");
+            setError(err.response?.data?.message || t("SectionReport.SubmitFailed"));
         }
     };
 
     return (
         <div className="scout-container">
             <img src="/logo.png" alt="Vireo logo" className="scout-logo" />
-            <h1>Create Section Report</h1>
+            <h1>{t("SectionReport.Title")}</h1>
 
             {/* Shows red error message if report fails */}
             {error && <p style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
@@ -66,7 +68,7 @@ function SectionReport() {
             {/*Form triggers when Enter or the Submit button are pressed*/}
             <form onSubmit={handleSectionReport}>
                 <div className="input-group">
-                    <label>Section ID</label>
+                    <label>{t("SectionReport.SectionID")}</label>
                     <input type="number"
                            value={sid}
                            onChange={(e) => setSid(e.target.value)}
@@ -74,7 +76,7 @@ function SectionReport() {
                 </div>
 
                 <div className="input-group">
-                    <label>User ID</label>
+                    <label>{t("SectionReport.UserID")}</label>
                     <input type="number"
                            value={uid}
                            onChange={(e) => setUid(e.target.value)}
@@ -82,7 +84,7 @@ function SectionReport() {
                 </div>
 
                 <div className="input-group">
-                    <label>Floor</label>
+                    <label>{t("SectionReport.Floor")}</label>
                     <input type="text"
                            value={floor}
                            onChange={(e) => setFloor(e.target.value)}
@@ -90,43 +92,43 @@ function SectionReport() {
                 </div>
 
                 <div className="input-group">
-                    <label>Pests Type</label>
+                    <label>{t("SectionReport.PestsType")}</label>
                     <select value={pestType}
                             onChange={(e) => {setPestType(e.target.value);
                                 if (e.target.value === 'none') {setPestSeverity('');}}}
                             required>
-                        <option value="">Select option</option>
-                        <option value="none">No pests found</option>
-                        <option value="red_spider_mite">Red spider mite</option>
-                        <option value="thrips">Thrips</option>
-                        <option value="green_louse">Green louse</option>
-                        <option value="black_louse">Black louse</option>
-                        <option value="mealybug">Mealybug</option>
-                        <option value="pythium">Pythium</option>
-                        <option value="mite">Mite</option>
-                        <option value="cycada">Cycada</option>
-                        <option value="weed">Weed</option>
-                        <option value="caterpillar">Caterpillar</option>
+                        <option value="">{t("SectionReport.SelectOption")}</option>
+                        <option value="none">{t("SectionReport.NoPestsFound")}</option>
+                        <option value="red_spider_mite">{t("SectionReport.RedSpiderMite")}</option>
+                        <option value="thrips">{t("SectionReport.Thrips")}</option>
+                        <option value="green_louse">{t("SectionReport.GreenLouse")}</option>
+                        <option value="black_louse">{t("SectionReport.BlackLouse")}</option>
+                        <option value="mealybug">{t("SectionReport.Mealybug")}</option>
+                        <option value="pythium">{t("SectionReport.Pythium")}</option>
+                        <option value="mite">{t("SectionReport.Mite")}</option>
+                        <option value="cycada">{t("SectionReport.Cycada")}</option>
+                        <option value="weed">{t("SectionReport.Weed")}</option>
+                        <option value="caterpillar">{t("SectionReport.Caterpillar")}</option>
                     </select>
                 </div>
 
                 {pestType !== 'none' && pestType !== '' && (<>
                     <div className="input-group">
-                        <label>Pest Severity (1-5)</label>
+                        <label>{t("SectionReport.PestSeverity")}</label>
                         <select value={pestSeverity}
                                 onChange={(e) => setPestSeverity(e.target.value)}
                                 required={pestType !== 'none' && pestType !== ''}>
-                            <option value="">Select score</option>
-                            <option value="1">1 (low)</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5 (high)</option>
+                            <option value="">{t("SectionReport.SelectScore")}</option>
+                            <option value="1">{t("SectionReport.Severity1")}</option>
+                            <option value="2">{t("SectionReport.Severity2")}</option>
+                            <option value="3">{t("SectionReport.Severity3")}</option>
+                            <option value="4">{t("SectionReport.Severity4")}</option>
+                            <option value="5">{t("SectionReport.Severity5")}</option>
                         </select>
                     </div>
 
                     <div className="input-group">
-                        <label>Biology</label>
+                        <label>{t("SectionReport.Biology")}</label>
                         <input type="text"
                                value={biology}
                                onChange={(e) => setBiology(e.target.value)}/>
@@ -134,25 +136,25 @@ function SectionReport() {
                 </>)}
 
                 <div className="input-group">
-                    <label>Trap Number</label>
+                    <label>{t("SectionReport.TrapNumber")}</label>
                     <input type="text"
                            value={trapNumber}
                            onChange={(e) => setTrapNumber(e.target.value)}/>
                 </div>
 
                 <div className="input-group">
-                    <label>Bug Count</label>
+                    <label>{t("SectionReport.BugCount")}</label>
                     <input type="number"
                            value={bugCount}
                            onChange={(e) => setBugCount(e.target.value)}/>
                 </div>
 
                 {/*Button working as well when Enter clicked (type="submit")*/}
-                <button type="submit" className="login-submit">Submit Report</button>
+                <button type="submit" className="login-submit">{t("SectionReport.SubmitReport")}</button>
             </form>
 
             {/* This button uses navigate to return the previous page */}
-            <button className="back-btn" onClick={() => navigate(-1)}>Back</button>
+            <button className="back-btn" onClick={() => navigate(-1)}>{t("SectionReport.Back")}</button>
         </div>
     );
 }

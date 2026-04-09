@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "./PasswordChange.css";
+import { useTranslation } from "react-i18next";
 
 const PasswordChange = () => {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ const PasswordChange = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const { t } = useTranslation();
+
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setError('');
@@ -18,7 +21,7 @@ const PasswordChange = () => {
 
     // Checking if the new password match in both fields
     if (newPassword !== confirmPassword) {
-      return setError("New passwords do not match.");
+      return setError(t("PasswordChange.NewPasswordsDoNotMatch"));
     }
 
     try {
@@ -34,26 +37,26 @@ const PasswordChange = () => {
         newPassword
       });
 
-      setSuccess("Password updated successfully!");
+      setSuccess(t("PasswordChange.UpdateSuccess"));
       // Redirecting after 2 seconds so the user can see the success message
       setTimeout(() => navigate(-1), 2000);
 
     } catch (err) {
-      setError(err.response?.data?.message || "Error updating password");
+      setError(err.response?.data?.message || t("PasswordChange.UpdateError"));
     }
   };
 
   return (
     <div className="password-change-container">
       <img src="/logo.png" alt="Vireo logo" className="scout-logo" />
-      <h1>Change Password</h1>
+      <h1>{t("PasswordChange.Title")}</h1>
 
       {error && <p className="error-msg">{error}</p>}
       {success && <p className="success-msg">{success}</p>}
 
       <form onSubmit={handleChangePassword}>
         <div className="input-group">
-          <label>Current Password</label>
+          <label>{t("PasswordChange.CurrentPassword")}</label>
           <input
             type="password"
             value={currentPassword}
@@ -63,7 +66,7 @@ const PasswordChange = () => {
         </div>
 
         <div className="input-group">
-          <label>New Password</label>
+          <label>{t("PasswordChange.NewPassword")}</label>
           <input
             type="password"
             value={newPassword}
@@ -73,7 +76,7 @@ const PasswordChange = () => {
         </div>
 
         <div className="input-group">
-          <label>Confirm New Password</label>
+          <label>{t("PasswordChange.ConfirmNewPassword")}</label>
           <input
             type="password"
             value={confirmPassword}
@@ -82,9 +85,11 @@ const PasswordChange = () => {
           />
         </div>
 
-        <button type="submit" className="password-change-btn" disabled={!!success}>{success ? "Change Password" : "Change Password"}</button>
+        <button type="submit" className="password-change-btn" disabled={!!success}>
+          {success ? t("PasswordChange.ChangePassword") : t("PasswordChange.ChangePassword")}
+        </button>
       </form>
-        <button type="button" className="back-btn" onClick={() => navigate(-1)}>Back</button>
+        <button type="button" className="back-btn" onClick={() => navigate(-1)}>{t("PasswordChange.Back")}</button>
 
     </div>
   );
