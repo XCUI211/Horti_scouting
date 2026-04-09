@@ -1,6 +1,20 @@
 {
   "test.translation": "Dit is een test vertaling",
   
+
+  "AdminLayout.Home" : "Thuis",
+  "AdminLayout.Maps" : "Kaarten",
+  "AdminLayout.Notifications" : "Notificaties",
+  "AdminLayout.Scouts" : "Scouts",
+  "AdminLayout.History" : "Geschiedenis",
+
+  
+  "ScoutLayout.Home" : "Thuis",
+  "ScoutLayout.Maps" : "Kaarten",
+  "ScoutLayout.Notifications" : "Notificaties",
+  "ScoutLayout.Tasks" : "Taken",
+
+
 	"AccountAdmin.YourAccount" : "Jouw account",
 	"AccountAdmin.manYour" : "Beheer je account",
 	"AccountAdmin.Username" : "Gebruikersnaam",
@@ -112,8 +126,8 @@
 
 	
   "ScoutPasswordReset.PageTitle": "Scout-wachtwoord resetten",
-  "ScoutPasswordReset.SelectScout": "Selecteer scout (gebruikersnaam)",
-  "ScoutPasswordReset.StartTyping": "Begin met typen van gebruikersnaam...",
+  "ScoutPasswordReset.SelectScout": "Selecteer scout",
+  "ScoutPasswordReset.StartTyping": "Gebruikersnaam...",
   "ScoutPasswordReset.TemporaryPassword": "Tijdelijk wachtwoord",
   "ScoutPasswordReset.ResetPassword": "Wachtwoord resetten",
   "ScoutPasswordReset.SelectValidScout": "Selecteer een geldige scout.",
@@ -153,6 +167,7 @@
   "SectionReport.SubmitSuccess": "Sectierapport succesvol ingediend.",
   "SectionReport.AlertSuccess": "Rapport succesvol ingediend!",
   "SectionReport.SubmitFailed": "Sectierapport kon niet worden ingediend"
+
 
 }
 

@@ -1,6 +1,19 @@
 {
   "test.translation": "This is a test translation",
-  
+
+  "AdminLayout.Home" : "Home",
+  "AdminLayout.Maps" : "Maps",
+  "AdminLayout.Notifications" : "Notifications",
+  "AdminLayout.Scouts" : "Scouts",
+  "AdminLayout.History" : "History",
+
+
+  "ScoutLayout.Home" : "Home",
+  "ScoutLayout.Maps" : "Maps",
+  "ScoutLayout.Notifications" : "Notifications",
+  "ScoutLayout.Tasks" : "Tasks",
+
+
 	"AccountAdmin.YourAccount" : "Your account",
 	"AccountAdmin.manYour" : "Manage your account",
 	"AccountAdmin.Username" : "Username",
@@ -112,8 +125,8 @@
 
 	
   "ScoutPasswordReset.PageTitle": "Reset scout password",
-  "ScoutPasswordReset.SelectScout": "Select scout (username)",
-  "ScoutPasswordReset.StartTyping": "Start typing username...",
+  "ScoutPasswordReset.SelectScout": "Select scout",
+  "ScoutPasswordReset.StartTyping": "Username...",
   "ScoutPasswordReset.TemporaryPassword": "Temporary password",
   "ScoutPasswordReset.ResetPassword": "Reset password",
   "ScoutPasswordReset.SelectValidScout": "Please select a valid scout.",
