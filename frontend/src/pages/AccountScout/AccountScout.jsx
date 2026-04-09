@@ -55,13 +55,22 @@ const AccountScout = () => {
 
           <div className="info-row email-row">
             <div className="email-top">
-              <span className="label">{t("AccountScout.Email")}:</span>
+              <span className="label">{t("AccountScout.Email")}</span>
               <span className="value">{userData?.email || t("AccountScout.NotSet")}</span>
             </div>
             <button className="grey-pill-btn align-right" onClick={() => navigate("/change_email")}>
               {t("AccountScout.ChangeEmail")}
             </button>
           </div>
+
+          <div className="info-row language-row">
+            <div className="language-top">
+              <span className="label">{t("AccountScout.Language")}</span>
+              <span className="value">{userData?.language}</span>
+            </div>
+            <button className="grey-pill-btn align-right" onClick={() => navigate("/change_language")}>{t("AccountScout.ChangeLanguage")}</button> {/* Change to dropdown, dont know how to change into db without adding page like email */}
+          </div>
+
         </section>
 
         {/* Log out */}

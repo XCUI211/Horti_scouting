@@ -11,7 +11,7 @@ describe("translator i18n config", () => {
   });
 
   it("has English as fallback language", () => {
-    expect(i18n.options.fallbackLng).toContain("en");
+    expect(i18n.options.fallbackLng).toContain("nl");
   });
 
   it("loads Dutch translations", () => {

@@ -242,6 +242,23 @@ app.post('/api/users/change-email', async (req, res) => {
     }
 });
 
+// POST request for changing user language
+app.post('/api/users/change-language', async (req, res) => {
+    const { uid, password, newLanguage } = req.body;
+
+    try {
+        const userResult = await pool.query('SELECT * FROM users WHERE uid = $1', [uid]);
+        if (userResult.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+
+        // Updating the language
+        await pool.query('UPDATE users SET language  = $1 WHERE uid = $2', [newLanguage, uid]);
+
+        res.json({ message: 'Language updated successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 // POST request to reset a scout's password (Admin only)
 app.post('/api/admin/reset-scout-password', async (req, res) => {
