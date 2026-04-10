@@ -23,6 +23,7 @@ i18n
     },
     lng: savedLanguage,
     fallbackLng: "nl",
+    supportedLngs: ["en", "nl"],
     interpolation: {
       escapeValue: false,
     },

@@ -9,9 +9,15 @@ describe("translator i18n config", () => {
   it("starts in Dutch", () => {
     expect(i18n.language).toBe("nl");
   });
+  it("doesn't start in English", () => {
+    expect(i18n.language).not.toBe("en");
+  });
 
-  it("has English as fallback language", () => {
+  it("has Dutch as fallback language", () => {
     expect(i18n.options.fallbackLng).toContain("nl");
+  });
+  it("doesn't have English as fallback language", () => {
+    expect(i18n.options.fallbackLng).not.toContain("en");
   });
 
   it("loads Dutch translations", () => {
@@ -30,6 +36,13 @@ describe("translator i18n config", () => {
     expect(i18n.t("test.translation")).toBe("Dit is een test vertaling");
   });
 
+    it("can not switch to a language it doesn't have", async () => {
+    await i18n.changeLanguage("fr");
+    expect(i18n.language).not.toBe("fr");
+    expect(i18n.language).toBe("nl");
+    expect(i18n.t("test.translation")).toBe("Dit is een test vertaling");
+  });
+
   it("falls back when a key is missing", () => {
     expect(i18n.t("missing.key")).toBe("missing.key");
   });
@@ -37,5 +50,6 @@ describe("translator i18n config", () => {
   it("registers both language resources", () => {
     expect(i18n.hasResourceBundle("nl", "translation")).toBe(true);
     expect(i18n.hasResourceBundle("en", "translation")).toBe(true);
+    expect(i18n.hasResourceBundle("fr", "translation")).toBe(false);
   });
 });
