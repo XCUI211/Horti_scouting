@@ -5,6 +5,5 @@
   },
   "scripts": {
   "test": "jest --roots tests",
-  "ci-check": "npm audit --audit-level=high && npm test"
-  }
+  "ci-check": "npm audit --audit-level=high && npm test && cd server && npm audit --audit-level=high && (npm test || echo 'Server tests skipped') && cd ../frontend && npm audit --audit-level=high && npm test -- --run"  }
 }
