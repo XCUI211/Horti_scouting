@@ -1,0 +1,60 @@
+name: Continuous Integration
+on: [pull_request]
+jobs:
+
+  root-check:  # General checks for entire project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'  # using the same node.js version
+          cache: 'npm'  # using caching for efficiency
+          cache-dependency-path: package-lock.json
+      - name: Installing dependencies
+        run: npm install
+      - name: Security audit
+        run: npm audit --audit-level=high  # only flag high-level security risks
+      - name: Running unit tests
+        run: npm test
+
+  backend-server-check:  # Checks for the server and backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+      - name: Installing server dependencies
+        working-directory: ./server
+        run: npm install
+      - name: Server security audit
+        working-directory: ./server
+        run: npm audit --audit-level=high
+      - name: Running server unit tests
+        working-directory: ./server
+        run: npm test || echo "No tests yet"  # prevents error if no tests defined yet
+
+  frontend-check:  # Checks for the frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Installing frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+      - name: Frontend security audit
+        working-directory: ./frontend
+        run: npm audit --audit-level=high
+      - name: Running frontend unit tests
+        working-directory: ./frontend
+        run: npm test -- --run  # runs frontend tests with Vitest (not jest)

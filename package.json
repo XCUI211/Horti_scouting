@@ -1,5 +1,10 @@
 {
   "devDependencies": {
+    "jest": "^30.3.0",
     "vitest": "^4.1.4"
+  },
+  "scripts": {
+  "test": "jest --roots tests",
+  "ci-check": "npm audit --audit-level=high && npm test"
   }
 }
