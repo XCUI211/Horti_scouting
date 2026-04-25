@@ -16,7 +16,7 @@ In the **root** directory run:
    > npm run ci-check
 
  Note: if some tests fail, for example in server directory, the tests for the remaining zones will not run. <br />
- Alternatively you can run navigate to each directory separately and run the CI check there: <br />
+ Alternatively, you can navigate to each directory separately and run the CI check there: <br />
  1. In **root**:
     > npm audit --audit-level=high <br />
     > npm test
