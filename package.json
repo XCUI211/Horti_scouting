@@ -1,9 +1,20 @@
 {
-  "devDependencies": {
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "server"
+  ],
+  "devDependencies": {    
     "jest": "^30.3.0",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.4",
+    "concurrently": "^9.2.1"  
   },
   "scripts": {
-  "test": "jest --roots tests",
-  "ci-check": "npm audit --audit-level=high && npm test && cd server && npm audit --audit-level=high && (npm test || echo 'Server tests skipped') && cd ../frontend && npm audit --audit-level=high && npm test -- --run"  }
+    "test": "jest --roots tests",
+    "test:frontend": "npm test --workspace=frontend -- --run",
+    "test:server": "npm test --workspace=server",
+    "audit": "npm audit --audit-level=high --workspaces --include-workspace-root",
+    "ci-check": "npm run audit && npm run test && npm run test:server && npm run test:frontend",
+    "startup": "concurrently \"npm run dev --workspace frontend\" \"npm run start --workspace server\""
+  }
 }
