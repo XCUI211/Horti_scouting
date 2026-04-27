@@ -3,7 +3,7 @@
 ## Automation
 
 ### Continuous Integration
-This project uses an automated analysis workflow that reviews pull requests and ensures that the new code obliges to security checks and does not break existing functionality. It runs analysis for the root, backend, and frontend separately, providing clarity and ease with fixing errors. The checks are run automatically on Pull Requests and can be viewed at the bottom of the Pull Request page.
+This project uses an automated analysis workflow that reviews pull requests and ensures that the new code obliges to security checks and does not break existing functionality. It runs analysis for the root, backend, and frontend, providing clarity and ease with fixing errors. The checks are run automatically on Pull Requests and can be viewed on the Pull Request page.
 
 #### Prerequisites
 * **Node.js**: v24.x
@@ -16,10 +16,10 @@ In the **root** directory run:
    > npm run ci-check
 
  Note: if some tests fail, for example in server directory, the tests for the remaining zones will not run. <br />
- Alternatively, you can navigate to each directory separately and run the CI check there: <br />
- 1. In **root**:
-    > npm test <br />
+ Alternatively, you can run the CI checks separately using these commands in **root**: <br />
+ 1. To perform overall security audit and root unit tests:
     > npm run audit <br />
+    > npm test <br />
  2. To check the backend:
     > npm run test:server
  3. To check the frontend:
