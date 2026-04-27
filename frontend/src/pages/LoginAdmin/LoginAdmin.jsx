@@ -36,7 +36,8 @@ function LoginAdmin() {
             //Sending the request to the backend
             const response = await axios.post('http://localhost:5000/api/login', {  //sends POST request for sensitive data
                 username: username,
-                password: password
+                password: password,
+                role: 'admin'
             });
 
             // if successful

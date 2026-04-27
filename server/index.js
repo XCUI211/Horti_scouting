@@ -39,7 +39,7 @@ const PORT = process.env.PORT || 5000;  // use port from .env file, or use port 
 
 // POST request for logging in
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;  // get data from the frontend
+    const { username, password, role } = req.body;  // get data from the frontend
 
     try {
         // Looking for the username in the database
@@ -52,6 +52,12 @@ app.post('/api/login', async (req, res) => {
 
         // Otherwise choosing the user
         const user = result.rows[0];
+
+        // Ensuring only authorized access
+        if (user.role !== role) {
+            return res.status(403).json({ message: `Access denied. You are not a(n) ${role}.` });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password_hash);  // compare password to hashed password
 
         if (isMatch) {
