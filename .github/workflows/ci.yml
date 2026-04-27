@@ -14,8 +14,8 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Installing dependencies
         run: npm install
-      - name: Security audit
-        run: npm audit --audit-level=high  # only flag high-level security risks
+      - name: Security audit  # runs security audit on root, backend, and frontend
+        run: npm run audit
       - name: Running unit tests
         run: npm test
 
@@ -28,16 +28,11 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-          cache-dependency-path: server/package-lock.json
-      - name: Installing server dependencies
-        working-directory: ./server
+          cache-dependency-path: package-lock.json
+      - name: Installing dependencies
         run: npm install
-      - name: Server security audit
-        working-directory: ./server
-        run: npm audit --audit-level=high
       - name: Running server unit tests
-        working-directory: ./server
-        run: npm test || echo "No tests yet"  # prevents error if no tests defined yet
+        run: npm run test:server
 
   frontend-check:  # Checks for the frontend
     runs-on: ubuntu-latest
@@ -48,13 +43,8 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-      - name: Installing frontend dependencies
-        working-directory: ./frontend
+          cache-dependency-path: package-lock.json
+      - name: Installing dependencies
         run: npm install
-      - name: Frontend security audit
-        working-directory: ./frontend
-        run: npm audit --audit-level=high
       - name: Running frontend unit tests
-        working-directory: ./frontend
-        run: npm test -- --run  # runs frontend tests with Vitest (not jest)
+        run: npm run test:frontend
