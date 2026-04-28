@@ -123,7 +123,7 @@ app.listen(PORT, () => {  // start the server
 });
 
 
-// GET request from database to get all users; for testing purposes only
+// GET request from database to get all users
 app.get('/api/users', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM users ORDER BY uid');
@@ -315,5 +315,86 @@ app.post('/api/users/complete-force-change', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// GET request to from the database to get all available maps
+app.get('/api/maps', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT mid, name, location, greenhouse FROM maps ORDER BY name ASC');  // alphabetically sorted by name
+        res.json(result.rows);  // sends the rows found in the database as json array
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error fetching maps' });
+    }
+});
+
+// GET request to get maps currently assigned to a specific scout
+// Uses a dynamic parameter uid
+app.get('/api/users/:uid/maps', async (req, res) => {
+    const { uid } = req.params;  // extracts uid from the url
+    try {
+        const result = await pool.query(
+            'SELECT mid FROM user_maps WHERE uid = $1',
+            [uid]
+        );
+        // Returns just an array of map IDs
+        res.json(result.rows.map(row => row.mid));
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error fetching user maps' });
+    }
+});
+
+// POST request to update map assignment for a scout
+app.post('/api/admin/assign-maps', async (req, res) => {
+    const { scoutUid, mapIds } = req.body;  // gets scout ID and an array of map IDs assigned to them
+    const client = await pool.connect();  // manually grabbing a connection to start a transaction
+
+    try {
+        await client.query('BEGIN');  // starts SQL transaction
+
+        // Removes all current scout-maps assignments
+        await client.query('DELETE FROM user_maps WHERE uid = $1', [scoutUid]);
+
+        // Inserts new assignments (this includes old map assignments that haven't been deleted) if any are selected
+        if (mapIds && mapIds.length > 0) {
+            const insertValues = mapIds.map(mid => `(${scoutUid}, ${mid})`).join(',');
+            await client.query(`INSERT INTO user_maps (uid, mid) VALUES ${insertValues}`);
+        }
+
+        await client.query('COMMIT');  // saves the transaction
+        res.json({ message: 'Maps assigned successfully' });
+    } catch (err) {
+        await client.query('ROLLBACK');  // if error occurs, undoes any changes to prevent loss of data
+        console.error(err);
+        res.status(500).json({ message: 'Failed to assign maps' });
+    } finally {
+        client.release();  // gives the connection back
+    }
+});
+
+
+// GET request to get all scouts and their assigned maps in one overview
+app.get('/api/admin/scouts-maps-overview', async (req, res) => {
+    try {  // json aggregate collects multiple maps into a single json array for each scout
+        const query = `
+            SELECT
+                u.uid,
+                u.username,
+                u.email,
+                COALESCE(json_agg(m.*) FILTER (WHERE m.mid IS NOT NULL), '[]') as assigned_maps
+            FROM users u
+            LEFT JOIN user_maps um ON u.uid = um.uid
+            LEFT JOIN maps m ON um.mid = m.mid
+            WHERE u.role = 'scout' AND u.is_employed = true
+            GROUP BY u.uid, u.username, u.email
+            ORDER BY u.username ASC;
+        `;
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error fetching overview' });
     }
 });

@@ -120,7 +120,7 @@
 
             <div className="info-row stackable">
               <span className="label">{t("AccountAdmin.EditScoutInfo")}</span>
-              <button className="grey-pill-btn">{t("AccountAdmin.EditScout")}</button>
+              <button className="grey-pill-btn" onClick={() => navigate("/scout_maps_assign")}>{t("AccountAdmin.EditScout")}</button>
             </div>
 
             <div className="info-row stackable">
