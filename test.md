@@ -1,7 +1,0 @@
-# I am using Git now
-
-for real for real
-
-## Here's a fish (NOT FOR CHRISTMAS)
-
-![fish](https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/cd1699c1-baaa-4632-8a2f-c609bcb3cb0e/djk9jx5-fea2de36-23cc-4e0f-9e1a-738dafb73732.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi9jZDE2OTljMS1iYWFhLTQ2MzItOGEyZi1jNjA5YmNiM2NiMGUvZGprOWp4NS1mZWEyZGUzNi0yM2NjLTRlMGYtOWUxYS03MzhkYWZiNzM3MzIucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.L3i4PI9Scp0-rSFsRPhYhcloJkCgguBG4BYI3b8r7lU)
