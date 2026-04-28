@@ -1,0 +1,236 @@
+.map-assign-container {
+    padding: 20px;
+    background-color: #f8fafc;
+    min-height: 100%;  /* Background covers the whole page height */
+}
+
+/* Scout overview list */
+.map-assign-container .scouts-maps-assignment-list {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;  /* Stacks scouts vertically */
+    gap: 15px;  /* Space between scout cards */
+}
+
+/* Individual scout card */
+.map-assign-container .overview-card {
+    display: flex;  /* Puts scout info on the left and button on the right */
+    justify-content: space-between;  /* Pushes items to opposite ends */
+    align-items: flex-start; /* Prevents button from jumping if text is long */
+    background: #fff;  /* White background */
+    padding: 20px;
+    border-radius: 10px;  /* Rounded corners */
+    border: 1px solid #ddd;  /* Grey border */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    gap: 20px; /* Forces space between info and button */
+}
+
+/* Scout name and maps assigned on the card */
+.map-assign-container .scout-info {
+    flex: 1; /* Takes up all available space on the left */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;  /* Space between name and maps list */
+}
+
+.map-assign-container .scout-info h3 {
+    margin: 0;  /* Removes header default margin */
+    color: #152974;  /* Vireo blue color */
+}
+
+.map-assign-container .tags-container {
+    display: flex;
+    flex-wrap: wrap;  /* Wraps to the new line if maps reach the assign button */
+    gap: 8px;  /* Space between map tags */
+    max-width: 100%;  /* Keeps tags within the info container */
+}
+
+/* Individual map tags (within scout cards) */
+.map-assign-container .map-tag {
+    background-color: #e2e8f0;
+    color: #475569;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Styling if no maps assigned */
+.map-assign-container .no-maps {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* In individual scout maps assignment overview */
+.map-assign-container .edit-header {
+    padding: 20px;
+    text-align: center;
+}
+
+.map-assign-container .edit-header h2 {
+    color: #1e293b;
+    font-size: 22px;
+    margin: 15px 0 25px 0;
+    font-weight: 700;
+}
+
+/* Back to overview */
+.map-assign-container .back-link {
+    background: none;  /* Removes button styling to look like a link */
+    border: none;
+    color: #152974;
+    text-decoration: underline;  /* Adds underline */
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* Map cards layout - grid containing the clickable maps */
+.map-assign-container .maps-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+/* Individual map card */
+.map-assign-container .map-card-v2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    cursor: pointer;
+}
+
+.map-assign-container .map-card-v2:hover {
+    transform: translateY(-2px);  /* Lift effect on hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+}
+
+/* Map card when selected */
+.map-assign-container .map-card-v2.is-active {
+    border-color: #57b021;  /* Green border */
+    background-color: #f0fdf4;  /* Light green background */
+}
+
+/* Map card internal content */
+.map-assign-container .map-card-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.map-assign-container .map-icon-circle {
+    width: 45px;
+    height: 45px;
+    background-color: #f1f5f9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-assign-container .is-active .map-icon-circle {
+    background-color: #57b021;
+}
+
+.map-assign-container .map-number {
+    font-weight: 700;
+    color: #475569;
+    font-size: 14px;
+}
+
+.map-assign-container .is-active .map-number {
+    color: white;
+}
+
+.map-assign-container .map-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.map-assign-container .map-title {
+    font-weight: 600;
+    color: #334155;
+    font-size: 16px;
+}
+
+.map-assign-container .map-subtitle {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Selection checkmarks */
+.map-assign-container .map-selection-indicator {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-assign-container .is-active .map-selection-indicator {
+    background-color: #57b021;
+    border-color: #57b021;
+}
+
+.map-assign-container .check-icon {
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Buttons styling */
+.map-assign-container .green-pill-btn.big {
+    padding: 12px 60px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: none;
+    background-color: #57b021;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.map-assign-container .green-pill-btn.big:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Assign Maps button */
+.map-assign-container .assign-pill-btn {
+    align-self: center;  /* Centers button vertically within the card */
+    background-color: #e5e7eb;  /* Light grey */
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    width: fit-content;
+    white-space: nowrap;
+    flex-shrink: 0;  /* Prevents the button from changing size when tags wrap */
+}
+
+.map-assign-container .assign-pill-btn:hover {
+    background-color: #d1d5db;
+    color: #1f2937;
+}
+
+.map-assign-container .map-assign-actions {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}

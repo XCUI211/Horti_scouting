@@ -12,6 +12,7 @@ import PasswordChange from "./pages/PasswordChange/PasswordChange";
 import EmailChange from "./pages/EmailChange/EmailChange";
 import ForcePasswordChange from "./pages/ForcePasswordChange/ForcePasswordChange";
 import ScoutPasswordReset from "./pages/ScoutPasswordReset/ScoutPasswordReset";
+import ScoutMapAssignment from "./pages/ScoutMapAssignment/ScoutMapAssignment";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
       <Route path="/change_email" element={<EmailChange />} />
       <Route path="/reset_scout_password" element={<ScoutPasswordReset />} />
       <Route path="/force_password_change" element={<ForcePasswordChange />} />
+      <Route path="/scout_maps_assign" element={<ScoutMapAssignment />} />
     </Routes>
   );
 }
