@@ -10,9 +10,12 @@
     "concurrently": "^9.2.1"  
   },
   "scripts": {
-    "test": "jest --roots tests",
-    "test:frontend": "npm test --workspace=frontend -- --run",
+    "test": "npm run test:root && npm run test:server && npm run test:frontend",
+
+    "test:root": "jest --roots tests",
     "test:server": "npm test --workspace=server",
+    "test:frontend": "npm test --workspace=frontend -- --run",
+    
     "audit": "npm audit --audit-level=high --workspaces --include-workspace-root",
     "ci-check": "npm run audit && npm run test && npm run test:server && npm run test:frontend",
     "startup": "concurrently \"npm run dev --workspace frontend\" \"npm run start --workspace server\""

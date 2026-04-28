@@ -19,13 +19,15 @@ const pool = new Pool({
 });
 
 // Testing the database connection
-pool.connect((err, client, release) => {
-    if (err) {
-        return console.error('Error acquiring client', err.stack);
+const testDatabaseConnection = async () => {
+    try {
+        const client = await pool.connect();
+        console.log('Successfully connected to PostgreSQL');
+        client.release();
+    } catch (err) {
+        console.error('Error acquiring client', err.stack);
     }
-    console.log('Successfully connected to PostgreSQL');  // if connection is working
-    release();
-});
+};
 
 // Simple confirmation that the server is working
 // if the localhost5000 opens with this message, server is working
@@ -118,10 +120,20 @@ app.get('/api/users/:uid', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {  // start the server
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Start the server
+const startServer = async () => {
+    await testDatabaseConnection();
 
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+};
+
+// Only start the server when run with node index.js
+// Server does not start automatically when importing this file (for testing)
+if (require.main === module) {
+    startServer();
+}
 
 // GET request from database to get all users; for testing purposes only
 app.get('/api/users', async (req, res) => {
@@ -203,7 +215,7 @@ app.post('/api/floorreports', async (req, res) => {
 
         // Sends success message back to frontend
         res.status(201).json({
-            message: 'Account created successfully!'
+            message: 'Floor report created successfully!'
         });
 
     } catch (err) {
@@ -234,7 +246,9 @@ app.post('/api/users/change-password', async (req, res) => {
 
         await pool.query('UPDATE users SET password_hash = $1 WHERE uid = $2', [newHashedPassword, uid]);
 
-        res.json({ message: 'Password updated successfully' });
+        res.status(200).json({
+            message: 'Password updated successfully'
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
@@ -259,7 +273,9 @@ app.post('/api/users/change-email', async (req, res) => {
         // Updating the email (new email can be empty for the Scout)
         await pool.query('UPDATE users SET email = $1 WHERE uid = $2', [newEmail, uid]);
 
-        res.json({ message: 'Email updated successfully' });
+        res.status(200).json({
+            message: 'Email updated successfully'
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
@@ -277,7 +293,9 @@ app.post('/api/users/change-language', async (req, res) => {
         // Updating the language
         await pool.query('UPDATE users SET language  = $1 WHERE uid = $2', [newLanguage, uid]);
 
-        res.json({ message: 'Language updated successfully' });
+        res.status(200).json({
+            message: 'Language updated successfully'
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
@@ -294,7 +312,10 @@ app.post('/api/admin/reset-scout-password', async (req, res) => {
             "UPDATE users SET password_hash = $1, must_change_password = true WHERE uid = $2",
             [hashedPassword, scoutUid]
         );
-        res.json({ message: 'Password reset and flag set successfully' });
+
+        res.status(200).json({
+            message: 'Password reset and flag set successfully'
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Failed to reset password' });
@@ -311,9 +332,19 @@ app.post('/api/users/complete-force-change', async (req, res) => {
             "UPDATE users SET password_hash = $1, must_change_password = false WHERE uid = $2",
             [hashedPassword, uid]
         );
-        res.json({ message: 'Password updated successfully' });
+        res.status(200).json({
+            message: 'Password updated successfully'
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+// Export so test files can import Express app without starting server.
+module.exports = {
+    app,
+    pool,
+    startServer,
+    testDatabaseConnection
+};

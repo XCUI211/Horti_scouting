@@ -17,9 +17,11 @@ In the **root** directory run:
 
  Note: if some tests fail, for example in server directory, the tests for the remaining zones will not run. <br />
  Alternatively, you can run the CI checks separately using these commands in **root**: <br />
- 1. To perform overall security audit and root unit tests:
+ 1. To perform overall security audit and all unit tests:
     > npm run audit <br />
     > npm test <br />
+ 3. To test the root:
+    > npm run test:root
  2. To check the backend:
     > npm run test:server
  3. To check the frontend:
