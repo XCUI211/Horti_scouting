@@ -51,7 +51,7 @@ const ScoutLayout = ({ children, title }) => {
             <Home size={22} />
             <span>{t("ScoutLayout.Home")}</span>
           </button>
-          <button className={`nav-item ${isActive('/map_scout') ? 'active' : ''}`} onClick={() => navigate('/map_scout')}>
+          <button className={`nav-item ${isActive('/maps') ? 'active' : ''}`} onClick={() => navigate('/maps')}>
             <MapPin size={22} />
             <span>{t("ScoutLayout.Maps")}</span>
           </button>
