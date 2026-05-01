@@ -168,6 +168,12 @@
   "SectionReport.Back": "Back",
   "SectionReport.SubmitSuccess": "Section report submitted successfully.",
   "SectionReport.AlertSuccess": "Report successfully submitted!",
-  "SectionReport.SubmitFailed": "Could not submit section report"
+  "SectionReport.SubmitFailed": "Could not submit section report",
 
+  "ScoutMapAssignment.TopOfPage": "Map Assignment",
+  "ScoutMapAssignment.NoMaps": "No maps assigned",
+  "ScoutMapAssignment.AssignMaps": "Assign Maps",
+  "ScoutMapAssignment.BackOverview": "Back to Overview",
+  "ScoutMapAssignment.EditMaps": "Editing Maps for",
+  "ScoutMapAssignment.Map": "Map"
 }

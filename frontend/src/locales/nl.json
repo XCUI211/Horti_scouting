@@ -168,7 +168,12 @@
   "SectionReport.Back": "Terug",
   "SectionReport.SubmitSuccess": "Sectierapport succesvol ingediend.",
   "SectionReport.AlertSuccess": "Rapport succesvol ingediend!",
-  "SectionReport.SubmitFailed": "Sectierapport kon niet worden ingediend"
+  "SectionReport.SubmitFailed": "Sectierapport kon niet worden ingediend",
 
-
+  "ScoutMapAssignment.TopOfPage": "Kaarten toekennen",
+  "ScoutMapAssignment.NoMaps": "Geen kaarten toegekent",
+  "ScoutMapAssignment.AssignMaps": "Kaart toekennen",
+  "ScoutMapAssignment.BackOverview": "Terug naar overzicht",
+  "ScoutMapAssignment.EditMaps": "Kaarten bewerken voor",
+  "ScoutMapAssignment.Map": "Kaart"
 }

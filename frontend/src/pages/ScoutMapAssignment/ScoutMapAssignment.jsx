@@ -67,7 +67,7 @@ const ScoutMapAssignment = () => {
     };
 
     return (
-        <AdminLayout title={t("Map Assignment")}>
+        <AdminLayout title={t("ScoutMapAssignment.TopOfPage")}>
             <div className="map-assign-container">
 
                 {/* Scout overview list, when NOT editing a scout */}
@@ -85,12 +85,12 @@ const ScoutMapAssignment = () => {
                                                     <span key={m.mid} className="map-tag">{m.name}</span>
                                                 ))
                                             ) : (
-                                                <span className="no-maps">{t("No maps assigned")}</span>
+                                                <span className="no-maps">{t("ScoutMapAssignment.NoMaps")}</span>
                                             )}
                                         </div>
                                     </div>
                                     <button className="assign-pill-btn" onClick={() => startEditing(scout)}>
-                                        {t("Assign Maps")}
+                                        {t("ScoutMapAssignment.AssignMaps")}
                                     </button>
                                 </div>
                             ))}
@@ -100,8 +100,8 @@ const ScoutMapAssignment = () => {
                     /* Maps assignment for one scout editing view */
                     <section className="map-assign-to-one-scout-section">
                         <div className="edit-header">
-                            <button className="back-link" onClick={() => setEditingScout(null)}>← {t("Back to Overview")}</button>
-                            <h2>{t("Editing Maps for")}: {editingScout.username}</h2>
+                            <button className="back-link" onClick={() => setEditingScout(null)}>← {t("ScoutMapAssignment.BackOverview")}</button>
+                            <h2>{t("ScoutMapAssignment.EditMaps")}: {editingScout.username}</h2>
                         </div>
 
                         <div className="maps-grid">
@@ -116,7 +116,7 @@ const ScoutMapAssignment = () => {
                                             <span className="map-number">{map.name}</span>
                                         </div>
                                         <div className="map-details">
-                                            <span className="map-title">{t("Map")} {map.name}</span>
+                                            <span className="map-title">{t("ScoutMapAssignment.Map")} {map.name}</span>
                                             <span className="map-subtitle">{map.location}</span>
                                         </div>
                                     </div>
