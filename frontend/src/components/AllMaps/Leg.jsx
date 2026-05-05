@@ -97,7 +97,7 @@ const Leg = ({ focusedReport }) => {
 
   return (
     <div className="map-container">
-      <div className="map-header"><h2>HW 13</h2></div>
+      <div className="map-header"><h2>Legmeerdijk</h2></div>
       <div className="map-viewport">
         <div
           className="merged-grid-container"

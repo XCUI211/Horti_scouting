@@ -10,17 +10,17 @@ def parse_all_nursery_maps(excel_path, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     for cell_name in wb.sheetnames:
+        # Determine unclickable cells
         if cell_name in ['Blad1', 'Blad2', 'Pesticides', 'Legenda plagen']: 
             continue
         
         ws = wb[cell_name]
         
         # Crete an empty grid 
-        actual_max_r = min(ws.max_row, 79)
+        actual_max_r = min(ws.max_row, 79) # Limit row nums to avoid white space at the bottom
         actual_max_c = ws.max_column
 
         grid = []
-
         for r in range(actual_max_r):            
             new_row = [""] * actual_max_c
             grid.append(new_row)   
@@ -29,8 +29,8 @@ def parse_all_nursery_maps(excel_path, output_dir):
         # Handle start of counting in Excel from 1 
         for r in range(1, actual_max_r + 1):
             for c in range(1, actual_max_c + 1):
-                val = ws.cell(row=r, column=c).value # extract the data
-                if val is not None:
+                val = ws.cell(row=r, column=c).value # Extract the data
+                if val is not None:                  # Do not overwrite with empty cell values
                     if isinstance(val, (int, float)) and not isinstance(val, bool):
                         if float(val).is_integer():
                             grid[r-1][c-1] = int(val)
@@ -66,11 +66,6 @@ def parse_all_nursery_maps(excel_path, output_dir):
             for c in range(len(grid[0])):
                 grid[0][c] = "Legmeerdijk"
                 
-
-        # for r in range(22, 26):
-        #     if r < len(grid) and len(grid[r]) > 1:
-        #         grid[r][1] = "silo"
-
         # Save to the json file 
         file_path = os.path.join(output_dir, "leg.json")
         with open(file_path, 'w', encoding='utf-8') as f:
