@@ -44,7 +44,7 @@ const AdminLayout = ({ children, title }) => {
             <Home size={22} />
             <span>{t("AdminLayout.Home")}</span>
           </button>
-          <button className={`nav-item ${isActive('/map_admin') ? 'active' : ''}`} onClick={() => navigate('/map_admin')}>
+          <button className={`nav-item ${isActive('/maps') ? 'active' : ''}`} onClick={() => navigate('/maps')}>
             <MapPin size={22} />
             <span>{t("AdminLayout.Maps")}</span>
           </button>
