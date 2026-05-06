@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import mapData from './hw10.12.json'; 
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
+import { useTranslation } from "react-i18next";
 
 const HW1012Map = ({ focusedReport }) => {
   const [selectedCell, setSelectedCell] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
+
+  const { t, i18n } = useTranslation(); //i18n for local language
 
   const mapId = "HW 10.12";
 
@@ -20,6 +23,19 @@ const HW1012Map = ({ focusedReport }) => {
     // 注: F1/F2/G1/G3 等特殊编号格子目前保留为可点击。
     // 如果这些是标注而非可 scout 的区域, 把它们加到这里。
   ];
+
+  const getDisplayLabel = (label) => {
+    const translations = {
+      "Tranportbaan": t("hw1012.TransportBelt"),
+      "Transport": t("hw1012.Transport"),
+      "Deur naar kas 2": t("hw1012.DoorToGreenhouse2"),
+      "Deur naar kas 3": t("hw1012.DoorToGreenhouse3"),
+      "Piramides": t("hw1012.Pyramids"),
+      "Bakken": t("hw1012.Trays"),
+    };
+
+    return translations[label] || label;
+  };
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent(mapId)}`)
@@ -80,7 +96,7 @@ const HW1012Map = ({ focusedReport }) => {
             }}
             onClick={isStatic ? null : () => setSelectedCell({ label: labelStr })}
           >
-            {labelStr}
+             {getDisplayLabel(labelStr)}
           </div>
         );
       });
@@ -91,7 +107,7 @@ const HW1012Map = ({ focusedReport }) => {
 
   return (
     <div className="map-container">
-      <h2>HW 10.12 - Scouting Map</h2>
+      <h2>{t("hw1012.Header")}</h2>
       <div
         className="merged-grid-container"
         style={{ 

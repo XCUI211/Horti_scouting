@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import mapData from './rijsenhout.json';
 import './MapStyles.css';
-import ScoutReportModal from './Forms/ScoutReportModal'; 
+import ScoutReportModal from './Forms/ScoutReportModal';
+import { useTranslation } from "react-i18next";
 
 const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -9,10 +10,25 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
   
   const [cellStatuses, setCellStatuses] = useState({});
 
+  const { t, i18n } = useTranslation(); //i18n for local language
+  
   const unclickableLabels = [
     "Rijsenhout", "Oppotruimte", "Raap plein", 
     "Magazijn", "KAS 2", "KAS 3", "KAS 4"
   ];
+
+  const getDisplayLabel = (label) => {
+    const translations = {
+      "Oppotruimte": t("Rijsenhout.Potting"),
+      "Raap plein": t("Rijsenhout.Square"),
+      "Magazijn": t("Rijsenhout.Stockroom"),
+      "KAS 2": `${t("Rijsenhout.Greenhouse")} 2`,
+      "KAS 3": `${t("Rijsenhout.Greenhouse")} 3`,
+      "KAS 4": `${t("Rijsenhout.Greenhouse")} 4`,
+    };
+
+    return translations[label] || label;
+  };
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/reports?map_id=${mapName}`)
@@ -89,7 +105,7 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
               setViewingReport(null);
             }}
           >
-            {bounds.label}
+            {getDisplayLabel(bounds.label)}
           </div>
         );
       } else {
@@ -102,8 +118,8 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
   return (
     <div className="map-container">
       <div className="map-header">
-        <h2>Rijsenhout - Scouting Map</h2>
-        <p className="mobile-hint">Drag your finger to move the map • Tap a section to report</p>
+        <h2>{t("Rijsenhout.Header")}</h2>
+        <p className="mobile-hint">{t("Rijsenhout.MobileHint")}</p>
       </div>
       <div className="map-viewport">
         <div className="merged-grid-container" style={{ display: 'grid', gridTemplateColumns: `repeat(${mapData[0].length}, minmax(70px, 1fr))`, gridAutoRows: 'minmax(45px, auto)' }}>

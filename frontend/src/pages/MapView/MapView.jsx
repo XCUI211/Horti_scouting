@@ -9,6 +9,7 @@ import HW1017Map from '../../components/AllMaps/hw.10.17';
 import HW15Map from '../../components/AllMaps/hw.15';
 import AdminDashboard from '../AdminDashboard/AdminDashboard';
 import './MapView.css';
+import { useTranslation } from "react-i18next";
 
 const MAPS = {
   'Rijsenhout': RijsenhoutMap,
@@ -24,6 +25,8 @@ function MapView() {
   const [view, setView] = useState('map');
   const [currentMap, setCurrentMap] = useState('Rijsenhout');
   const [focusedReport, setFocusedReport] = useState(null);
+  
+  const { t, i18n } = useTranslation(); //i18n for local language
 
   const handleLocate = (report) => {
     if (report.map_id && MAPS[report.map_id]) {
@@ -41,20 +44,20 @@ function MapView() {
   const CurrentMap = MAPS[currentMap];
 
   return (
-    <AdminLayout title={view === 'map' ? `Maps: ${currentMap}` : 'Maps'}>
+    <AdminLayout title={view === 'map' ? `${t("Mapview.Maps")}: ${currentMap}` : t("Mapview.Maps")}>
       <div className="mapview-toolbar">
         <div className="mapview-tabs">
           <button
             className={`mapview-tab ${view === 'map' ? 'active' : ''}`}
             onClick={() => setView('map')}
           >
-            Map View
+            {t("Mapview.Maps")}
           </button>
           <button
             className={`mapview-tab ${view === 'admin' ? 'active' : ''}`}
             onClick={() => setView('admin')}
           >
-            Admin Dashboard
+            {t("Mapview.AdminDashboard")}
           </button>
         </div>
         {view === 'map' && (

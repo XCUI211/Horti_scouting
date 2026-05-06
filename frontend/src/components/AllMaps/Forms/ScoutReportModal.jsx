@@ -1,29 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-const pestOptions = [
-  { value: 'red_spider_mite', label: 'Red spider mite' },
-  { value: 'thrips', label: 'Thrips' },
-  { value: 'green_louse', label: 'Green louse' },
-  { value: 'black_louse', label: 'Black louse' },
-  { value: 'mealybug', label: 'Mealybug' },
-  { value: 'pythium', label: 'Pythium' },
-  { value: 'mite', label: 'Mite' },
-  { value: 'cycada', label: 'Cycada' },
-  { value: 'weed', label: 'Weed' },
-  { value: 'caterpillar', label: 'Caterpillar' },
-];
-
-const biologyOptions = [
-  { value: 'bio1', label: 'Bio1' },
-  { value: 'bio2', label: 'Bio2' },
-  { value: 'bio3', label: 'Bio3' },
-];
-
-const chemicalsOptions = [
-  { value: 'chem1', label: 'Chem1' },
-  { value: 'chem2', label: 'Chem2' },
-  { value: 'chem3', label: 'Chem3' },
-];
+import { useTranslation } from "react-i18next";
 
 export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData, mapName }) {
   const [fid, setFid] = useState('');
@@ -53,6 +29,33 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   const [view, setView] = useState('info');
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  const { t, i18n } = useTranslation(); //i18n for local language
+
+  const pestOptions = [
+    { value: 'red_spider_mite', label: t("ScoutReportModal.RedSpiderMite") },
+    { value: 'thrips', label: t("ScoutReportModal.Thrips") },
+    { value: 'green_louse', label: t("ScoutReportModal.GreenLouse") },
+    { value: 'black_louse', label: t("ScoutReportModal.BlackLouse") },
+    { value: 'mealybug', label: t("ScoutReportModal.Mealybug") },
+    { value: 'pythium', label: t("ScoutReportModal.Pythium") },
+    { value: 'mite', label: t("ScoutReportModal.Mite") },
+    { value: 'cycada', label: t("ScoutReportModal.Cycada") },
+    { value: 'weed', label: t("ScoutReportModal.Weed") },
+    { value: 'caterpillar', label: t("ScoutReportModal.Caterpillar") },
+  ];
+
+  const biologyOptions = [
+    { value: 'bio1', label: t("ScoutReportModal.Bio1") },
+    { value: 'bio2', label: t("ScoutReportModal.Bio2") },
+    { value: 'bio3', label: t("ScoutReportModal.Bio3") },
+  ];
+
+  const chemicalsOptions = [
+    { value: 'chem1', label: t("ScoutReportModal.Chem1") },
+    { value: 'chem2', label: t("ScoutReportModal.Chem2") },
+    { value: 'chem3', label: t("ScoutReportModal.Chem3") },
+  ];
 
   useEffect(() => {
     if (reportData) {
@@ -198,14 +201,14 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        setSuccess('Floor report submitted successfully.');
-        alert('Report submitted!');
+        setSuccess(t("ScoutReportModal.FloorReportSubmittedSuccessfully"));
+        alert(t("ScoutReportModal.ReportSubmitted"));
         onClose();
       } else {
-        setError(data.message || 'Could not submit Floor report');
+        setError(data.message || t("ScoutReportModal.CouldNotSubmitFloorReport"));
       }
     } catch (err) {
-      setError('Network error: ' + err.message);
+      setError(t("ScoutReportModal.NetworkError") + ': ' + err.message);
     }
   };
 
@@ -217,13 +220,13 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
         body: JSON.stringify({ status: newStatus, admin_comment: adminComment }),
       });
       if (response.ok) {
-        alert(`Report marked as ${newStatus.toUpperCase()}!`);
+        alert(t("ScoutReportModal.ReportMarkedAs") + ` ${newStatus.toUpperCase()}!`);
         window.location.reload();
       } else {
-        alert('Failed to update status. Check backend connection.');
+        alert(t("ScoutReportModal.FailedToUpdateStatus"));
       }
     } catch (err) {
-      alert('Network error updating report.');
+      alert(t("ScoutReportModal.NetworkErrorUpdatingReport"));
     }
   };
 
@@ -233,31 +236,31 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       <div style={styles.overlay}>
         <div style={styles.modal}>
           <div style={styles.header}>
-            <h3 style={{ margin: 0, color: '#1976d2' }}>🛡️ Admin Approval View</h3>
+            <h3 style={{ margin: 0, color: '#1976d2' }}>{t("ScoutReportModal.AdminApproval")}</h3>
           </div>
           <div style={styles.body}>
             <div style={{ background: '#f5f5f5', padding: '14px', borderRadius: '8px', marginBottom: '14px', border: '1px solid #ddd' }}>
-              <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Issue Details</h4>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Location:</strong> {reportData.cell_name}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Severity:</strong> Level {reportData.severity}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Date Reported:</strong> {reportData.entry_date}</p>
+              <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{t("ScoutReportModal.IssueDetails")}</h4>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Location")}:</strong> {reportData.cell_name}</p>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Severity")}:</strong> {t("ScoutReportModal.Level")} {reportData.severity}</p>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.DateReported")}:</strong> {reportData.entry_date}</p>
               <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '10px 0' }} />
-              <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Reporter Info</h4>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Name:</strong> {reportData.reporter_name}</p>
+              <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{t("ScoutReportModal.ReporterInfo")}</h4>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Name")}:</strong> {reportData.reporter_name}</p>
             </div>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Admin Comment (Optional):</label>
+              <label style={styles.label}>{t("ScoutReportModal.AdminCommentOptional")}:</label>
               <textarea
                 style={{ ...styles.input, minHeight: '60px', resize: 'vertical' }}
                 value={adminComment}
                 onChange={(e) => setAdminComment(e.target.value)}
-                placeholder="Leave a comment..."
+                placeholder={t("ScoutReportModal.LeaveAComment")}
               />
             </div>
             {reportData.status === 'pending' ? (
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                <button style={styles.btnAccept} onClick={() => handleUpdateStatus('approved')}>Accept</button>
-                <button style={styles.btnReject} onClick={() => handleUpdateStatus('rejected')}>Reject</button>
+                <button style={styles.btnAccept} onClick={() => handleUpdateStatus('approved')}>{t("ScoutReportModal.Accept")}</button>
+                <button style={styles.btnReject} onClick={() => handleUpdateStatus('rejected')}>{t("ScoutReportModal.Reject")}</button>
               </div>
             ) : (
               <div style={{
@@ -266,12 +269,12 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                 color: reportData.status === 'approved' ? '#2e7d32' : '#c62828',
                 borderRadius: '6px', marginBottom: '10px', fontWeight: 'bold',
               }}>
-                This report has been {reportData.status.toUpperCase()}.
+                {t("ScoutReportModal.ThisReportHasBeen")} {reportData.status.toUpperCase()}.
               </div>
             )}
           </div>
           <div style={styles.footer}>
-            <button onClick={onClose} style={styles.btnSecondary}>Close</button>
+            <button onClick={onClose} style={styles.btnSecondary}>{t("ScoutReportModal.Close")}</button>
           </div>
         </div>
       </div>
@@ -284,12 +287,12 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       <div style={styles.overlay}>
         <div style={styles.modal}>
           <div style={styles.header}>
-            <h3 style={{ margin: 0 }}>Cell Info</h3>
+            <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CellInfo")}</h3>
             <span style={{ fontSize: '12px', color: '#666' }}>{mapName} · {cellInfo.label}</span>
           </div>
           <div style={styles.body}>
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Current Status</div>
+              <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>{t("ScoutReportModal.CurrentStatus")}</div>
               {latestApproved ? (
                 <div style={{
                   background: statusColors.approved.bg,
@@ -297,18 +300,18 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                   borderRadius: '8px', padding: '12px',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={statusBadge('approved')}>Approved</span>
+                    <span style={statusBadge('approved')}>{t("ScoutReportModal.Approved")}</span>
                     <span style={{ fontSize: '12px', color: '#666' }}>{latestApproved.entry_date}</span>
                   </div>
                   <div style={{ fontSize: '13px' }}>
-                    <strong>Severity:</strong> {latestApproved.severity != null ? `Level ${latestApproved.severity}` : 'N/A'}
+                    <strong>{t("ScoutReportModal.Severity")}:</strong> {latestApproved.severity != null ? `${t("ScoutReportModal.Level")} ${latestApproved.severity}` : t("ScoutReportModal.NotAvailable")}
                   </div>
                   <div style={{ fontSize: '13px' }}>
-                    <strong>Reporter:</strong> {latestApproved.reporter_name}
+                    <strong>{t("ScoutReportModal.Reporter")}:</strong> {latestApproved.reporter_name}
                   </div>
                   {Array.isArray(latestApproved.pest_types) && latestApproved.pest_types.length > 0 && (
                     <div style={{ fontSize: '13px' }}>
-                      <strong>Pests:</strong> {latestApproved.pest_types.join(', ')}
+                      <strong>{t("ScoutReportModal.Pests")}:</strong> {latestApproved.pest_types.join(', ')}
                     </div>
                   )}
                 </div>
@@ -317,23 +320,23 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                   background: '#f5f5f5', border: '1px solid #ddd',
                   borderRadius: '8px', padding: '12px', color: '#666', fontSize: '13px',
                 }}>
-                  No approved status yet for this cell.
+                  {t("ScoutReportModal.NoApprovedStatusYet")}
                 </div>
               )}
             </div>
 
             <div>
               <div style={{ fontSize: '13px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>
-                History {history.length > 0 && `(${history.length})`}
+                {t("ScoutReportModal.History")} {history.length > 0 && `(${history.length})`}
               </div>
               {historyLoading ? (
-                <div style={{ fontSize: '13px', color: '#999' }}>Loading...</div>
+                <div style={{ fontSize: '13px', color: '#999' }}>{t("ScoutReportModal.Loading")}</div>
               ) : history.length === 0 ? (
                 <div style={{
                   background: '#f5f5f5', border: '1px solid #ddd',
                   borderRadius: '8px', padding: '12px', color: '#666', fontSize: '13px',
                 }}>
-                  No reports for this cell yet.
+                  {t("ScoutReportModal.NoReportsForThisCellYet")}
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -348,7 +351,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                       </div>
                       <div style={{ fontSize: '12px', color: '#555' }}>
                         <strong>{r.reporter_name}</strong>
-                        {r.severity != null && ` · Sev ${r.severity}`}
+                        {r.severity != null && ` · ${t("ScoutReportModal.Sev")} ${r.severity}`}
                       </div>
                       {Array.isArray(r.pest_types) && r.pest_types.length > 0 && (
                         <div style={{ fontSize: '12px', color: '#555' }}>
@@ -362,8 +365,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
             </div>
           </div>
           <div style={styles.footer}>
-            <button style={styles.btnSecondary} onClick={onClose}>Close</button>
-            <button style={styles.btnPrimary} onClick={() => setView('form')}>Create Report</button>
+            <button style={styles.btnSecondary} onClick={onClose}>{t("ScoutReportModal.Close")}</button>
+            <button style={styles.btnPrimary} onClick={() => setView('form')}>{t("ScoutReportModal.CreateReport")}</button>
           </div>
         </div>
       </div>
@@ -375,7 +378,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <div style={styles.header}>
-          <h3 style={{ margin: 0 }}>Create Floor Report</h3>
+          <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CreateFloorReport")}</h3>
           <span style={{ fontSize: '12px', color: '#666' }}>{mapName} · {cellInfo.label}</span>
         </div>
         <form onSubmit={handleSubmit} style={{ display: 'contents' }}>
@@ -384,17 +387,17 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
             {success && <p style={{ color: 'green', fontWeight: 'bold', margin: '0 0 10px 0' }}>{success}</p>}
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Floor ID</label>
+              <label style={styles.label}>{t("ScoutReportModal.FloorID")}</label>
               <input style={styles.input} type="number" value={fid} onChange={(e) => setFid(e.target.value)} required />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>User ID</label>
+              <label style={styles.label}>{t("ScoutReportModal.UserID")}</label>
               <input style={styles.input} type="number" value={uid} onChange={(e) => setUid(e.target.value)} required />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Pests Found</label>
+              <label style={styles.label}>{t("ScoutReportModal.PestsFound")}</label>
               <select
                 style={styles.input}
                 value={pestsFound}
@@ -405,16 +408,16 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                 }}
                 required
               >
-                <option value="">Select option</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
+                <option value="">{t("ScoutReportModal.SelectOption")}</option>
+                <option value="true">{t("ScoutReportModal.Yes")}</option>
+                <option value="false">{t("ScoutReportModal.No")}</option>
               </select>
             </div>
 
             {pestsFound === 'true' && (
               <>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Found Pests</label>
+                  <label style={styles.label}>{t("ScoutReportModal.FoundPests")}</label>
                   <div style={styles.checkboxGroup}>
                     {pestOptions.map(p => (
                       <label key={p.value} style={styles.checkboxItem}>
@@ -430,24 +433,24 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                 </div>
 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Pest Severity (1-5)</label>
+                  <label style={styles.label}>{t("ScoutReportModal.PestSeverity")}</label>
                   <select
                     style={styles.input}
                     value={pestSeverity}
                     onChange={(e) => setPestSeverity(e.target.value)}
                     required={pestType.length > 0}
                   >
-                    <option value="">Select score</option>
-                    <option value="1">1 (low)</option>
+                    <option value="">{t("ScoutReportModal.SelectScore")}</option>
+                    <option value="1">1 ({t("ScoutReportModal.Low")})</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
-                    <option value="5">5 (high)</option>
+                    <option value="5">5 ({t("ScoutReportModal.High")})</option>
                   </select>
                 </div>
 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Biology Used</label>
+                  <label style={styles.label}>{t("ScoutReportModal.BiologyUsed")}</label>
                   <select
                     style={styles.input}
                     value={biologyUsed}
@@ -461,15 +464,15 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                     }}
                     required
                   >
-                    <option value="">Select option</option>
-                    <option value="true">Yes</option>
-                    <option value="false">No</option>
+                    <option value="">{t("ScoutReportModal.SelectOption")}</option>
+                    <option value="true">{t("ScoutReportModal.Yes")}</option>
+                    <option value="false">{t("ScoutReportModal.No")}</option>
                   </select>
                 </div>
 
                 {biologyUsed === 'true' && (
                   <div style={styles.formGroup}>
-                    <label style={styles.label}>Biology Type</label>
+                    <label style={styles.label}>{t("ScoutReportModal.BiologyType")}</label>
                     <div style={styles.checkboxGroup}>
                       {biologyOptions.map(b => (
                         <label key={b.value} style={styles.checkboxItem}>
@@ -486,7 +489,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                 )}
 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Chemicals Used</label>
+                  <label style={styles.label}>{t("ScoutReportModal.ChemicalsUsed")}</label>
                   <select
                     style={styles.input}
                     value={chemicalsUsed}
@@ -500,15 +503,15 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                     }}
                     required
                   >
-                    <option value="">Select option</option>
-                    <option value="true">Yes</option>
-                    <option value="false">No</option>
+                    <option value="">{t("ScoutReportModal.SelectOption")}</option>
+                    <option value="true">{t("ScoutReportModal.Yes")}</option>
+                    <option value="false">{t("ScoutReportModal.No")}</option>
                   </select>
                 </div>
 
                 {chemicalsUsed === 'true' && (
                   <div style={styles.formGroup}>
-                    <label style={styles.label}>Chemicals Type</label>
+                    <label style={styles.label}>{t("ScoutReportModal.ChemicalsType")}</label>
                     <div style={styles.checkboxGroup}>
                       {chemicalsOptions.map(c => (
                         <label key={c.value} style={styles.checkboxItem}>
@@ -526,7 +529,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
 
                 {(biologyUsed === 'true' || chemicalsUsed === 'true') && (
                   <div style={styles.formGroup}>
-                    <label style={styles.label}>Behandelaar</label>
+                    <label style={styles.label}>{t("ScoutReportModal.Behandelaar")}</label>
                     <input
                       style={styles.input}
                       type="text"
@@ -539,34 +542,34 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
             )}
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Potmaat</label>
+              <label style={styles.label}>{t("ScoutReportModal.Potmaat")}</label>
               <input style={styles.input} type="text" value={potmaat} onChange={(e) => setPotmaat(e.target.value)} />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Oppotweek</label>
+              <label style={styles.label}>{t("ScoutReportModal.Oppotweek")}</label>
               <input style={styles.input} type="number" value={oppotweek} onChange={(e) => setOppotweek(e.target.value)} />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Teelduur (weeks)</label>
+              <label style={styles.label}>{t("ScoutReportModal.TeelduurWeeks")}</label>
               <input style={styles.input} type="number" value={teelduurWeeks} onChange={(e) => setTeelduurWeeks(e.target.value)} />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Trap Number</label>
+              <label style={styles.label}>{t("ScoutReportModal.TrapNumber")}</label>
               <input style={styles.input} type="date" value={trapNumber} onChange={(e) => setTrapNumber(e.target.value)} />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Bug Count</label>
+              <label style={styles.label}>{t("ScoutReportModal.BugCount")}</label>
               <input style={styles.input} type="number" value={bugCount} onChange={(e) => setBugCount(e.target.value)} />
             </div>
           </div>
 
           <div style={styles.footer}>
-            <button type="button" style={styles.btnSecondary} onClick={() => setView('info')}>Back</button>
-            <button type="submit" style={styles.btnPrimary}>Submit Report</button>
+            <button type="button" style={styles.btnSecondary} onClick={() => setView('info')}>{t("ScoutReportModal.Back")}</button>
+            <button type="submit" style={styles.btnPrimary}>{t("ScoutReportModal.SubmitReport")}</button>
           </div>
         </form>
       </div>

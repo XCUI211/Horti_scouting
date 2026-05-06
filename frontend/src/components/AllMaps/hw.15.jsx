@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import mapData from './hw.15.json';
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
+import { useTranslation } from "react-i18next";
 
 const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
+
+  const { t, i18n } = useTranslation(); //i18n for local language
 
   const isClickable = (labelStr) => /^\d+$/.test(labelStr.trim());
 

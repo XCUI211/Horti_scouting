@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import mapData from './hw53.json'; 
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
+import { useTranslation } from "react-i18next";
 
 const HW53Map = ({ focusedReport }) => {
   const [selectedCell, setSelectedCell] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
+
+  const { t, i18n } = useTranslation(); //i18n for local language
 
   const mapId = "HW 53";
 
@@ -16,6 +19,16 @@ const HW53Map = ({ focusedReport }) => {
     "wkk/kunstmest unit",
     "21"
   ];
+
+  const getDisplayLabel = (label) => {
+    const translations = {
+      "water ruimte": t("hw53.WaterRoom"),
+      "schuur/ketelhuis": t("hw53.ShedBoilerHouse"),
+      "wkk/kunstmest unit": t("hw53.FertilizerUnit"),
+    };
+
+    return translations[label] || label;
+  };
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent(mapId)}`)
@@ -76,7 +89,7 @@ const HW53Map = ({ focusedReport }) => {
             }}
             onClick={isStatic ? null : () => setSelectedCell({ label: labelStr })}
           >
-            {labelStr}
+            {getDisplayLabel(labelStr)}
           </div>
         );
       });
@@ -87,7 +100,7 @@ const HW53Map = ({ focusedReport }) => {
 
   return (
     <div className="map-container">
-      <h2>HW 53 - Scouting Map</h2>
+      <h2>{t("hw53.Header")}</h2>
       <div
         className="merged-grid-container"
         style={{ 

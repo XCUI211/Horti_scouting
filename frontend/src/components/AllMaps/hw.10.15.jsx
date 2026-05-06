@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import mapData from './hw10.15.json';
 import './MapStyles.css';
-import ScoutReportModal from './Forms/ScoutReportModal'; 
+import ScoutReportModal from './Forms/ScoutReportModal';
+import { useTranslation } from "react-i18next";
 
 const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
 
+  const { t, i18n } = useTranslation(); //i18n for local language
+
   const unclickableLabels = ["Schuur", "Deur naar 1600", "1300"];
+
+  const getDisplayLabel = (label) => {
+    const translations = {
+      "Schuur": t("hw1015.Shed"),
+      "Deur naar 1600": t("hw1015.DoorTo1600"),
+    };
+
+    return translations[label] || label;
+  };
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/reports?map_id=${mapName}`)
@@ -125,7 +137,7 @@ const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
                 setViewingReport(null);
               }}
             >
-              {bounds.label}
+              {getDisplayLabel(bounds.label)}
             </div>
           );
         }
@@ -136,8 +148,8 @@ const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
   return (
     <div className="map-container">
       <div className="map-header">
-        <h2>{mapName} - Scouting Map</h2>
-        <p className="mobile-hint">Drag your finger to move the map • Tap a section to report</p>
+        <h2>{t("hw1015.Header")}</h2>
+        <p className="mobile-hint">{t("hw1015.MobileHint")}</p>
       </div>
       <div className="map-viewport">
         <div className="merged-grid-container" style={{ display: 'grid', gridTemplateColumns: `repeat(${mapData[0].length}, minmax(22px, 1fr))`, gridAutoRows: 'minmax(45px, auto)' }}>

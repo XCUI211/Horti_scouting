@@ -2,13 +2,25 @@ import React, { useState, useEffect } from 'react';
 import mapData from './hw10.16.json';
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
+import { useTranslation } from "react-i18next";
 
 const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
 
+  const { t, i18n } = useTranslation(); //i18n for local language
+
   const staticCells = ["Deur naar 1500", "Deur naar 1700"];
+
+  const getDisplayLabel = (label) => {
+    const translations = {
+      "Deur naar 1500": t("hw1016.DoorTo1500"),
+      "Deur naar 1700": t("hw1016.DoorTo1700"),
+    };
+
+    return translations[label] || label;
+  };
 
   useEffect(() => {
     fetch('http://localhost:5000/api/reports')
@@ -138,7 +150,7 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
             setViewingReport(null);
           }}
         >
-          {bounds.label}
+          {getDisplayLabel(bounds.label)}
         </div>
       );
     });
@@ -147,8 +159,8 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
   return (
     <div className="map-container">
       <div className="map-header">
-        <h2>HW10.16 - Scouting Map</h2>
-        <p className="mobile-hint">Drag your finger to move the map • Tap a section to report</p>
+        <h2>{t("hw1016.Header")}</h2>
+        <p className="mobile-hint">{t("hw1016.MobileHint")}</p>
       </div>
       <div className="map-viewport">
         <div
