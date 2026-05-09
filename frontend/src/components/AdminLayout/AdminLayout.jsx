@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, MapPin, Bell, Users, BarChart3, UserCircle } from 'lucide-react';
+import { Home, MapPin, BookText, Users, BarChart3, UserCircle } from 'lucide-react';
 import "./AdminLayout.css";
 import { useTranslation } from "react-i18next";
 
@@ -49,8 +49,8 @@ const AdminLayout = ({ children, title }) => {
             <span>{t("AdminLayout.Maps")}</span>
           </button>
           <button className={`nav-item ${isActive('/notifications_admin') ? 'active' : ''}`} onClick={() => navigate('/notifications_admin')}>
-            <Bell size={22} />
-            <span>{t("AdminLayout.Notifications")}</span>
+            <BookText size={22} />
+            <span>{t("Other Reports")}</span>
           </button>
           <button className={`nav-item ${isActive('/scouts_overview') ? 'active' : ''}`} onClick={() => navigate('/scouts_overview')}>
             <Users size={22} />
