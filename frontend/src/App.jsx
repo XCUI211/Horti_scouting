@@ -13,6 +13,7 @@ import ForcePasswordChange from "./pages/ForcePasswordChange/ForcePasswordChange
 import ScoutPasswordReset from "./pages/ScoutPasswordReset/ScoutPasswordReset";
 import ScoutMapAssignment from "./pages/ScoutMapAssignment/ScoutMapAssignment";
 import MapView from "./pages/MapView/MapView";
+import AdminDashboardPage from "./pages/AdminDashboard/AdminDashboardPage";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
       <Route path="/force_password_change" element={<ForcePasswordChange />} />
       <Route path="/scout_maps_assign" element={<ScoutMapAssignment />} />
       <Route path="/maps" element={<MapView />} />
+      <Route path="/maps/admin_dashboard" element={<AdminDashboardPage />} />
     </Routes>
   );
 }

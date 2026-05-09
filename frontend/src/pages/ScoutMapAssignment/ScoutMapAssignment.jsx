@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AdminLayout from '../../components/AdminLayout/AdminLayout';
+import { MAP_ORDER } from '../../constants/mapOrder';
 import "./ScoutMapAssignment.css";
 import { useTranslation } from "react-i18next";
 
@@ -29,7 +30,13 @@ const ScoutMapAssignment = () => {
     const fetchAllMaps = async () => {
         try {
             const res = await axios.get('http://localhost:5000/api/maps');
-            setAllMaps(res.data);
+            // Sort maps by MAP_ORDER to maintain consistent ordering across the app
+            const sortedMaps = res.data.sort((a, b) => {
+                const indexA = MAP_ORDER.indexOf(a.name);
+                const indexB = MAP_ORDER.indexOf(b.name);
+                return (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB);
+            });
+            setAllMaps(sortedMaps);
         } catch (err) { console.error(err); }
     };
 

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../components/AdminLayout/AdminLayout';
+import { MAP_ORDER } from '../../constants/mapOrder';
 import RijsenhoutMap from '../../components/AllMaps/Rijsenhout';
 import HW53Map from '../../components/AllMaps/hw.53';
 import HW1012Map from '../../components/AllMaps/hw.10.12';
@@ -10,8 +12,6 @@ import HW15Map from '../../components/AllMaps/hw.15';
 import Leg from '../../components/AllMaps/Leg';
 import Plattergrond13 from '../../components/AllMaps/Plattergrond13';
 import Plattergrond29 from '../../components/AllMaps/Plattergrond29';
-
-import AdminDashboard from '../AdminDashboard/AdminDashboard';
 import './MapView.css';
 import { useTranslation } from "react-i18next";
 
@@ -23,69 +23,68 @@ const MAPS = {
   'HW 10.16': HW1016Map,
   'HW 15': HW15Map,
   'HW 10.17': HW1017Map,
-  'Legmeerdijk': Leg,           // ADD
-  'HW 13': Plattergrond13,  // ADD
-  'HW 29': Plattergrond29,  // ADD
+  'Legmeerdijk': Leg,
+  'HW 13': Plattergrond13,
+  'HW 29': Plattergrond29,
 };
 
+// Stores the last selected map in session storage so that when the admin navigates away and comes back to the MapView
+// page, it will show the same map they were on before instead of defaulting back to Rijsenhout. This is stored in
+// session storage so if the user closes the browser and opens it again, it will reset back to the first one (Rijsenhout).
+const MAP_STORAGE_KEY = 'hortihorti:lastSelectedMap';
 function MapView() {
-  const [view, setView] = useState('map');
-  const [currentMap, setCurrentMap] = useState('Rijsenhout');
-  const [focusedReport, setFocusedReport] = useState(null);
-  
-  const { t, i18n } = useTranslation(); //i18n for local language
+  const [currentMap, setCurrentMap] = useState(() => {
+    if (typeof window === 'undefined') return 'Rijsenhout';
 
-  const handleLocate = (report) => {
-    if (report.map_id && MAPS[report.map_id]) {
-      setCurrentMap(report.map_id);
-    }
-    setFocusedReport(report);
-    setView('map');
-  };
+    const storedMap = window.sessionStorage.getItem(MAP_STORAGE_KEY);
+    return storedMap && MAPS[storedMap] ? storedMap : 'Rijsenhout';
+  });
+  const navigate = useNavigate();
+
+  const { t } = useTranslation();
 
   const handleSwitchMap = (name) => {
     setCurrentMap(name);
-    setFocusedReport(null);
+    window.sessionStorage.setItem(MAP_STORAGE_KEY, name);
   };
 
   const CurrentMap = MAPS[currentMap];
 
   return (
-    <AdminLayout title={view === 'map' ? `${t("Mapview.Maps")}: ${currentMap}` : t("Mapview.Maps")}>
+    <AdminLayout title={`${t("Mapview.Maps")}: ${currentMap}`}>
       <div className="mapview-toolbar">
         <div className="mapview-tabs">
+
+          {/*Naviagte to the maps URL when the map button is clicked*/}
           <button
-            className={`mapview-tab ${view === 'map' ? 'active' : ''}`}
-            onClick={() => setView('map')}
+            className="mapview-tab active"
+            onClick={() => navigate('/maps')}
           >
             {t("Mapview.Maps")}
           </button>
+
+          {/*Gave the Admin Dashboard its own page since there were bugs with navigating the pages*/}
           <button
-            className={`mapview-tab ${view === 'admin' ? 'active' : ''}`}
-            onClick={() => setView('admin')}
+            className="mapview-tab"
+            onClick={() => navigate('/maps/admin_dashboard')}
           >
             {t("Mapview.AdminDashboard")}
           </button>
         </div>
-        {view === 'map' && (
-          <select
-            className="mapview-select"
-            value={currentMap}
-            onChange={(e) => handleSwitchMap(e.target.value)}
-          >
-            {Object.keys(MAPS).map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-        )}
+        <select
+          className="mapview-select"
+          value={currentMap}
+          onChange={(e) => handleSwitchMap(e.target.value)}
+        >
+          {/*Uses mapOrder.js to maintain same map order across the app*/}
+          {MAP_ORDER.map((name) => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
       </div>
 
       <div className="mapview-content">
-        {view === 'map' ? (
-          <CurrentMap focusedReport={focusedReport} />
-        ) : (
-          <AdminDashboard onLocate={handleLocate} />
-        )}
+        <CurrentMap />
       </div>
     </AdminLayout>
   );

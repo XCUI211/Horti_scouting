@@ -25,6 +25,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   const [adminComment, setAdminComment] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showSubmittedPopup, setShowSubmittedPopup] = useState(false);
 
   const [view, setView] = useState('info');
   const [history, setHistory] = useState([]);
@@ -68,6 +69,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
     if (isOpen) {
       setError('');
       setSuccess('');
+      setShowSubmittedPopup(false);
       setView('info');
     }
   }, [isOpen, cellInfo]);
@@ -131,8 +133,13 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       maxHeight: '90vh', display: 'flex', flexDirection: 'column',
       boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
     },
-    header: {
-      padding: '0px 0px 15px', borderBottom: '1px solid #eee',
+    infoHeader: {
+      padding: '0px 0px 25px', borderBottom: '1px solid #eee',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+      textAlign: 'center',
+    },
+    adminHeader: {
+      padding: '20px 0px 15px', borderBottom: '1px solid #eee',
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
       textAlign: 'center',
     },
@@ -228,9 +235,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        setSuccess(t("ScoutReportModal.FloorReportSubmittedSuccessfully"));
-        alert(t("ScoutReportModal.ReportSubmitted"));
-        onClose();
+        setSuccess('');
+        setShowSubmittedPopup(true);
       } else {
         setError(data.message || t("ScoutReportModal.CouldNotSubmitFloorReport"));
       }
@@ -252,17 +258,52 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       } else {
         alert(t("ScoutReportModal.FailedToUpdateStatus"));
       }
-    } catch (err) {
+    } catch {
       alert(t("ScoutReportModal.NetworkErrorUpdatingReport"));
     }
   };
+
+  if (showSubmittedPopup) {
+    return (
+      <div style={styles.overlay}>
+        <div style={{
+          background: '#fff',
+          borderRadius: '12px',
+          padding: '28px 30px 24px',
+          minWidth: '280px',
+          maxWidth: '360px',
+          width: '100%',
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
+        }}>
+          <div style={{ fontSize: '22px', fontWeight: 700, color: '#222', lineHeight: 1.2 }}>
+            {t("ScoutReportModal.ReportSubmitted")}
+          </div>
+          <button
+            type="button"
+            style={{ ...styles.btnPrimary, width: '100%' }}
+            onClick={() => {
+              setShowSubmittedPopup(false);
+              onClose();
+            }}
+          >
+            {t("ScoutReportModal.Continue")}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // ---- ADMIN APPROVAL VIEW ----
   if (reportData) {
     return (
       <div style={styles.overlay}>
         <div style={styles.modal}>
-          <div style={styles.header}>
+          <div style={styles.adminHeader}>
             <h3 style={{ margin: 0, color: '#1976d2' }}>{t("ScoutReportModal.AdminApproval")}</h3>
           </div>
           <div style={styles.body}>
@@ -313,9 +354,9 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
     return (
       <div style={styles.overlay}>
         <div style={styles.modal}>
-          <div style={styles.header}>
+          <div style={styles.infoHeader}>
             <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CellInfo")}</h3>
-            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2 }}>{mapName} · {cellInfo.label}</span>
+            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2, width: '100%', textAlign: 'center' }}>{mapName} · {cellInfo.label}</span>
           </div>
           <div style={styles.body}>
             <div style={{ marginBottom: '16px' }}>
@@ -404,7 +445,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
-        <div style={styles.header}>
+        <div style={styles.infoHeader}>
           <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CreateFloorReport")}</h3>
             <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2 }}>{mapName} · {cellInfo.label}</span>
         </div>

@@ -11,7 +11,7 @@ const AdminLayout = ({ children, title }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => path === '/maps' ? location.pathname.startsWith('/maps') : location.pathname === path;
   const { t } = useTranslation();
 
   return (

@@ -57,8 +57,22 @@ CREATE TABLE floor_reports (
 );
 
 CREATE TABLE climate_computer (
-    cid         SERIAL      PRIMARY KEY,                                        -- unique climate computer ID number
-    mid         INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,    -- foreign key to maps table; one map has many climate computers
-    name        VARCHAR(50) NOT NULL,                                           -- name of the climate computer
-    model       VARCHAR(50) NOT NULL                                            -- model of the climate computer
-)
+    ccid                 SERIAL         PRIMARY KEY,                                            -- unique climate computer ID number
+    mid                  INT            NOT NULL UNIQUE REFERENCES maps(mid) ON DELETE CASCADE, -- foreign key to maps table; ONE map has ONE climate computer
+    name                 VARCHAR(50)    NOT NULL,                                               -- name of the climate computer
+    model                VARCHAR(50)    NOT NULL,                                               -- model of the climate computer
+    hoogendoornnummer    VARCHAR(50)    NOT NULL,                                               -- Hoogendoorn identification number
+    afdeling             VARCHAR(50)    NOT NULL,                                               -- department/section this climate computer belongs to
+    inside_temperature   DECIMAL(10,2),                                                          -- inside temperature for this afdeling
+    outside_temperature  DECIMAL(10,2),                                                          -- outside temperature
+    humidity             DECIMAL(10,2),                                                          -- humidity for this afdeling
+    light                DECIMAL(10,2)                                                          -- light level for this afdeling
+);
+
+CREATE TABLE roof_painting (
+    rpid             SERIAL      PRIMARY KEY,                                        -- unique roof painting entry ID number
+    mid              INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,    -- foreign key to maps table; one map can have multiple roof painting records
+    painted_on_week  DATE        NOT NULL,                                           -- week number the roof was painted                                                   -- optional person or company that painted the roof
+    notes            TEXT,                                                           -- optional notes about the roof painting
+    created_at       TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP                  -- when the record was added
+);
