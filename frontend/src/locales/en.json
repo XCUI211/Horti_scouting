@@ -4,9 +4,9 @@
   "AdminLayout": {
     "Home": "Home",
     "Maps": "Maps",
-    "Notifications": "Notifications",
     "Scouts": "Scouts",
-    "History": "History"
+    "History": "History",
+    "Reports": "Reports"
   },
 
   "ScoutLayout": {

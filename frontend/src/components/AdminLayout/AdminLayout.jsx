@@ -50,7 +50,7 @@ const AdminLayout = ({ children, title }) => {
           </button>
           <button className={`nav-item ${isActive('/notifications_admin') ? 'active' : ''}`} onClick={() => navigate('/notifications_admin')}>
             <BookText size={22} />
-            <span>{t("Other Reports")}</span>
+            <span>{t("AdminLayout.Reports")}</span>
           </button>
           <button className={`nav-item ${isActive('/scouts_overview') ? 'active' : ''}`} onClick={() => navigate('/scouts_overview')}>
             <Users size={22} />

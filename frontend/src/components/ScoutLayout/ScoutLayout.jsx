@@ -56,10 +56,10 @@ const ScoutLayout = ({ children, title }) => {
             <MapPin size={22} />
             <span>{t("ScoutLayout.Maps")}</span>
           </button>
-          <button className={`nav-item ${isActive('/notifications_scout') ? 'active' : ''}`} onClick={() => navigate('/notifications_scout')}>
-            <Bell size={22} />
-            <span>{t("ScoutLayout.Notifications")}</span>
-          </button>
+{/*           <button className={`nav-item ${isActive('/notifications_scout') ? 'active' : ''}`} onClick={() => navigate('/notifications_scout')}> */}
+{/*             <Bell size={22} /> */}
+{/*             <span>{t("ScoutLayout.Notifications")}</span> */}
+{/*           </button> */}
           <button className={`nav-item ${isActive('/tasks') ? 'active' : ''}`} onClick={() => navigate('/tasks')}>
             <ClipboardList size={22} />
             <span>{t("ScoutLayout.Tasks")}</span>
