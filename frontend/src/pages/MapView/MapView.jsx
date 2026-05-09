@@ -7,6 +7,10 @@ import HW1015Map from '../../components/AllMaps/hw.10.15';
 import HW1016Map from '../../components/AllMaps/hw.10.16';
 import HW1017Map from '../../components/AllMaps/hw.10.17';
 import HW15Map from '../../components/AllMaps/hw.15';
+import Leg from '../../components/AllMaps/Leg';
+import Plattergrond13 from '../../components/AllMaps/Plattergrond13';
+import Plattergrond29 from '../../components/AllMaps/Plattergrond29';
+
 import AdminDashboard from '../AdminDashboard/AdminDashboard';
 import './MapView.css';
 import { useTranslation } from "react-i18next";
@@ -19,6 +23,9 @@ const MAPS = {
   'HW 10.16': HW1016Map,
   'HW 15': HW15Map,
   'HW 10.17': HW1017Map,
+  'Legmeerdijk': Leg,           // ADD
+  'HW 13': Plattergrond13,  // ADD
+  'HW 29': Plattergrond29,  // ADD
 };
 
 function MapView() {

@@ -32,7 +32,20 @@ MAP_CONFIG = [{"map_name": "Rijsenhout",
 
               {"map_name": "HW 15",
                "json_file": "hw.15.json",
-               "exclude": []}]
+               "exclude": []},
+
+              {"map_name": "HW 13",
+               "json_file": "hw_13.json",
+               "exclude": ["PAD", "VERWERKINGSHAL", "Plattegrond HW13", "Rijsenhout", "Oppotruimte", "Raap plein", "Magazijn", "KAS 2", "KAS 3", "KAS 4"]},
+
+              {"map_name": "HW 29",
+               "json_file": "hw_29.json",
+               "exclude": ["PAD", "VERWERKINGSHAL", "Plattegrond HW29", "Rijsenhout", "Oppotruimte", "Raap plein", "Magazijn", "KAS 2", "KAS 3", "KAS 4", "silo", "ketel", "wkk", "water ruimte"]},
+
+              {"map_name": "Legmeerdijk",
+               "json_file": "leg.json",
+               "exclude": ["PAD", "VERWERKINGSHAL", "Legmeerdijk", "Rijsenhout", "Oppotruimte", "Raap plein", "Magazijn", "KAS 2", "KAS 3", "KAS 4", "silo", "ketel", "wkk", "water ruimte", "Afdeling 3", "Afdeling 4", "Afdeling 2.2", "Afdeling 2.1", "Ketel en WWK", "WC", "Verwerkingshal // Buffer", "kantine"]}]
+
 
 def load_json(path: Path):
     with path.open(encoding="utf-8") as file:

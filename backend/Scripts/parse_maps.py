@@ -1,7 +1,6 @@
 import openpyxl
 import json
 import os
-from api import SessionLocal, Map
 
 def parse_all_nursery_maps(excel_path, output_dir, base_filename):
     if not os.path.exists(excel_path):

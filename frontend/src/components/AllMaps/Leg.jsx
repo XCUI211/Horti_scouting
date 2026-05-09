@@ -12,7 +12,7 @@ const Leg = ({ focusedReport }) => {
 
   // Load the data
   useEffect(() => {
-    fetch('http://localhost:8000/api/reports')
+    fetch('http://localhost:5000/api/reports')
       .then(res => res.json())
       .then(({ status, data }) => {
         if (status !== 'success') {
@@ -86,7 +86,7 @@ const Leg = ({ focusedReport }) => {
             // Stretch a cell for multiple row and column if needed
             style={{ gridRow: `span ${h}`, gridColumn: `span ${w}` }}
             // Click and fill the form 
-            onClick={isStatic ? null : () => setSelectedCell({ cell_name: key })}
+            onClick={isStatic ? null : () => setSelectedCell({ label: key })}
           >
             {label}
           </div>
@@ -112,6 +112,7 @@ const Leg = ({ focusedReport }) => {
         cellInfo={selectedCell}
         reportData={focusedReport?.cell_name === selectedCell?.cell_name ? focusedReport : null}
         onClose={() => setSelectedCell(null)}
+        mapName="Legmeerdijk"
       />
     </div>
   );
