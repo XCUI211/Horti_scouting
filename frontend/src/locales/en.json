@@ -1,173 +1,338 @@
 {
   "test.translation": "This is a test translation",
 
+  "AdminLayout": {
+    "Home": "Home",
+    "Maps": "Maps",
+    "Notifications": "Notifications",
+    "Scouts": "Scouts",
+    "History": "History"
+  },
+
+  "ScoutLayout": {
+    "Home": "Home",
+    "Maps": "Maps",
+    "Notifications": "Notifications",
+    "Tasks": "Tasks"
+  },
+
+  "AccountAdmin": {
+    "YourAccount": "Your account",
+    "manYour": "Manage your account",
+    "Username": "Username",
+    "Role": "Role",
+    "Password": "Password",
+    "ChangePassword": "Change",
+    "Email": "Email:",
+    "ChangeEmail": "Change",
+    "Language": "Current language:",
+    "ChangeLanguage": "Change",
+    "manScout": "Manage scout accounts",
+    "newScout": "Add new scout",
+    "newScoutAcc": "Create",
+    "EditScoutInfo": "Edit scout information:",
+    "EditScout": "Edit",
+    "ResPass": "Reset password:",
+    "ResScoutPass": "Reset",
+    "LogOut": "Log out"
+  },
+
+  "AccountScout": {
+    "YourAccount": "Your account",
+    "manYour": "Manage your account",
+    "Username": "Username",
+    "Role": "Role",
+    "Password": "Password",
+    "ChangePassword": "Change",
+    "Email": "Email:",
+    "ChangeEmail": "Change",
+    "Language": "Current language:",
+    "ChangeLanguage": "Change",
+    "LogOut": "Log out",
+    "Loading": "Loading...",
+    "NotSet": "Not set"
+  },
+
+  "CreateAccount": {
+    "Title": "Create scout account",
+    "Username": "Username",
+    "EmailOptional": "Email (optional)",
+    "Password": "Password",
+    "CreateButton": "Create account",
+    "Back": "Back",
+    "SuccessMessage": "You have successfully created a new scout account with a temporary password!",
+    "InvalidCredentials": "Invalid credentials"
+  },
+
+  "EmailChange": {
+    "Title": "Update email",
+    "Current": "Current:",
+    "NoEmailSet": "No email set",
+    "NewEmailAddress": "New email address",
+    "EmailPlaceholder": "example@vireo.nl",
+    "ConfirmWithPassword": "Confirm with password",
+    "UpdateEmail": "Update",
+    "Back": "Back",
+    "AdminMustHaveValidEmail": "Admins must have a valid email address.",
+    "UpdateSuccess": "Email successfully updated!",
+    "UpdateError": "Error updating email"
+  },
+
+  "ForcePasswordChange": {
+    "Title": "Update password",
+    "Description": "Your password was reset by the administrator. You must choose a new one to continue.",
+    "NewPassword": "New password",
+    "ConfirmNewPassword": "Confirm new password",
+    "SaveContinue": "Save & continue",
+    "PasswordsDoNotMatch": "Passwords do not match.",
+    "UpdateFailed": "Failed to update password. Try again."
+  },
+
+  "HomeAdmin": {
+    "Title": "Home",
+    "Dashboard": "Admin dashboard",
+    "Description": "Content for plant quality control will appear here."
+  },
+
+  "HomeScout": {
+    "Title": "Home",
+    "Dashboard": "Scout dashboard",
+    "Description": "Content for plant quality control will appear here."
+  },
+
+  "Login": {
+    "Title": "Plant quality control app",
+    "Admin": "Login as administrator",
+    "Scout": "Login as scout",
+    "Help": "Help"
+  },
+
+  "LoginAdmin": {
+    "Title": "Login as administrator",
+    "Username": "Username",
+    "Password": "Password",
+    "LoginButton": "Login",
+    "ForgotPassword": "I forgot my password",
+    "Back": "Back",
+    "InvalidCredentials": "Invalid credentials"
+  },
+
+  "LoginScout": {
+    "Title": "Login as scout",
+    "Username": "Username",
+    "Password": "Password",
+    "LoginButton": "Login",
+    "ForgotPassword": "I forgot my password",
+    "Back": "Back",
+    "InvalidCredentials": "Invalid credentials"
+  },
+
+  "PasswordChange": {
+    "Title": "Change password",
+    "CurrentPassword": "Current password",
+    "NewPassword": "New password",
+    "ConfirmNewPassword": "Confirm new password",
+    "ChangePassword": "Change password",
+    "NewPasswordsDoNotMatch": "New passwords do not match.",
+    "UpdateSuccess": "Password successfully updated!",
+    "UpdateError": "Error updating password",
+    "Back": "Back"
+  },
+
+  "ScoutPasswordReset": {
+    "PageTitle": "Reset scout password",
+    "SelectScout": "Select scout",
+    "StartTyping": "Username...",
+    "TemporaryPassword": "Temporary password",
+    "ResetPassword": "Reset password",
+    "SelectValidScout": "Please select a valid scout.",
+    "ResetSuccess": "Password has been reset successfully!",
+    "ResetFailed": "Failed to reset password"
+  },
+
+  "SectionReport": {
+    "Title": "Create section report",
+    "SectionID": "Section ID",
+    "UserID": "User ID",
+    "Floor": "Floor",
+    "PestsType": "Pest type",
+    "SelectOption": "Select option",
+    "NoPestsFound": "No pests found",
+    "RedSpiderMite": "Red spider mite",
+    "Thrips": "Thrips",
+    "GreenLouse": "Green louse",
+    "BlackLouse": "Black louse",
+    "Mealybug": "Mealybug",
+    "Pythium": "Pythium",
+    "Mite": "Mite",
+    "Cycada": "Cycada",
+    "Weed": "Weed",
+    "Caterpillar": "Caterpillar",
+    "PestSeverity": "Pest severity (1-5)",
+    "SelectScore": "Select score",
+    "Severity1": "1 (low)",
+    "Severity2": "2",
+    "Severity3": "3",
+    "Severity4": "4",
+    "Severity5": "5 (high)",
+    "Biology": "Biology",
+    "TrapNumber": "Trap number",
+    "BugCount": "Bug count",
+    "SubmitReport": "Submit report",
+    "Back": "Back",
+    "SubmitSuccess": "Section report submitted successfully.",
+    "AlertSuccess": "Report successfully submitted!",
+    "SubmitFailed": "Could not submit section report"
+  },
+
+  "ScoutMapAssignment": {
+    "TopOfPage": "Map Assignment",
+    "NoMaps": "No maps assigned",
+    "AssignMaps": "Assign Maps",
+    "BackOverview": "Back to Overview",
+    "EditMaps": "Editing Maps for",
+    "Map": "Map"
+  },
+
+  "Mapview": {
+    "Maps": "Maps",
+    "AdminDashboard": "Admin Dashboard"
+  },
+
+  "AdminDashboard": {
+    "Pending": "Pending Scout Reports",
+    "Load": "Loading reports...",
+    "NoPending": "No pending reports!",
+    "Alert": "Alert at",
+    "Reporter": "Reporter",
+    "Severity": "Severity",
+    "Level": "Level",
+    "Date": "Date",
+    "LocateReview": "Locate & Review"
+  },
+
+  "ScoutReportModal": {
+    "ScoutName": "Scout Name",
+    "Continue": "Continue",
+    "RedSpiderMite": "Red spider mite",
+    "Thrips": "Thrips",
+    "GreenLouse": "Green louse",
+    "BlackLouse": "Black louse",
+    "Mealybug": "Mealybug",
+    "Pythium": "Pythium",
+    "Mite": "Mite",
+    "Cycada": "Cycada",
+    "Weed": "Weed",
+    "Caterpillar": "Caterpillar",
+    "Bio1": "Bio1",
+    "Bio2": "Bio2",
+    "Bio3": "Bio3",
+    "Chem1": "Chem1",
+    "Chem2": "Chem2",
+    "Chem3": "Chem3",
+    "FloorReportSubmittedSuccessfully": "Floor report submitted successfully.",
+    "ReportSubmitted": "Report submitted!",
+    "CouldNotSubmitFloorReport": "Could not submit Floor report",
+    "NetworkError": "Network error",
+    "ReportMarkedAs": "Report marked as",
+    "FailedToUpdateStatus": "Failed to update status. Check backend connection.",
+    "NetworkErrorUpdatingReport": "Network error updating report.",
+    "AdminApproval": "Admin Approval View",
+    "IssueDetails": "Issue Details",
+    "Location": "Location",
+    "Severity": "Severity",
+    "Level": "Level",
+    "DateReported": "Date Reported",
+    "ReporterInfo": "Reporter Info",
+    "Name": "Name",
+    "AdminCommentOptional": "Admin Comment (Optional)",
+    "LeaveAComment": "Leave a comment...",
+    "Accept": "Accept",
+    "Reject": "Reject",
+    "ThisReportHasBeen": "This report has been",
+    "Close": "Close",
+    "CellInfo": "Cell Info",
+    "CurrentStatus": "Current Status",
+    "Approved": "Approved",
+    "Reporter": "Reporter",
+    "Pests": "Pests",
+    "NotAvailable": "N/A",
+    "NoApprovedStatusYet": "No approved status yet for this cell.",
+    "History": "History",
+    "Loading": "Loading...",
+    "NoReportsForThisCellYet": "No reports for this cell yet.",
+    "Sev": "Sev",
+    "CreateReport": "Create Report",
+    "CreateFloorReport": "Create Floor Report",
+    "FloorID": "Floor ID",
+    "UserID": "User ID",
+    "PestsFound": "Pests Found",
+    "SelectOption": "Select option",
+    "Yes": "Yes",
+    "No": "No",
+    "FoundPests": "Found Pests",
+    "PestSeverity": "Pest Severity (1-5)",
+    "SelectScore": "Select score",
+    "Low": "low",
+    "High": "high",
+    "BiologyUsed": "Biology Used",
+    "BiologyType": "Biology Type",
+    "ChemicalsUsed": "Chemicals Used",
+    "ChemicalsType": "Chemicals Type",
+    "Behandelaar": "Treatment provider",
+    "Potmaat": "Pot size",
+    "Oppotweek": "Potting week",
+    "TeelduurWeeks": "Cultivation duration (weeks)",
+    "TrapNumber": "Trap Number",
+    "BugCount": "Bug Count",
+    "Back": "Back",
+    "SubmitReport": "Submit Report"
+  },
+
+  "Rijsenhout": {
+    "Potting": "Potting",
+    "Square": "Pick-up square",
+    "Stockroom": "Stockroom",
+    "Greenhouse": "Greenhouse",
+    "Header": "Rijsenhout - Scouting Map",
+    "MobileHint": "Scroll to move the map • Tap a section to report"
+  },
   
-  "AdminLayout.Home" : "Home",
-  "AdminLayout.Maps" : "Maps",
-  "AdminLayout.Notifications" : "Notifications",
-  "AdminLayout.Scouts" : "Scouts",
-  "AdminLayout.History" : "History",
+  "hw53": {
+    "Header": "HW 53 - Scouting Map",
+    "WaterRoom": "Water room",
+    "ShedBoilerHouse": "Shed / boiler room",
+    "FertilizerUnit": "Fertilizer Unit"
+  },
 
+  "hw1012": {
+    "Header": "HW 10.12 - Scouting Map",
+    "TransportBelt": "Transport belt",
+    "Transport": "Transport",
+    "DoorToGreenhouse2": "Door to greenhouse 2",
+    "DoorToGreenhouse3": "Door to greenhouse 3",
+    "Pyramids": "Pyramids",
+    "Trays": "Trays"
+  },
 
-  "ScoutLayout.Home" : "Home",
-  "ScoutLayout.Maps" : "Maps",
-  "ScoutLayout.Notifications" : "Notifications",
-  "ScoutLayout.Tasks" : "Tasks",
+  "hw1015": {
+    "Header": "HW 10.15 - Scouting Map",
+    "MobileHint": "Drag your finger to move the map • Tap a section to report",
+    "Shed": "Shed",
+    "DoorTo1600": "Door to 1600"
+  },
 
+  "hw1016": {
+    "Header": "HW10.16 - Scouting Map",
+    "MobileHint": "Drag your finger to move the map • Tap a section to report",
+    "DoorTo1500": "Door to 1500",
+    "DoorTo1700": "Door to 1700"
+  },
 
-	"AccountAdmin.YourAccount" : "Your account",
-	"AccountAdmin.manYour" : "Manage your account",
-	"AccountAdmin.Username" : "Username",
-	"AccountAdmin.Role" : "Role",
-	"AccountAdmin.Password" : "Password",
-	"AccountAdmin.ChangePassword" : "Change",
-	"AccountAdmin.Email" : "Email:",
-	"AccountAdmin.ChangeEmail" : "Change",
-	"AccountAdmin.Language" : "Current language: ",
-	"AccountAdmin.ChangeLanguage" : "Change",
-	"AccountAdmin.manScout" : "Manage scout accounts",
-	"AccountAdmin.newScout" : "Add new scout",
-	"AccountAdmin.newScoutAcc" : "Create",
-	"AccountAdmin.EditScoutInfo" : "Edit scout information:",
-	"AccountAdmin.EditScout" : "Edit",
-	"AccountAdmin.ResPass" : "Reset password:",
-	"AccountAdmin.ResScoutPass" : "Reset",
-	"AccountAdmin.LogOut" : "Log out",
-
-
-  "AccountScout.YourAccount": "Your account",
-  "AccountScout.manYour": "Manage your account",
-  "AccountScout.Username": "Username",
-  "AccountScout.Role": "Role",
-  "AccountScout.Password": "Password",
-  "AccountScout.ChangePassword": "Change",
-  "AccountScout.Email": "Email:",
-  "AccountScout.ChangeEmail": "Change",
-  "AccountScout.Language" : "Current language: ",
-	"AccountScout.ChangeLanguage" : "Change",
-  "AccountScout.LogOut": "Log out",
-  "AccountScout.Loading": "Loading...",
-  "AccountScout.NotSet": "Not set",
-
-	
-  "CreateAccount.Title": "Create scout account",
-  "CreateAccount.Username": "Username",
-  "CreateAccount.EmailOptional": "Email (optional)",
-  "CreateAccount.Password": "Password",
-  "CreateAccount.CreateButton": "Create account",
-  "CreateAccount.Back": "Back",
-  "CreateAccount.SuccessMessage": "You have successfully created a new scout account with a temporary password!",
-  "CreateAccount.InvalidCredentials": "Invalid credentials",
-
-
-  "EmailChange.Title": "Update email",
-  "EmailChange.Current": "Current:",
-  "EmailChange.NoEmailSet": "No email set",
-  "EmailChange.NewEmailAddress": "New email address",
-  "EmailChange.EmailPlaceholder": "example@vireo.nl",
-  "EmailChange.ConfirmWithPassword": "Confirm with password",
-  "EmailChange.UpdateEmail": "Update",
-  "EmailChange.Back": "Back",
-  "EmailChange.AdminMustHaveValidEmail": "Admins must have a valid email address.",
-  "EmailChange.UpdateSuccess": "Email successfully updated!",
-  "EmailChange.UpdateError": "Error updating email",
-
-
-  "ForcePasswordChange.Title": "Update password",
-  "ForcePasswordChange.Description": "Your password was reset by the administrator. You must choose a new one to continue.",
-  "ForcePasswordChange.NewPassword": "New password",
-  "ForcePasswordChange.ConfirmNewPassword": "Confirm new password",
-  "ForcePasswordChange.SaveContinue": "Save & continue",
-  "ForcePasswordChange.PasswordsDoNotMatch": "Passwords do not match.",
-  "ForcePasswordChange.UpdateFailed": "Failed to update password. Try again.",
-
-	
-  "HomeAdmin.Title": "Home",
-  "HomeAdmin.Dashboard": "Admin dashboard",
-  "HomeAdmin.Description": "Content for plant quality control will appear here.",
-
-
-  "HomeScout.Title": "Home",
-  "HomeScout.Dashboard": "Scout dashboard",
-  "HomeScout.Description": "Content for plant quality control will appear here.",
-
-	
-  "Login.Title": "Plant quality control app",
-  "Login.Admin": "Login as administrator",
-  "Login.Scout": "Login as scout",
-  "Login.Help": "Help",
-
-
-	"LoginAdmin.Title": "Login as administrator",
-	"LoginAdmin.Username": "Username",
-	"LoginAdmin.Password": "Password",
-	"LoginAdmin.LoginButton": "Login",
-	"LoginAdmin.ForgotPassword": "I forgot my password",
-	"LoginAdmin.Back": "Back",
-	"LoginAdmin.InvalidCredentials": "Invalid credentials",
-
-
-	"LoginScout.Title": "Login as scout",
-	"LoginScout.Username": "Username",
-	"LoginScout.Password": "Password",
-	"LoginScout.LoginButton": "Login",
-	"LoginScout.ForgotPassword": "I forgot my password",
-	"LoginScout.Back": "Back",
-	"LoginScout.InvalidCredentials": "Invalid credentials",
-
-
-	"PasswordChange.Title": "Change password",
-	"PasswordChange.CurrentPassword": "Current password",
-	"PasswordChange.NewPassword": "New password",
-	"PasswordChange.ConfirmNewPassword": "Confirm new password",
-	"PasswordChange.ChangePassword": "Change password",
-	"PasswordChange.NewPasswordsDoNotMatch": "New passwords do not match.",
-	"PasswordChange.UpdateSuccess": "Password successfully updated!",
-	"PasswordChange.UpdateError": "Error updating password",
-	"PasswordChange.Back": "Back",
-
-	
-  "ScoutPasswordReset.PageTitle": "Reset scout password",
-  "ScoutPasswordReset.SelectScout": "Select scout",
-  "ScoutPasswordReset.StartTyping": "Username...",
-  "ScoutPasswordReset.TemporaryPassword": "Temporary password",
-  "ScoutPasswordReset.ResetPassword": "Reset password",
-  "ScoutPasswordReset.SelectValidScout": "Please select a valid scout.",
-  "ScoutPasswordReset.ResetSuccess": "Password for {{username}} has been reset successfully!",
-  "ScoutPasswordReset.ResetFailed": "Failed to reset password",
-	
-	
-  "SectionReport.Title": "Create section report",
-  "SectionReport.SectionID": "Section ID",
-  "SectionReport.UserID": "User ID",
-  "SectionReport.Floor": "Floor",
-  "SectionReport.PestsType": "Pest type",
-  "SectionReport.SelectOption": "Select option",
-  "SectionReport.NoPestsFound": "No pests found",
-  "SectionReport.RedSpiderMite": "Red spider mite",
-  "SectionReport.Thrips": "Thrips",
-  "SectionReport.GreenLouse": "Green louse",
-  "SectionReport.BlackLouse": "Black louse",
-  "SectionReport.Mealybug": "Mealybug",
-  "SectionReport.Pythium": "Pythium",
-  "SectionReport.Mite": "Mite",
-  "SectionReport.Cycada": "Cycada",
-  "SectionReport.Weed": "Weed",
-  "SectionReport.Caterpillar": "Caterpillar",
-  "SectionReport.PestSeverity": "Pest severity (1-5)",
-  "SectionReport.SelectScore": "Select score",
-  "SectionReport.Severity1": "1 (low)",
-  "SectionReport.Severity2": "2",
-  "SectionReport.Severity3": "3",
-  "SectionReport.Severity4": "4",
-  "SectionReport.Severity5": "5 (high)",
-  "SectionReport.Biology": "Biology",
-  "SectionReport.TrapNumber": "Trap number",
-  "SectionReport.BugCount": "Bug count",
-  "SectionReport.SubmitReport": "Submit report",
-  "SectionReport.Back": "Back",
-  "SectionReport.SubmitSuccess": "Section report submitted successfully.",
-  "SectionReport.AlertSuccess": "Report successfully submitted!",
-  "SectionReport.SubmitFailed": "Could not submit section report"
-
+  "hw1017": {
+    "Header": "HW10.17 - Scouting Map",
+    "MobileHint": "Drag your finger to move the map • Tap a section to report",
+    "DoorTo1600": "Door to 1600",
+    "Door": "Door"
+  }
 }

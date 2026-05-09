@@ -120,6 +120,82 @@ app.get('/api/users/:uid', async (req, res) => {
     }
 });
 
+// ---------- Reports endpoints (used by map cell coloring + admin dashboard) ----------
+// Returns floor reports joined with floor / map / user info, shaped for the frontend map components.
+app.get('/api/reports', async (req, res) => {
+    const { map_id, cell_name } = req.query;
+    try {
+        const baseQuery = `
+            SELECT fr.rid              AS report_id,
+                   f.name              AS cell_name,
+                   m.name              AS map_id,
+                   fr.pest_severity    AS severity,
+                   fr.pest_types       AS pest_types,
+                   to_char(fr.report_time, 'YYYY-MM-DD') AS entry_date,
+                   fr.approval_status  AS status,
+                   u.username          AS reporter_name
+            FROM floor_reports fr
+            JOIN floors f ON fr.fid = f.fid
+            JOIN maps m   ON f.mid  = m.mid
+            JOIN users u  ON fr.uid = u.uid
+        `;
+        const conditions = [];
+        const params = [];
+        if (map_id) { params.push(map_id); conditions.push(`m.name = $${params.length}`); }
+        if (cell_name) { params.push(cell_name); conditions.push(`f.name = $${params.length}`); }
+        const where = conditions.length ? ' WHERE ' + conditions.join(' AND ') : '';
+        const result = await pool.query(baseQuery + where + ' ORDER BY fr.report_time DESC', params);
+        res.json({ status: 'success', data: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// Here, the frontend can send a map name and cell name, and the backend will return the corresponding floor ID (fid)
+// if it exists. This is used when submitting a new report to link it to the correct floor. Said query joins the floors
+// and maps tables to find the matching floor based on the provided map and cell names.
+app.get('/api/floors/resolve', async (req, res) => {
+    const { map_name, cell_name } = req.query;
+
+    if (!map_name || !cell_name) {return res.status(400).json({ status: 'error', message: 'map_name and cell_name are required' });}
+
+    try {const result = await pool.query(
+            `SELECT f.fid
+             FROM floors f
+             JOIN maps m ON f.mid = m.mid
+             WHERE m.name = $1 AND f.name = $2
+             LIMIT 1`,
+            [map_name, cell_name]);
+
+        if (result.rows.length === 0) {return res.status(404).json({ status: 'not_found', message: 'Floor not found' });}
+            res.json({ status: 'success', fid: result.rows[0].fid })}
+        catch (err) {console.error(err);
+                    res.status(500).json({ status: 'error', message: err.message })}
+    });
+
+// Admin approves or rejects a report.
+app.put('/api/reports/:id/approve', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
+    }
+    try {
+        const result = await pool.query(
+            'UPDATE floor_reports SET approval_status = $1, reviewed_at = CURRENT_TIMESTAMP WHERE rid = $2 RETURNING *',
+            [status, id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+        res.json({ status: 'success', data: result.rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
 // Start the server
 const startServer = async () => {
     await testDatabaseConnection();
@@ -341,16 +417,13 @@ app.post('/api/users/complete-force-change', async (req, res) => {
     }
 });
 
-// GET request to from the database to get all available maps
+// GET request to fetch all maps including their JSON layout
 app.get('/api/maps', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT mid, name, location, greenhouse FROM maps ORDER BY name ASC');  // alphabetically sorted by name
-        res.json(result.rows);  // sends the rows found in the database as json array
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error fetching maps' });
-    }
-});
+    try {const result = await pool.query('SELECT mid, name, location, greenhouse, json_map FROM maps ORDER BY name ASC');
+        res.json(result.rows);}
+    catch (err) {console.error(err);
+                res.status(500).json({ message: 'Server error fetching maps' })}
+    });
 
 // GET request to get maps currently assigned to a specific scout
 // Uses a dynamic parameter uid

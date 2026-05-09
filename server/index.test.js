@@ -457,3 +457,198 @@ describe("POST /api/users/complete-force-change", () => {
     expect(res.body).toEqual({ message: "Password updated successfully" });
   });
 });
+
+// ---------- All Maps ----------
+describe("GET /api/maps", () => {
+  it("returns all maps", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        { mid: 1, name: "A Map", location: "Greenhouse 1", greenhouse: "GH1" },
+        { mid: 2, name: "B Map", location: "Greenhouse 2", greenhouse: "GH2" },
+      ],
+    });
+
+    const res = await request(app).get("/api/maps");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual([
+      { mid: 1, name: "A Map", location: "Greenhouse 1", greenhouse: "GH1" },
+      { mid: 2, name: "B Map", location: "Greenhouse 2", greenhouse: "GH2" },
+    ]);
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      "SELECT mid, name, location, greenhouse FROM maps ORDER BY name ASC"
+    );
+  });
+
+});
+
+
+// ---------- Uid Maps ----------
+describe("GET /api/users/:uid/maps", () => {
+  it("returns map IDs assigned to a scout", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [{ mid: 1 }, { mid: 3 }, { mid: 5 }],
+    });
+
+    const res = await request(app).get("/api/users/2/maps");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual([1, 3, 5]);
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      "SELECT mid FROM user_maps WHERE uid = $1",
+      ["2"]
+    );
+  });
+
+  it("returns an empty array when scout has no maps", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).get("/api/users/2/maps");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+});
+
+
+// ---------- Assign Maps ----------
+describe("POST /api/admin/assign-maps", () => {
+  it("assigns maps to a scout", async () => {
+    const mockClientQuery = jest.fn().mockResolvedValue({});
+    const mockClientRelease = jest.fn();
+
+    mockConnect.mockResolvedValueOnce({
+      query: mockClientQuery,
+      release: mockClientRelease,
+    });
+
+    const res = await request(app).post("/api/admin/assign-maps").send({
+      scoutUid: 2,
+      mapIds: [1, 3],
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ message: "Maps assigned successfully" });
+
+    expect(mockClientQuery).toHaveBeenCalledWith("BEGIN");
+    expect(mockClientQuery).toHaveBeenCalledWith(
+      "DELETE FROM user_maps WHERE uid = $1",
+      [2]
+    );
+    expect(mockClientQuery).toHaveBeenCalledWith(
+      "INSERT INTO user_maps (uid, mid) VALUES (2, 1),(2, 3)"
+    );
+    expect(mockClientQuery).toHaveBeenCalledWith("COMMIT");
+    expect(mockClientRelease).toHaveBeenCalled();
+  });
+
+  it("removes all map assignments when no maps are selected", async () => {
+    const mockClientQuery = jest.fn().mockResolvedValue({});
+    const mockClientRelease = jest.fn();
+
+    mockConnect.mockResolvedValueOnce({
+      query: mockClientQuery,
+      release: mockClientRelease,
+    });
+
+    const res = await request(app).post("/api/admin/assign-maps").send({
+      scoutUid: 2,
+      mapIds: [],
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ message: "Maps assigned successfully" });
+
+    expect(mockClientQuery).toHaveBeenCalledWith("BEGIN");
+    expect(mockClientQuery).toHaveBeenCalledWith(
+      "DELETE FROM user_maps WHERE uid = $1",
+      [2]
+    );
+    expect(mockClientQuery).not.toHaveBeenCalledWith(
+      expect.stringContaining("INSERT INTO user_maps")
+    );
+    expect(mockClientQuery).toHaveBeenCalledWith("COMMIT");
+    expect(mockClientRelease).toHaveBeenCalled();
+  });
+
+  it("rolls back and returns 500 when assigning maps fails", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    const mockClientQuery = jest
+      .fn()
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new Error("DB failed"))
+      .mockResolvedValueOnce({});
+
+    const mockClientRelease = jest.fn();
+
+    mockConnect.mockResolvedValueOnce({
+      query: mockClientQuery,
+      release: mockClientRelease,
+    });
+
+    const res = await request(app).post("/api/admin/assign-maps").send({
+      scoutUid: 2,
+      mapIds: [1, 3],
+    });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ message: "Failed to assign maps" });
+
+    expect(mockClientQuery).toHaveBeenCalledWith("BEGIN");
+    expect(mockClientQuery).toHaveBeenCalledWith("ROLLBACK");
+    expect(mockClientRelease).toHaveBeenCalled();
+
+    errorSpy.mockRestore();
+  });
+});
+
+
+// ---------- Scouts Maps Overview ----------
+describe("GET /api/admin/scouts-maps-overview", () => {
+  it("returns scouts with their assigned maps", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        {
+          uid: 1,
+          username: "scoutA",
+          email: "scoutA@example.com",
+          assigned_maps: [
+            { mid: 1, name: "Map A", location: "GH1", greenhouse: "A" },
+          ],
+        },
+        {
+          uid: 2,
+          username: "scoutB",
+          email: "scoutB@example.com",
+          assigned_maps: [],
+        },
+      ],
+    });
+
+    const res = await request(app).get("/api/admin/scouts-maps-overview");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual([
+      {
+        uid: 1,
+        username: "scoutA",
+        email: "scoutA@example.com",
+        assigned_maps: [
+          { mid: 1, name: "Map A", location: "GH1", greenhouse: "A" },
+        ],
+      },
+      {
+        uid: 2,
+        username: "scoutB",
+        email: "scoutB@example.com",
+        assigned_maps: [],
+      },
+    ]);
+
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("FROM users u"));
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("WHERE u.role = 'scout'"));
+  });
+});
