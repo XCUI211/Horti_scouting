@@ -10,11 +10,11 @@ CREATE TABLE users (
 );
 
 CREATE TABLE maps (
-    mid         SERIAL      PRIMARY KEY,   -- unique map ID number
-    name        VARCHAR(50) NOT NULL,      -- name of the map
-    location    VARCHAR(50) NOT NULL,      -- location of the map
-    greenhouse  VARCHAR(50) NOT NULL,      -- greenhouse associated with the map
-    json_map    JSONB       NOT NULL       -- JSON representation of the map data; JSONB allows for JSON queries if needed
+    mid        SERIAL PRIMARY KEY,          -- unique map ID number
+    name       VARCHAR(50) NOT NULL UNIQUE, -- name of the map
+    location   VARCHAR(50) NOT NULL,        -- location of the map
+    greenhouse VARCHAR(50) NOT NULL,        -- greenhouse associated with the map
+    json_map   JSONB       NOT NULL         -- JSON representation of the map data; JSONB allows for JSON queries if needed);
 );
 
 CREATE TABLE user_maps (
@@ -55,3 +55,10 @@ CREATE TABLE floor_reports (
     approval_status VARCHAR(50) NOT NULL CHECK (approval_status IN ('pending', 'approved', 'rejected')), -- approval status of the report
     reviewed_at     TIMESTAMP                                                                            -- timestamp of when the report was reviewed (approved/rejected)
 );
+
+CREATE TABLE climate_computer (
+    cid         SERIAL      PRIMARY KEY,                                        -- unique climate computer ID number
+    mid         INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,    -- foreign key to maps table; one map has many climate computers
+    name        VARCHAR(50) NOT NULL,                                           -- name of the climate computer
+    model       VARCHAR(50) NOT NULL                                            -- model of the climate computer
+)

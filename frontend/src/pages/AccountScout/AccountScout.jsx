@@ -4,28 +4,28 @@ import axios from 'axios';
 import ScoutLayout from '../../components/ScoutLayout/ScoutLayout';
 import "../AccountAdmin/Account.css";  // only one css file defined for user account page layout to keep it consistent
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../context/AuthContext";
 
 const AccountScout = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const { t } = useTranslation();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user')); // gets user info
-
-    if (storedUser && storedUser.uid) {
-      axios.get(`http://localhost:5000/api/users/${storedUser.uid}`)  // sends a request for specific user info
+    if (user && user.uid) {
+      axios.get(`http://localhost:5000/api/users/${user.uid}`)  // sends a request for specific user info
         .then(res => setUserData(res.data))  // saves user data
         .catch(err => console.error("Error fetching user:", err));
     } else {
       navigate("/login_scout");  // prevents unauthorized access if no user logged in
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   // Log out function
   const handleLogout = () => {
-    localStorage.removeItem('user');  // removes the user info from the browser
-    navigate('/');
+    logout();  // removes the user info from the browser
+    navigate('/');  // navigates back to the first app page
   };
 
   return (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "./PasswordChange.css";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../context/AuthContext";
 
 const PasswordChange = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const PasswordChange = () => {
   const [success, setSuccess] = useState('');
 
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -25,14 +27,13 @@ const PasswordChange = () => {
     }
 
     try {
-      const storedUser = JSON.parse(localStorage.getItem('user'));
-      if (!storedUser || !storedUser.uid) {
+      if (!user || !user.uid) {
         return navigate("/login_admin");
       }
 
       // Sending uid, current password for verification and the new password to the backend
       const response = await axios.post('http://localhost:5000/api/users/change-password', {
-        uid: storedUser.uid,
+        uid: user.uid,
         currentPassword,
         newPassword
       });

@@ -3,6 +3,7 @@ import axios from 'axios';  //carries data to the server
 import "./LoginScout.css";
 import {useNavigate} from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../context/AuthContext";
 
 function LoginScout() {
     //Keeping track of user input [variable, function]
@@ -13,17 +14,17 @@ function LoginScout() {
 
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const { setUser, logout } = useAuth();  // Uses AuthContext for setting the user and logging out
 
     // Logging the user out if they hit back arrow right after logging in
     // Ensures each user logs in using their credentials and does not use somebody else's account by accident
     useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-        // If they land on login page while a session is active, delete it
-        localStorage.removeItem('user');
-        console.log("Shared Device Security: Session cleared.");
-    }
-}, []);  // no navigating away, just the log in page for the next person to log in
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            logout();
+            console.log("Shared Device Security: Session cleared.");
+        }
+    }, [logout]);
 
 
     const handleLogin = async (e) => {  //waiting for the server
@@ -42,8 +43,9 @@ function LoginScout() {
             if (response.data && response.data.user) {
                 const user = response.data.user;
 
-                // Saving the user first
-                localStorage.setItem('user', JSON.stringify(user));
+                // Saving the userID via AuthContext (which automatically links to localStorage)
+                setUser(user);
+                console.log("Success:", response.data);
 
                 // Deciding where to send them based on the flag
                 if (user.mustChangePassword) {  // if they are using a One Time Password

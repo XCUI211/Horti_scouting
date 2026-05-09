@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "./ForcePasswordChange.css";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../context/AuthContext";
 
 const ForcePasswordChange = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const ForcePasswordChange = () => {
   const [error, setError] = useState('');
 
   const { t } = useTranslation();
+  const { user, setUser } = useAuth();
 
   const handleForceChange = async (e) => {
     e.preventDefault(); // stops browser from refreshing
@@ -20,7 +22,6 @@ const ForcePasswordChange = () => {
     }
 
     try {
-      const user = JSON.parse(localStorage.getItem('user')); // gets user info
 
       await axios.post('http://localhost:5000/api/users/complete-force-change', {
         uid: user.uid,
@@ -29,7 +30,7 @@ const ForcePasswordChange = () => {
 
       // Updating local storage so the 'mustChangePassword' flag is now false
       const updatedUser = { ...user, mustChangePassword: false };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
 
       navigate("/scout_home");
     } catch (err) {

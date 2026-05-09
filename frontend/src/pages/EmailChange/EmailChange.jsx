@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "./EmailChange.css";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../context/AuthContext";
 
 const EmailChange = () => {
   const navigate = useNavigate();
@@ -10,15 +11,13 @@ const EmailChange = () => {
   const [password, setPassword] = useState(''); // required to authorize the change
   const [error, setError] = useState('');  // holds error messages
   const [success, setSuccess] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);  // holds user basic info
 
   const { t } = useTranslation();
+  const { user, setUser } = useAuth();
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
     if (!user) navigate('/login_admin');  // log out if no user
-    setCurrentUser(user);  // saves user info
-  }, [navigate]);
+  }, [user, navigate]);
 
   const handleUpdateEmail = async (e) => {
     e.preventDefault();  // prevents page from refreshing when "submit" is clicked
@@ -27,7 +26,7 @@ const EmailChange = () => {
     setSuccess('');
 
     // Prevents Admins from clearing the email (they always need a valid email!)
-    const isAdmin = currentUser?.role === 'admin' || window.location.pathname.includes('admin');
+    const isAdmin = user?.role === 'admin' || window.location.pathname.includes('admin');
     if (isAdmin && !newEmail.trim()) {
       setError(t("EmailChange.AdminMustHaveValidEmail"));
       return;
@@ -35,14 +34,14 @@ const EmailChange = () => {
 
     try { 
       const response = await axios.post('http://localhost:5000/api/users/change-email', {
-        uid: currentUser.uid,
+        uid: user.uid,
         password: password,
-        newEmail: newEmail || null // allows clearing the email if left blank (if user is a scout)
+        newEmail: newEmail || null
       });
 
-      // Updating local storage so the UI shows the new email immediately
-      const updatedUser = { ...currentUser, email: newEmail };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      // Updating AuthContext so the UI shows the new email immediately
+      const updatedUser = { ...user, email: newEmail };
+      setUser(updatedUser);
 
       setSuccess(t("EmailChange.UpdateSuccess"));
       setTimeout(() => navigate(-1), 800);  // goes back to previous page after a moment
@@ -58,7 +57,7 @@ const EmailChange = () => {
       <h1>{t("EmailChange.Title")}</h1>
 
       <p className="current-email-hint">
-        {t("EmailChange.Current")} {currentUser?.email || t("EmailChange.NoEmailSet")}
+        {t("EmailChange.Current")} {user?.email || t("EmailChange.NoEmailSet")}
       </p>
 
       {error && <p className="error-msg">{error}</p>}

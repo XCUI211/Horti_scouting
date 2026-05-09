@@ -212,6 +212,7 @@
   },
 
   "ScoutReportModal": {
+    "ScoutName": "Scout Name",
     "RedSpiderMite": "Red spider mite",
     "Thrips": "Thrips",
     "GreenLouse": "Green louse",

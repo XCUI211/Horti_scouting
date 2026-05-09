@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData, mapName }) {
   const [fid, setFid] = useState('');
-  const [uid, setUid] = useState('');
 
   const [pestsFound, setPestsFound] = useState('');
   const [pestType, setPestType] = useState([]);
@@ -31,6 +31,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   const [historyLoading, setHistoryLoading] = useState(false);
 
   const { t, i18n } = useTranslation(); //i18n for local language
+  const { user } = useAuth();
 
   const pestOptions = [
     { value: 'red_spider_mite', label: t("ScoutReportModal.RedSpiderMite") },
@@ -70,6 +71,24 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       setView('info');
     }
   }, [isOpen, cellInfo]);
+
+  // Try to resolve fID from cell info when modal opens, but allow manual override if it fails or if reportData
+  // is provided (admin view).
+  useEffect(() => {
+    if (!isOpen || !cellInfo || reportData) return;
+
+    fetch(`http://localhost:5000/api/floors/resolve?map_name=${encodeURIComponent(mapName)}&cell_name=${encodeURIComponent(cellInfo.label)}`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.status !== 'success' || data.fid == null) {
+          throw new Error(`FloorID resolve failed for ${mapName} / ${cellInfo.label}`);
+        }
+        setFid(String(data.fid));
+      })
+      .catch((err) => {
+        setError(err.message); // strict: show error, no fallback typing
+      });
+  }, [isOpen, cellInfo, mapName, reportData]);
 
   useEffect(() => {
     if (!isOpen || !cellInfo || reportData) return;
@@ -113,8 +132,9 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
     },
     header: {
-      padding: '16px 20px', borderBottom: '1px solid #eee',
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '0px 0px 15px', borderBottom: '1px solid #eee',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+      textAlign: 'center',
     },
     body: { padding: '16px 20px', overflowY: 'auto', flex: 1 },
     footer: {
@@ -177,13 +197,20 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    // Do not accept reports without FloorID
+    if (!fid) {
+      setError("FloorID could not be loaded");
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:5000/api/floorreports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fid: Number(fid),
-          uid: Number(uid),
+          uid: Number(user?.uid),
           pests_found: !pestType.includes('none') && pestType.length > 0,
           pest_types: pestsFound === 'true' && pestType.length > 0 ? pestType : null,
           pest_severity: pestType.includes('none') || pestSeverity === '' ? null : Number(pestSeverity),
@@ -288,7 +315,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
         <div style={styles.modal}>
           <div style={styles.header}>
             <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CellInfo")}</h3>
-            <span style={{ fontSize: '12px', color: '#666' }}>{mapName} · {cellInfo.label}</span>
+            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2 }}>{mapName} · {cellInfo.label}</span>
           </div>
           <div style={styles.body}>
             <div style={{ marginBottom: '16px' }}>
@@ -379,21 +406,22 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       <div style={styles.modal}>
         <div style={styles.header}>
           <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CreateFloorReport")}</h3>
-          <span style={{ fontSize: '12px', color: '#666' }}>{mapName} · {cellInfo.label}</span>
+            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2 }}>{mapName} · {cellInfo.label}</span>
         </div>
         <form onSubmit={handleSubmit} style={{ display: 'contents' }}>
           <div style={styles.body}>
             {error && <p style={{ color: 'red', fontWeight: 'bold', margin: '0 0 10px 0' }}>{error}</p>}
             {success && <p style={{ color: 'green', fontWeight: 'bold', margin: '0 0 10px 0' }}>{success}</p>}
 
+            {/*Name of scout (based on UID)*/}
             <div style={styles.formGroup}>
-              <label style={styles.label}>{t("ScoutReportModal.FloorID")}</label>
-              <input style={styles.input} type="number" value={fid} onChange={(e) => setFid(e.target.value)} required />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>{t("ScoutReportModal.UserID")}</label>
-              <input style={styles.input} type="number" value={uid} onChange={(e) => setUid(e.target.value)} required />
+              <label style={styles.label}>{t("ScoutReportModal.ScoutName")}</label>
+              <input
+                style={{...styles.input, backgroundColor: '#f0f0f0', cursor: 'not-allowed'}}
+                type="text"
+                value={user?.username || ''}
+                disabled
+              />
             </div>
 
             <div style={styles.formGroup}>
@@ -569,7 +597,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
 
           <div style={styles.footer}>
             <button type="button" style={styles.btnSecondary} onClick={() => setView('info')}>{t("ScoutReportModal.Back")}</button>
-            <button type="submit" style={styles.btnPrimary}>{t("ScoutReportModal.SubmitReport")}</button>
+            <button type="submit" style={styles.btnPrimary} disabled={!fid}>{t("ScoutReportModal.SubmitReport")}</button>
           </div>
         </form>
       </div>

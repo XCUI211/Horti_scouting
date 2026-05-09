@@ -152,6 +152,28 @@ app.get('/api/reports', async (req, res) => {
     }
 });
 
+// Here, the frontend can send a map name and cell name, and the backend will return the corresponding floor ID (fid)
+// if it exists. This is used when submitting a new report to link it to the correct floor. Said query joins the floors
+// and maps tables to find the matching floor based on the provided map and cell names.
+app.get('/api/floors/resolve', async (req, res) => {
+    const { map_name, cell_name } = req.query;
+
+    if (!map_name || !cell_name) {return res.status(400).json({ status: 'error', message: 'map_name and cell_name are required' });}
+
+    try {const result = await pool.query(
+            `SELECT f.fid
+             FROM floors f
+             JOIN maps m ON f.mid = m.mid
+             WHERE m.name = $1 AND f.name = $2
+             LIMIT 1`,
+            [map_name, cell_name]);
+
+        if (result.rows.length === 0) {return res.status(404).json({ status: 'not_found', message: 'Floor not found' });}
+            res.json({ status: 'success', fid: result.rows[0].fid })}
+        catch (err) {console.error(err);
+                    res.status(500).json({ status: 'error', message: err.message })}
+    });
+
 // Admin approves or rejects a report.
 app.put('/api/reports/:id/approve', async (req, res) => {
     const { id } = req.params;
@@ -395,16 +417,13 @@ app.post('/api/users/complete-force-change', async (req, res) => {
     }
 });
 
-// GET request to from the database to get all available maps
+// GET request to fetch all maps including their JSON layout
 app.get('/api/maps', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT mid, name, location, greenhouse FROM maps ORDER BY name ASC');  // alphabetically sorted by name
-        res.json(result.rows);  // sends the rows found in the database as json array
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error fetching maps' });
-    }
-});
+    try {const result = await pool.query('SELECT mid, name, location, greenhouse, json_map FROM maps ORDER BY name ASC');
+        res.json(result.rows);}
+    catch (err) {console.error(err);
+                res.status(500).json({ message: 'Server error fetching maps' })}
+    });
 
 // GET request to get maps currently assigned to a specific scout
 // Uses a dynamic parameter uid

@@ -4,34 +4,33 @@ import axios from 'axios';
 import AdminLayout from '../../components/AdminLayout/AdminLayout';
 import "./Account.css";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../context/AuthContext";
 
 const AccountAdmin = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState("nl");
   const [password, setPassword] = useState("");
-
   const { t, i18n } = useTranslation(); //i18n for local language
+  const { user, setUser, logout } = useAuth();
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user')); // gets user info
-
-    if (storedUser && storedUser.uid) {
-      axios.get(`http://localhost:5000/api/users/${storedUser.uid}`)  // sends a request for specific user info
+    if (user && user.uid) {
+      axios.get(`http://localhost:5000/api/users/${user.uid}`)
         .then(res => {
-          setUserData(res.data);  // saves user data
+          setUserData(res.data);
           setSelectedLanguage(res.data.language || "nl");
           i18n.changeLanguage(res.data.language || "nl");
         })
         .catch(err => console.error("Error fetching user:", err));
     } else {
-      navigate("/login_admin");  // prevents unauthorized access if no user logged in
+      navigate("/login_admin");
     }
-  }, [navigate, i18n]);
+  }, [user, navigate, i18n]);
 
   // Log out function
   const handleLogout = () => {
-    localStorage.removeItem('user');  // removes the user info from the browser
+    logout();  // removes the user info from the browser
     navigate('/');  // navigates back to the first app page
   };
 
@@ -47,16 +46,9 @@ const AccountAdmin = () => {
       });
       i18n.changeLanguage(newLanguage);
 
-      const updatedUser = { ...userData, language: newLanguage };
-      setUserData(updatedUser);
+      const updatedUser = { ...user, language: newLanguage };
+      setUser(updatedUser);
 
-      const storedUser = JSON.parse(localStorage.getItem('user'));
-      if (storedUser) {
-        localStorage.setItem(
-          'user',
-          JSON.stringify({ ...storedUser, language: newLanguage })
-        );
-      }
     } catch (err) {
       console.error("Error updating language:", err);
     }

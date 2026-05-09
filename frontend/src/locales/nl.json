@@ -212,6 +212,7 @@
   },
 
   "ScoutReportModal": {
+    "ScoutName": "Scoutnaam",
     "RedSpiderMite": "Rode spintmijt",
     "Thrips": "Trips",
     "GreenLouse": "Groene luis",

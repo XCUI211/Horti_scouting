@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, MapPin, Bell, ClipboardList, UserCircle } from 'lucide-react';
 import "./ScoutLayout.css";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../context/AuthContext";
 
 // Defines the general in-app layout for the Scout view
 // that includes top header and bottom navigation bar
@@ -13,13 +14,13 @@ const ScoutLayout = ({ children, title }) => {
 
   const isActive = (path) => location.pathname === path;
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
     if (user?.mustChangePassword) {
-        navigate("/force_password_change");
+      navigate("/force_password_change");
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   return (
     <div className="scout-mobile-wrapper">
