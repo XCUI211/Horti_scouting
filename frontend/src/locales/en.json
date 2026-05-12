@@ -168,7 +168,8 @@
     "AwaitingApproval": "Awaiting Approval",
     "StatusApproved": "Done",
     "StatusRejected": "Redo",
-    "StatusPending": "Awaiting Approval"
+    "StatusPending": "Awaiting Approval",
+    "AdminNote": "Admin comment"
   },
 
   "History": {

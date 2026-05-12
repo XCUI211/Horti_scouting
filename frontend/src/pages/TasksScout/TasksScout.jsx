@@ -2,21 +2,20 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
-import ScoutLayout from '../../components/ScoutLayout/ScoutLayout'; // Adjust path if needed
+import ScoutLayout from '../../components/ScoutLayout/ScoutLayout';
 import "./TasksScout.css";
 import { useAuth } from "../../context/AuthContext";
 
 const TasksScout = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { user } = useAuth(); // Use the context instead of localStorage for consistency
+    const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                // Ensure we have a user ID before calling the API
                 if (user?.uid) {
                     const res = await axios.get(`http://localhost:5000/api/scout/tasks/${user.uid}`);
                     setTasks(res.data);
@@ -30,8 +29,11 @@ const TasksScout = () => {
         fetchTasks();
     }, [user]);
 
-    const handleRedo = (report) => {
-        navigate(`/report-form/${report.mid}/${report.sid}`, { state: { redoReportId: report.rid } });
+    // Navigates to maps
+    const handleRedo = (task) => {
+        navigate(`/maps/`, {
+            state: { redoReportId: task.rid }
+        });
     };
 
     return (
@@ -43,33 +45,47 @@ const TasksScout = () => {
                     <div className="task-scout-vireo-list">
                         {tasks.length > 0 ? (
                             tasks.map((task) => (
-                                <div key={task.rid} className="task-scout-vireo-row">
-                                    <span className="task-scout-vireo-location">
-                                        {task.map_name} {task.section_name}
-                                    </span>
-
-                                    <div className="task-scout-vireo-status-area">
-                                        {task.status === 'rejected' && (
-                                            <button
-                                                className="task-scout-vireo-btn-redo"
-                                                onClick={() => handleRedo(task)}
-                                            >
-                                                {t("TasksScout.Redo")}
-                                            </button>
-                                        )}
-
-                                        {task.status === 'pending' && (
-                                            <span className="task-scout-vireo-status-pending">
-                                                {t("TasksScout.AwaitingApproval")}
+                                <div key={task.rid} className="task-scout-vireo-item-group">
+                                    <div className="task-scout-vireo-row">
+                                        <div className="task-scout-vireo-info">
+                                            <span className="task-scout-vireo-location">
+                                                {task.map_name}
                                             </span>
-                                        )}
-
-                                        {task.status === 'approved' && (
-                                            <span className="task-scout-vireo-status-done">
-                                                {t("TasksScout.Done")}
+                                            <span className="task-scout-vireo-section">
+                                                {task.section_name}
                                             </span>
-                                        )}
+                                        </div>
+
+                                        <div className="task-scout-vireo-status-area">
+                                            {task.status === 'rejected' && (
+                                                <button
+                                                    className="task-scout-vireo-btn-redo"
+                                                    onClick={() => handleRedo(task)}
+                                                >
+                                                    {t("TasksScout.Redo")}
+                                                </button>
+                                            )}
+                                            {task.status === 'pending' && (
+                                                <span className="task-scout-vireo-status-pending">
+                                                    {t("TasksScout.AwaitingApproval")}
+                                                </span>
+                                            )}
+                                            {task.status === 'approved' && (
+                                                <span className="task-scout-vireo-status-done">
+                                                    {t("TasksScout.Done")}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
+
+                                    {/* Admin comment */}
+                                    {task.comment && (
+                                        <div className="task-scout-vireo-comment-box">
+                                            <p className="task-scout-vireo-comment-text">
+                                                <strong>{t("TasksScout.AdminNote")}:</strong> {task.comment}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         ) : (
