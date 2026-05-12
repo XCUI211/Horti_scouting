@@ -21,6 +21,10 @@
   font-size: 14px;
 }
 
+.pest-history-state {
+  padding: 10px;
+}
+
 .pest-history-period-btn {
   padding: 8px 12px;
   border: 1px solid #ddd;
@@ -104,6 +108,8 @@
 .pest-history-chemicals-section {
   background: #f3e5f5;
 }
+
+
 
 .pest-history-biology-section,
 .pest-history-chemicals-section {

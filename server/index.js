@@ -133,7 +133,8 @@ app.get('/api/reports', async (req, res) => {
                    fr.pest_types       AS pest_types,
                    to_char(fr.report_time, 'YYYY-MM-DD') AS entry_date,
                    fr.approval_status  AS status,
-                   u.username          AS reporter_name
+                   u.username          AS reporter_name,
+                   fr.comment          AS admin_comment
             FROM floor_reports fr
             JOIN floors f ON fr.fid = f.fid
             JOIN maps m   ON f.mid  = m.mid
@@ -177,14 +178,19 @@ app.get('/api/floors/resolve', async (req, res) => {
 // Admin approves or rejects a report.
 app.put('/api/reports/:id/approve', async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, admin_comment } = req.body;
     if (!['approved', 'rejected'].includes(status)) {
         return res.status(400).json({ message: 'Invalid status' });
     }
     try {
         const result = await pool.query(
-            'UPDATE floor_reports SET approval_status = $1, reviewed_at = CURRENT_TIMESTAMP WHERE rid = $2 RETURNING *',
-            [status, id]
+            `UPDATE floor_reports
+             SET approval_status = $1,
+                 reviewed_at = CURRENT_TIMESTAMP,
+                 comment = $2
+             WHERE rid = $3
+             RETURNING *`,
+            [status, admin_comment || null, id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Report not found' });

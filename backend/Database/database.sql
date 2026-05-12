@@ -53,7 +53,8 @@ CREATE TABLE floor_reports (
 
     report_time     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,                                      -- timestamp of the report
     approval_status VARCHAR(50) NOT NULL CHECK (approval_status IN ('pending', 'approved', 'rejected')), -- approval status of the report
-    reviewed_at     TIMESTAMP                                                                            -- timestamp of when the report was reviewed (approved/rejected)
+    reviewed_at     TIMESTAMP,                                                                           -- timestamp of when the report was reviewed (approved/rejected)
+    comment         TEXT                                                                                 -- optional comment from the admin when approving/rejecting the report
 );
 
 CREATE TABLE climate_computer (

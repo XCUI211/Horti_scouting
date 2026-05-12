@@ -3,11 +3,13 @@ import { BarChart, Bar, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis
 import axios from 'axios';
 import { formatPestName, getPestColor } from '../../constants/pestNames';
 import './PestHistory.css';
+import { useTranslation } from "react-i18next";
 
-const PERIODS = [{ key: 'week', label: 'Week' },
-                                        { key: 'month', label: 'Month' },
-                                        { key: 'year', label: 'Year' },
-                                        { key: 'all', label: 'All time' }];
+const PERIOD_KEYS = [
+    { key: 'week', labelKey: 'PestHistory.Periods.Week' },
+    { key: 'month', labelKey: 'PestHistory.Periods.Month' },
+    { key: 'year', labelKey: 'PestHistory.Periods.Year' },
+    { key: 'all', labelKey: 'PestHistory.Periods.All' },];
 
 // Used to format the "tooltip" when hovering over a pest in the bar plot
 function PestHistoryTooltip({ active, payload }) {
@@ -24,7 +26,8 @@ function PestHistoryTooltip({ active, payload }) {
 
 // Main part that takes care of getting the data for the bar plot, actually creating the plot, and showing the details
 // of the pest when overing over one of the options in the bar plot.
-export default function PestHistory() {const [period, setPeriod] = useState('month');
+export default function PestHistory() {const { t } = useTranslation();
+                                       const [period, setPeriod] = useState('month');
                                        const [data, setData] = useState([]);
                                        const [loading, setLoading] = useState(true);
                                        const [error, setError] = useState(null);
@@ -108,17 +111,20 @@ export default function PestHistory() {const [period, setPeriod] = useState('mon
           <p className="pest-history-subtitle">Bar chart of pest counts for the selected time period.</p>
         </div>
 
-        <div className="pest-history-periods" role="tablist" aria-label="Pest history period">
-          {PERIODS.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className={`pest-history-period-btn ${period === item.key ? 'active' : ''}`}
-              onClick={() => setPeriod(item.key)}
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="pest-history-periods" role="tablist" aria-label={t?.('PestHistory.Periods.Label', 'Pest history period')}>
+          {PERIOD_KEYS.map((item) => {
+            const label = t(item.labelKey, { defaultValue: item.key.charAt(0).toUpperCase() + item.key.slice(1) });
+            return (
+              <button
+                key={item.key}
+                type="button"
+                className={`pest-history-period-btn ${period === item.key ? 'active' : ''}`}
+                onClick={() => setPeriod(item.key)}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

@@ -175,6 +175,13 @@
     "Title": "Report History"
   },
 
+  "PestHistory": {
+    "Periods": {"Week": "Week",
+                "Month": "Month",
+                "Year": "Year",
+                "All": "All time"}
+  },
+
   "SectionReport": {
     "Title": "Create section report",
     "SectionID": "Section ID",
