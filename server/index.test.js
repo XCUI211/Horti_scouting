@@ -477,7 +477,7 @@ describe("GET /api/maps", () => {
     ]);
 
     expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT mid, name, location, greenhouse FROM maps ORDER BY name ASC"
+      "SELECT mid, name, location, greenhouse, json_map FROM maps ORDER BY name ASC"
     );
   });
 

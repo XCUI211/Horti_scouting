@@ -151,6 +151,28 @@
     "ResetFailed": "Wachtwoord resetten mislukt"
   },
 
+  "ScoutOverview": {
+    "PageTitle": "",
+    "AwaitingApproval": "",
+    "StatusApproved": "",
+    "StatusRejected": "",
+    "Loading": "",
+    "NoReports": ""
+  },
+
+  "TasksScout": {
+    "Title": "Taken",
+    "Loading": "Taken laden...",
+    "NoReports": "Je hebt nog geen rapporten ingediend.",
+    "Redo": "Opnieuw",
+    "Done": "Klaar",
+    "AwaitingApproval": "Wacht op goedkeuring",
+    "StatusApproved": "Klaar",
+    "StatusRejected": "Opnieuw",
+    "StatusPending": "Wacht op goedkeuring",
+    "AdminNote": "Beheerder opmerking"
+  },
+
   "History": {
     "Title": "Rapportgeschiedenis"
   },

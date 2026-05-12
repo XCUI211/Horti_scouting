@@ -639,6 +639,33 @@ app.get('/api/admin/scouts-reports-summary', async (req, res) => {
     }
 });
 
+// GET request to get specific scout's report history
+app.get('/api/scout/tasks/:uid', async (req, res) => {
+    const { uid } = req.params;
+    try {
+        const result = await pool.query(`
+            SELECT
+                fr.rid,
+                fr.approval_status as status,
+                fr.comment,
+                f.name as section_name,
+                m.name as map_name,
+                m.mid,
+                f.fid
+            FROM floor_reports fr
+            JOIN floors f ON fr.fid = f.fid
+            JOIN maps m ON f.mid = m.mid
+            WHERE fr.uid = $1
+            ORDER BY fr.report_time DESC
+        `, [uid]);
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("DATABASE ERROR:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Export so test files can import Express app without starting server.
 module.exports = {
     app,

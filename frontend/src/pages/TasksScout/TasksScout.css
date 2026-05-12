@@ -1,0 +1,87 @@
+.task-scout-vireo-page-wrapper {
+    background-color: #fff;
+    width: 100%;
+}
+
+.task-scout-vireo-item-group {
+    border-bottom: 1px solid #eeeeee;
+    display: flex;
+    flex-direction: column;
+}
+
+.task-scout-vireo-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+}
+
+.task-scout-vireo-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.task-scout-vireo-location {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.task-scout-vireo-section {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+/* Status styles */
+.task-scout-vireo-btn-redo {
+    background-color: #6cc033;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 22px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.task-scout-vireo-btn-redo:hover {
+    background-color: #5aa32a;
+}
+
+.task-scout-vireo-status-pending {
+    color: #4a90e2;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.task-scout-vireo-status-done {
+    color: #6cc033;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Admin comment styling */
+.task-scout-vireo-comment-box {
+    margin: 0 20px 15px 20px;
+    padding: 10px 15px;
+    background-color: #fff8f8;
+    border-left: 4px solid #ff4d4d;
+    border-radius: 4px;
+}
+
+.task-scout-vireo-comment-text {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #444;
+    line-height: 1.4;
+}
+
+/* Empty/Loading states */
+.task-scout-vireo-loading,
+.task-scout-vireo-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: #999;
+    font-size: 0.95rem;
+}
