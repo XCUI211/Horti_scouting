@@ -15,6 +15,7 @@ import ScoutMapAssignment from "./pages/ScoutMapAssignment/ScoutMapAssignment";
 import MapView from "./pages/MapView/MapView";
 import AdminDashboardPage from "./pages/AdminDashboard/AdminDashboardPage";
 import History from "./pages/History/History.jsx";
+import ScoutOverview from "./pages/ScoutOverview/ScoutOverview";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/maps" element={<MapView />} />
         <Route path="/maps/admin_dashboard" element={<AdminDashboardPage />} />
         <Route path="/history" element={<History />} />
+        <Route path="/scout_overview" element={<ScoutOverview />} />
     </Routes>
   );
 }

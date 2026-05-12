@@ -597,6 +597,42 @@ app.get('/api/analytics/pest-history-details', async (req, res) => {
         res.status(500).json({ status: 'error', message: err.message })}
 });
 
+// GET request to fetch scouts and their recent report history for the scout overview page
+app.get('/api/admin/scouts-reports-summary', async (req, res) => {
+    try {
+        const query = `
+            SELECT
+                u.uid,
+                u.username,
+                (
+                    SELECT json_agg(report_sub)
+                    FROM (
+                        SELECT
+                            fr.rid,
+                            m.name as map_name,
+                            f.name as section_name,
+                            to_char(fr.report_time, 'DD/MM/YYYY HH24:MI') as formatted_date,
+                            fr.approval_status as status
+                        FROM floor_reports fr
+                        JOIN floors f ON fr.fid = f.fid
+                        JOIN maps m ON f.mid = m.mid
+                        WHERE fr.uid = u.uid
+                        ORDER BY fr.report_time DESC
+                        LIMIT 4
+                    ) report_sub
+                ) as recent_reports
+            FROM users u
+            WHERE u.role = 'scout' AND u.is_employed = true
+            ORDER BY u.username ASC;
+        `;
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error fetching scouts reports summary' });
+    }
+});
+
 // Export so test files can import Express app without starting server.
 module.exports = {
     app,

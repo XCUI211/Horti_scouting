@@ -1,0 +1,76 @@
+.scout-overview-page-wrapper {
+    padding: 10px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.scout-overview-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Scouts card styling */
+.scout-overview-card-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.scout-overview-user-name {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+/* Row layout */
+.scout-overview-table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.scout-overview-data-row {
+    display: grid;
+    grid-template-columns: 1.8fr 1.2fr 1fr; /* Decides how much space each info column gets*/
+    align-items: center;
+    font-size: 15px;
+}
+
+.scout-overview-loc-text {
+    font-weight: 500;
+    color: #334155;
+}
+
+.scout-overview-date-text {
+    color: #4a69bd;
+    text-align: center;
+    font-family: monospace;
+}
+
+/* Status styles */
+.scout-overview-status-text {
+    text-align: right;
+    font-weight: 600;
+}
+
+.scout-overview-status-pending {
+    color: #4a69bd; /* Blue */
+    text-decoration: underline;
+}
+
+.scout-overview-status-approved {
+    color: #57b021; /* Green */
+}
+
+.scout-overview-status-rejected {
+    color: #ef4444; /* Red */
+}
+
+.scout-overview-empty-text {
+    color: #94a3b8;
+    font-style: italic;
+    padding: 10px 0;
+}

@@ -48,11 +48,11 @@ const AdminLayout = ({ children, title }) => {
             <MapPin size={22} />
             <span>{t("AdminLayout.Maps")}</span>
           </button>
-          <button className={`nav-item ${isActive('/notifications_admin') ? 'active' : ''}`} onClick={() => navigate('/notifications_admin')}>
+          <button className={`nav-item ${isActive('/reports_admin') ? 'active' : ''}`} onClick={() => navigate('/reports_admin')}>
             <BookText size={22} />
             <span>{t("AdminLayout.Reports")}</span>
           </button>
-          <button className={`nav-item ${isActive('/scouts_overview') ? 'active' : ''}`} onClick={() => navigate('/scouts_overview')}>
+          <button className={`nav-item ${isActive('/scout_overview') ? 'active' : ''}`} onClick={() => navigate('/scout_overview')}>
             <Users size={22} />
             <span>{t("AdminLayout.Scouts")}</span>
           </button>

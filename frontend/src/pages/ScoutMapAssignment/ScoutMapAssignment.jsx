@@ -4,6 +4,7 @@ import AdminLayout from '../../components/AdminLayout/AdminLayout';
 import { MAP_ORDER } from '../../constants/mapOrder';
 import "./ScoutMapAssignment.css";
 import { useTranslation } from "react-i18next";
+import { Map as MapIcon } from 'lucide-react';
 
 const ScoutMapAssignment = () => {
     const { t } = useTranslation();
@@ -120,7 +121,8 @@ const ScoutMapAssignment = () => {
                                 >
                                     <div className="map-card-content">
                                         <div className="map-icon-circle">
-                                            <span className="map-number">{map.name}</span>
+                                            <MapIcon size={20} className="map-number" />
+{/*                                             <span className="map-number">{map.name}</span> */}
                                         </div>
                                         <div className="map-details">
                                             <span className="map-title">{t("ScoutMapAssignment.Map")} {map.name}</span>

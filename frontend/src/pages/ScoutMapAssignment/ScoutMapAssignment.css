@@ -16,13 +16,14 @@
 .map-assign-container .overview-card {
     display: flex;  /* Puts scout info on the left and button on the right */
     justify-content: space-between;  /* Pushes items to opposite ends */
-    align-items: flex-start; /* Prevents button from jumping if text is long */
+    align-items: center; /* Prevents button from jumping if text is long */
     background: #fff;  /* White background */
     padding: 20px;
     border-radius: 10px;  /* Rounded corners */
     border: 1px solid #ddd;  /* Grey border */
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    gap: 20px; /* Forces space between info and button */
+    gap: 15px; /* Forces space between info and button */
+    overflow: hidden;
 }
 
 /* Scout name and maps assigned on the card */
@@ -209,10 +210,11 @@
 
 /* Assign Maps button */
 .map-assign-container .assign-pill-btn {
+    flex-shrink: 0;
     align-self: center;  /* Centers button vertically within the card */
     background-color: #e5e7eb;  /* Light grey */
     border: none;
-    border-radius: 20px;
+    border-radius: 15px;
     padding: 8px 20px;
     font-weight: 600;
     color: #4b5563;
@@ -220,8 +222,14 @@
     font-size: 14px;
     transition: all 0.2s ease;
     width: fit-content;
-    white-space: nowrap;
+    white-space: normal;
+    text-align: center;
+    width: 100px;
     flex-shrink: 0;  /* Prevents the button from changing size when tags wrap */
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .map-assign-container .assign-pill-btn:hover {

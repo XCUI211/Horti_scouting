@@ -150,6 +150,15 @@
     "ResetFailed": "Failed to reset password"
   },
 
+  "ScoutOverview": {
+    "PageTitle": "Scout Overview",
+    "AwaitingApproval": "Awaiting Approval",
+    "StatusApproved": "Approved",
+    "StatusRejected": "Rejected",
+    "Loading": "Loading scouts data...",
+    "NoReports": "No recent reports for this scout"
+  },
+
   "History": {
     "Title": "Report History"
   },
