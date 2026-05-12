@@ -150,6 +150,10 @@
     "ResetFailed": "Failed to reset password"
   },
 
+  "History": {
+    "Title": "Report History"
+  },
+
   "SectionReport": {
     "Title": "Create section report",
     "SectionID": "Section ID",

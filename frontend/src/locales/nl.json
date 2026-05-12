@@ -151,6 +151,10 @@
     "ResetFailed": "Wachtwoord resetten mislukt"
   },
 
+  "History": {
+    "Title": "Rapportgeschiedenis"
+  },
+
   "SectionReport": {
     "Title": "Sectierapport aanmaken",
     "SectionID": "Sectie-ID",

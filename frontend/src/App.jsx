@@ -14,25 +14,27 @@ import ScoutPasswordReset from "./pages/ScoutPasswordReset/ScoutPasswordReset";
 import ScoutMapAssignment from "./pages/ScoutMapAssignment/ScoutMapAssignment";
 import MapView from "./pages/MapView/MapView";
 import AdminDashboardPage from "./pages/AdminDashboard/AdminDashboardPage";
+import History from "./pages/History/History.jsx";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/login_admin" element={<LoginAdmin />} />
-      <Route path="/admin_home" element={<HomeAdmin />} />
-      <Route path="/scout_home" element={<HomeScout />} />
-      <Route path="/login_scout" element={<LoginScout />} />
-      <Route path="/create" element={<CreateAccount />} />
-      <Route path="/account_management_admin" element={<AccountAdmin />} />
-      <Route path="/account_management_scout" element={<AccountScout />} />
-      <Route path="/change_password" element={<PasswordChange />} />
-      <Route path="/change_email" element={<EmailChange />} />
-      <Route path="/reset_scout_password" element={<ScoutPasswordReset />} />
-      <Route path="/force_password_change" element={<ForcePasswordChange />} />
-      <Route path="/scout_maps_assign" element={<ScoutMapAssignment />} />
-      <Route path="/maps" element={<MapView />} />
-      <Route path="/maps/admin_dashboard" element={<AdminDashboardPage />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/login_admin" element={<LoginAdmin />} />
+        <Route path="/admin_home" element={<HomeAdmin />} />
+        <Route path="/scout_home" element={<HomeScout />} />
+        <Route path="/login_scout" element={<LoginScout />} />
+        <Route path="/create" element={<CreateAccount />} />
+        <Route path="/account_management_admin" element={<AccountAdmin />} />
+        <Route path="/account_management_scout" element={<AccountScout />} />
+        <Route path="/change_password" element={<PasswordChange />} />
+        <Route path="/change_email" element={<EmailChange />} />
+        <Route path="/reset_scout_password" element={<ScoutPasswordReset />} />
+        <Route path="/force_password_change" element={<ForcePasswordChange />} />
+        <Route path="/scout_maps_assign" element={<ScoutMapAssignment />} />
+        <Route path="/maps" element={<MapView />} />
+        <Route path="/maps/admin_dashboard" element={<AdminDashboardPage />} />
+        <Route path="/history" element={<History />} />
     </Routes>
   );
 }

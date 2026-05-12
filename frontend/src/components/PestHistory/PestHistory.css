@@ -1,0 +1,134 @@
+
+
+.pest-history-title,
+.pest-history-detail-title {
+  margin: 0;
+  color: #333;
+}
+
+.pest-history-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.pest-history-detail-title {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.pest-history-subtitle {
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.pest-history-period-btn {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #f7f7f7;
+  cursor: pointer;
+}
+
+.pest-history-periods {
+  display: flex;
+  gap: 10px;
+}
+
+.pest-history-period-btn.active {
+  background: #1976d2;
+  border-color: #1976d2;
+  color: white;
+}
+
+.pest-history-summary {
+  margin-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.pest-history-detail-card,
+.pest-history-detail-item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+}
+
+.pest-history-detail-card {
+  margin-top: 18px;
+  padding: 16px;
+}
+
+.pest-history-detail-item {
+  padding: 12px;
+}
+
+.pest-history-detail-item-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pest-history-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.pest-history-detail-selected-count{
+  font-size: 14px;
+  padding-bottom: 10px;
+}
+
+.pest-history-detail-kicker,
+.pest-history-detail-meta {
+  font-size: 14px
+}
+
+.pest-history-detail-note,
+.pest-history-detail-date {
+  font-size: 14px;
+}
+
+.pest-history-detail-meta {
+  line-height: 1.35;
+  color: #333;
+}
+
+.pest-history-biology-section {
+  background: #e8f5e9;
+}
+
+.pest-history-chemicals-section {
+  background: #f3e5f5;
+}
+
+.pest-history-biology-section,
+.pest-history-chemicals-section {
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.pest-history-tooltip {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  min-width: 140px;
+}
+
+.pest-history-tooltip-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.pest-history-tooltip-value {
+  font-size: 12px;
+  color: #666;
+}

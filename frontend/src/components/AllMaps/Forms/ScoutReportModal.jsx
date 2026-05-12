@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../context/AuthContext";
+import { formatPestNames } from "../../../constants/pestNames";
 
 export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData, mapName }) {
   const [fid, setFid] = useState('');
@@ -379,7 +380,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                   </div>
                   {Array.isArray(latestApproved.pest_types) && latestApproved.pest_types.length > 0 && (
                     <div style={{ fontSize: '13px' }}>
-                      <strong>{t("ScoutReportModal.Pests")}:</strong> {latestApproved.pest_types.join(', ')}
+                      <strong>{t("ScoutReportModal.Pests")}:</strong> {formatPestNames(latestApproved.pest_types).join(', ')}
                     </div>
                   )}
                 </div>
@@ -423,7 +424,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                       </div>
                       {Array.isArray(r.pest_types) && r.pest_types.length > 0 && (
                         <div style={{ fontSize: '12px', color: '#555' }}>
-                          {r.pest_types.join(', ')}
+                          {formatPestNames(r.pest_types).join(', ')}
                         </div>
                       )}
                     </div>
