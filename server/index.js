@@ -633,6 +633,28 @@ app.get('/api/admin/scouts-reports-summary', async (req, res) => {
     }
 });
 
+app.get('/api/scout/tasks/:uid', async (req, res) => {
+    const { uid } = req.params;
+    try {
+        const result = await pool.query(`
+            SELECT
+                fr.rid, fr.status,
+                m.name as map_name,
+                s.name as section_name,
+                fr.mid, fr.sid
+            FROM floor_reports fr
+            JOIN maps m ON fr.mid = m.mid
+            JOIN sections s ON fr.sid = s.sid
+            WHERE fr.uid = $1
+            ORDER BY fr.created_at DESC
+        `, [uid]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
 // Export so test files can import Express app without starting server.
 module.exports = {
     app,

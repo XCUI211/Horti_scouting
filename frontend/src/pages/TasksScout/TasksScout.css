@@ -1,0 +1,49 @@
+/* Parent container wrapping the list */
+.task-scout-vireo-page-wrapper {
+    padding: 0;
+    background-color: #fff;
+}
+
+.task-scout-vireo-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.task-scout-vireo-location {
+    font-size: 1.05rem;
+    color: #333;
+    font-weight: 400;
+}
+
+.task-scout-vireo-btn-redo {
+    background-color: #6cc033;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 24px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.task-scout-vireo-status-pending {
+    color: #4a90e2;
+    font-size: 0.9rem;
+}
+
+.task-scout-vireo-status-done {
+    color: #6cc033;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.task-scout-vireo-loading,
+.task-scout-vireo-empty {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}

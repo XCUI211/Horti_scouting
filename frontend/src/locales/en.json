@@ -159,6 +159,18 @@
     "NoReports": "No recent reports for this scout"
   },
 
+  "TasksScout": {
+    "Title": "Tasks",
+    "Loading": "Loading your tasks...",
+    "NoReports": "You haven't submitted any reports yet.",
+    "Redo": "Redo",
+    "Done": "Done",
+    "AwaitingApproval": "Awaiting Approval",
+    "StatusApproved": "Done",
+    "StatusRejected": "Redo",
+    "StatusPending": "Awaiting Approval"
+  },
+
   "History": {
     "Title": "Report History"
   },
