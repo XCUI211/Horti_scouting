@@ -29,11 +29,12 @@ const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
         if (data.status === 'success') {
           const statusMap = {};
           data.data.forEach(report => {
-            const currentStatus = statusMap[report.cell_name];
+            const key = report.block_key || report.cell_name;
+            const currentStatus = statusMap[key];
             if (report.status === 'approved') {
-              statusMap[report.cell_name] = 'approved';
+              statusMap[key] = 'approved';
             } else if (report.status === 'pending' && currentStatus !== 'approved') {
-              statusMap[report.cell_name] = 'pending';
+              statusMap[key] = 'pending';
             }
           });
           setCellStatuses(statusMap);
@@ -47,7 +48,14 @@ const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
       for (let r = 0; r < mapData.length; r++) {
         for (let c = 0; c < mapData[r].length; c++) {
           if (mapData[r][c] !== null && String(mapData[r][c]) === String(focusedReport.cell_name)) {
+            const currentBlockKey = `${mapName}::${String(mapData[r][c])}::${r}:${c}`;
+            
+            if (focusedReport.block_key && focusedReport.block_key !== currentBlockKey) {
+              continue;
+            }
+
             const bounds = getMergedBounds(r, c, mapData[r][c]);
+            bounds.block_key = focusedReport.block_key || currentBlockKey;
             setSelectedGroup(bounds);
             setViewingReport(focusedReport);
             return;
@@ -55,13 +63,12 @@ const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
         }
       }
     }
-  }, [focusedReport]);
+  }, [focusedReport, mapName]);
 
   const getMergedBounds = (r, c, label) => {
     const isNull = label === null || label === '';
     let maxR = r; let maxC = c;
     
-    // 计算最大宽度
     while (maxC + 1 < mapData[r].length && 
           (isNull ? (mapData[r][maxC + 1] === null || mapData[r][maxC + 1] === '') 
                   : mapData[r][maxC + 1] === label)) { 
@@ -119,21 +126,26 @@ const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
           );
         } else {
           const isUnclickable = unclickableLabels.includes(bounds.label);
+          const blockKey = `${mapName}::${bounds.label}::${rIdx}:${cIdx}`;
           
           let statusClass = '';
-          if (cellStatuses[bounds.label] === 'pending') statusClass = 'status-pending';
-          if (cellStatuses[bounds.label] === 'approved') statusClass = 'status-approved';
+          const currentStatus = cellStatuses[blockKey] || cellStatuses[bounds.label];
+          if (currentStatus === 'pending') statusClass = 'status-pending';
+          if (currentStatus === 'approved') statusClass = 'status-approved';
+
+          const isSelected = selectedGroup?.block_key === blockKey || 
+                            (!selectedGroup?.block_key && selectedGroup?.label === bounds.label && selectedGroup?.startRow === rIdx && selectedGroup?.startCol === cIdx);
 
           gridElements.push(
             <div
               key={`${rIdx}-${cIdx}`}
-              className={`grid-cell merged-block ${isUnclickable ? 'static-block' : 'clickable-block'} ${selectedGroup?.label === bounds.label ? 'selected' : ''} ${statusClass}`}
+              className={`grid-cell merged-block ${isUnclickable ? 'static-block' : 'clickable-block'} ${isSelected ? 'selected' : ''} ${statusClass}`}
               style={{
                 gridRow: `span ${bounds.height}`,
                 gridColumn: `span ${bounds.width}`
               }}
               onClick={isUnclickable ? null : () => {
-                setSelectedGroup(bounds);
+                setSelectedGroup({ ...bounds, block_key: blockKey });
                 setViewingReport(null);
               }}
             >
