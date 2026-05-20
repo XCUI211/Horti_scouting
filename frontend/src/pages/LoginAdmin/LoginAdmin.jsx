@@ -15,7 +15,7 @@ function LoginAdmin() {
 
     //  use navigate (for back button) to redirect button back to routed main page
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { setUser, logout } = useAuth();  // Uses AuthContext for setting the user and logging out
 
 
@@ -48,6 +48,7 @@ function LoginAdmin() {
 
                 // Saving the userID via AuthContext (which automatically links to localStorage)
                 setUser(user);
+                i18n.changeLanguage(user.language || "nl");
                 console.log("Success:", response.data);
 
                 // Storing user info in localStorage for other pages

@@ -232,6 +232,12 @@
     "AdminDashboard": "Admin Dashboard"
   },
 
+  "MapViewScouts": {
+    "Maps": "Maps",
+    "Loading": "Loading maps...",
+    "NoMaps": "No maps assigned"
+  },
+
   "AdminDashboard": {
     "Pending": "Pending Scout Reports",
     "Load": "Loading reports...",

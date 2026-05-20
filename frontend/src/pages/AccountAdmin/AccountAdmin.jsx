@@ -9,18 +9,21 @@ import { useAuth } from "../../context/AuthContext";
 const AccountAdmin = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState("nl");
+  const { user, setUser, logout } = useAuth();
+  const [selectedLanguage, setSelectedLanguage] = useState(user?.language || "nl");
   const [password, setPassword] = useState("");
   const { t, i18n } = useTranslation(); //i18n for local language
-  const { user, setUser, logout } = useAuth();
 
   useEffect(() => {
     if (user && user.uid) {
       axios.get(`http://localhost:5000/api/users/${user.uid}`)
         .then(res => {
+          const lang = res.data.language || "nl";
           setUserData(res.data);
-          setSelectedLanguage(res.data.language || "nl");
-          i18n.changeLanguage(res.data.language || "nl");
+          setSelectedLanguage(lang);
+          if (i18n.language !== lang) {
+            i18n.changeLanguage(lang);
+          }
         })
         .catch(err => console.error("Error fetching user:", err));
     } else {
@@ -97,8 +100,8 @@ const AccountAdmin = () => {
                 <option value="nl">Nederlands</option>
               </select>
             </div>
-            
           </div>
+          
         </section>
 
         {/* Manage scout accounts */}

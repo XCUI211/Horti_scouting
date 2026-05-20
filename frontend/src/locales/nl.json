@@ -233,6 +233,12 @@
     "AdminDashboard": "Admin Dashboard"
   },
 
+  "MapViewScouts": {
+    "Maps": "Plattegronden",
+    "Loading": "Plattegronden laden...",
+    "NoMaps": "Geen Plattegronden toegekent"
+  },
+
   "AdminDashboard": {
     "Pending": "Binnenkomende Scout rapporten",
     "Load": "Rapporten laden...",
@@ -369,5 +375,4 @@
     "DoorTo1600": "Deur naar 1600",
     "Door": "Deur"
   }
-  
 }
