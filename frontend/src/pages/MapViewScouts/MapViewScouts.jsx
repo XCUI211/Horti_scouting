@@ -49,7 +49,7 @@ function MapViewScouts() {
       axios.get(`http://localhost:5000/api/users/${user.uid}/maps`)
     ])
       .then(([allMapsRes, assignedRes]) => {
-        const assignedMids = assignedRes.data.map(r => r.mid);
+        const assignedMids = assignedRes.data;
 
         const nameToMid = {};
         allMapsRes.data.forEach(m => { nameToMid[m.name] = m.mid; });
@@ -82,7 +82,7 @@ function MapViewScouts() {
   const CurrentMap = assignedMaps[currentMap];
 
   return (
-    <ScoutLayout title={`${t('MapviewScouts.Maps')}: ${currentMap}`}>
+    <ScoutLayout title={`${t("MapViewScouts.Maps")}: ${currentMap}`}>
       <div className="mapview-toolbar">
         <div className="mapview-tabs">
 
@@ -91,7 +91,7 @@ function MapViewScouts() {
             className="mapview-tab active"
             onClick={() => navigate('/scout_maps')}
           >
-            {t("MapviewScouts.Maps")}
+            {t("MapViewScouts.Maps")}
           </button>
         </div>
         {assignedOrder.length > 1 && (

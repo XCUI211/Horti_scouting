@@ -328,50 +328,54 @@
     "SubmitReport": "Submit Report"
   },
 
-  "Rijsenhout": {
-    "Potting": "Potting",
-    "Square": "Pick-up square",
-    "Stockroom": "Stockroom",
-    "Greenhouse": "Greenhouse",
-    "Header": "Rijsenhout - Scouting Map",
-    "MobileHint": "Scroll to move the map • Tap a section to report"
+  "Comment": {
+    "In dutch here" : "Could be changed if we want the maps in english"
   },
-  
+
+  "Rijsenhout": {
+    "Potting": "Oppotruimte",
+    "Square": "Raap plein",
+    "Stockroom": "Magazijn",
+    "Greenhouse": "Kas",
+    "Header": "Rijsenhout - Scouting Plattegrond",
+    "MobileHint": "Scroll om de plattegrond te bewegen • klik een sectie om te rapporteren"
+  },
+
   "hw53": {
-    "Header": "HW 53 - Scouting Map",
-    "WaterRoom": "Water room",
-    "ShedBoilerHouse": "Shed / boiler room",
-    "FertilizerUnit": "Fertilizer Unit"
+    "Header": "HW 53 - Scouting Plattegrond",
+    "WaterRoom": "Water ruimte",
+    "ShedBoilerHouse": "Schuur / Ketelhuis",
+    "FertilizerUnit": "Kunstmest Unit"
   },
 
   "hw1012": {
-    "Header": "HW 10.12 - Scouting Map",
-    "TransportBelt": "Transport belt",
+    "Header": "HW 10.12 - Scouting Plattegrond",
+    "TransportBelt": "Transport baan",
     "Transport": "Transport",
-    "DoorToGreenhouse2": "Door to greenhouse 2",
-    "DoorToGreenhouse3": "Door to greenhouse 3",
-    "Pyramids": "Pyramids",
-    "Trays": "Trays"
+    "DoorToGreenhouse2": "Deur naar kas 2",
+    "DoorToGreenhouse3": "Deur naar kas 3",
+    "Pyramids": "Pyramides",
+    "Trays": "Bakken"
   },
 
   "hw1015": {
-    "Header": "HW 10.15 - Scouting Map",
-    "MobileHint": "Drag your finger to move the map • Tap a section to report",
-    "Shed": "Shed",
-    "DoorTo1600": "Door to 1600"
+    "Header": "HW 10.15 - Scouting Plattegrond",
+    "MobileHint": "Scroll om de plattegrond te bewegen • klik een sectie om te rapporteren",
+    "Shed": "Schuur",
+    "DoorTo1600": "Deur naar 1600"
   },
 
   "hw1016": {
-    "Header": "HW10.16 - Scouting Map",
-    "MobileHint": "Drag your finger to move the map • Tap a section to report",
-    "DoorTo1500": "Door to 1500",
-    "DoorTo1700": "Door to 1700"
+    "Header": "HW10.16 - Scouting Plattegrond",
+    "MobileHint": "Scroll om de plattegrond te bewegen • klik een sectie om te rapporteren",
+    "DoorTo1500": "Deur naar 1500",
+    "DoorTo1700": "Deur naar 1700"
   },
 
   "hw1017": {
-    "Header": "HW10.17 - Scouting Map",
-    "MobileHint": "Drag your finger to move the map • Tap a section to report",
-    "DoorTo1600": "Door to 1600",
-    "Door": "Door"
+    "Header": "HW10.17 - Scouting Plattegrond",
+    "MobileHint": "Scroll om de plattegrond te bewegen • klik een sectie om te rapporteren",
+    "DoorTo1600": "Deur naar 1600",
+    "Door": "Deur"
   }
 }
