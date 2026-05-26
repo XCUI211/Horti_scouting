@@ -13,7 +13,7 @@ function LoginScout() {
     const [error, setError] = useState('');  //error to be shown to the user through interface (e.g.wrong password)
 
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { setUser, logout } = useAuth();  // Uses AuthContext for setting the user and logging out
 
     // Logging the user out if they hit back arrow right after logging in
@@ -45,6 +45,7 @@ function LoginScout() {
 
                 // Saving the userID via AuthContext (which automatically links to localStorage)
                 setUser(user);
+                i18n.changeLanguage(user.language || "nl");
                 console.log("Success:", response.data);
 
                 // Deciding where to send them based on the flag

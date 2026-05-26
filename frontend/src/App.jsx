@@ -13,32 +13,43 @@ import ForcePasswordChange from "./pages/ForcePasswordChange/ForcePasswordChange
 import ScoutPasswordReset from "./pages/ScoutPasswordReset/ScoutPasswordReset";
 import ScoutMapAssignment from "./pages/ScoutMapAssignment/ScoutMapAssignment";
 import MapView from "./pages/MapView/MapView";
+import MapViewScouts from "./pages/MapViewScouts/MapViewScouts";
 import AdminDashboardPage from "./pages/AdminDashboard/AdminDashboardPage";
 import History from "./pages/History/History.jsx";
 import ScoutOverview from "./pages/ScoutOverview/ScoutOverview";
 import TasksScout from "./pages/TasksScout/TasksScout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login_admin" element={<LoginAdmin />} />
-        <Route path="/admin_home" element={<HomeAdmin />} />
-        <Route path="/scout_home" element={<HomeScout />} />
-        <Route path="/login_scout" element={<LoginScout />} />
-        <Route path="/create" element={<CreateAccount />} />
-        <Route path="/account_management_admin" element={<AccountAdmin />} />
-        <Route path="/account_management_scout" element={<AccountScout />} />
-        <Route path="/change_password" element={<PasswordChange />} />
-        <Route path="/change_email" element={<EmailChange />} />
-        <Route path="/reset_scout_password" element={<ScoutPasswordReset />} />
-        <Route path="/force_password_change" element={<ForcePasswordChange />} />
-        <Route path="/scout_maps_assign" element={<ScoutMapAssignment />} />
-        <Route path="/maps" element={<MapView />} />
-        <Route path="/maps/admin_dashboard" element={<AdminDashboardPage />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/scout_overview" element={<ScoutOverview />} />
-        <Route path="/tasks" element={<TasksScout />} />
+      {/* Public routes: login landing + role-specific login pages */}
+      <Route path="/" element={<Login />} />
+      <Route path="/login_admin" element={<LoginAdmin />} />
+      <Route path="/login_scout" element={<LoginScout />} />
+
+      {/* Admin-only routes */}
+      <Route path="/admin_home" element={<ProtectedRoute role="admin"><HomeAdmin /></ProtectedRoute>} />
+      <Route path="/account_management_admin" element={<ProtectedRoute role="admin"><AccountAdmin /></ProtectedRoute>} />
+      <Route path="/create" element={<ProtectedRoute role="admin"><CreateAccount /></ProtectedRoute>} />
+      <Route path="/reset_scout_password" element={<ProtectedRoute role="admin"><ScoutPasswordReset /></ProtectedRoute>} />
+      <Route path="/scout_maps_assign" element={<ProtectedRoute role="admin"><ScoutMapAssignment /></ProtectedRoute>} />
+      <Route path="/maps/admin_dashboard" element={<ProtectedRoute role="admin"><AdminDashboardPage /></ProtectedRoute>} />
+      <Route path="/history" element={<ProtectedRoute role="admin"><History /></ProtectedRoute>} />
+      <Route path="/scout_overview" element={<ProtectedRoute role="admin"><ScoutOverview /></ProtectedRoute>} />
+      <Route path="/maps" element={<ProtectedRoute role="admin"><MapView /></ProtectedRoute>} />
+
+      {/* Scout-only routes */}
+      <Route path="/scout_home" element={<ProtectedRoute role="scout"><HomeScout /></ProtectedRoute>} />
+      <Route path="/account_management_scout" element={<ProtectedRoute role="scout"><AccountScout /></ProtectedRoute>} />
+      <Route path="/tasks" element={<ProtectedRoute role="scout"><TasksScout /></ProtectedRoute>} />
+      <Route path="/scout_maps" element={<ProtectedRoute role="scout"><MapViewScouts /></ProtectedRoute>} />
+
+      {/* Any authenticated user (either role) */}
+      <Route path="/change_password" element={<ProtectedRoute><PasswordChange /></ProtectedRoute>} />
+      <Route path="/change_email" element={<ProtectedRoute><EmailChange /></ProtectedRoute>} />
+      <Route path="/force_password_change" element={<ProtectedRoute><ForcePasswordChange /></ProtectedRoute>} />
+      
     </Routes>
   );
 }

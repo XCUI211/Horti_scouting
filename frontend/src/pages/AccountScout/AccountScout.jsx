@@ -9,23 +9,50 @@ import { useAuth } from "../../context/AuthContext";
 const AccountScout = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
-  const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { user, setUser, logout } = useAuth();
+  const [selectedLanguage, setSelectedLanguage] = useState(user?.language || "nl");
 
   useEffect(() => {
     if (user && user.uid) {
-      axios.get(`http://localhost:5000/api/users/${user.uid}`)  // sends a request for specific user info
-        .then(res => setUserData(res.data))  // saves user data
+      axios.get(`http://localhost:5000/api/users/${user.uid}`)
+        .then(res => {
+          const lang = res.data.language || "nl";
+          setUserData(res.data);
+          setSelectedLanguage(lang);
+          if (i18n.language !== lang) {
+            i18n.changeLanguage(lang);
+          }
+        })
         .catch(err => console.error("Error fetching user:", err));
     } else {
-      navigate("/login_scout");  // prevents unauthorized access if no user logged in
+      navigate("/login_scout");
     }
-  }, [user, navigate]);
+  }, [user, navigate, i18n]);
 
   // Log out function
   const handleLogout = () => {
     logout();  // removes the user info from the browser
     navigate('/');  // navigates back to the first app page
+  };
+
+  const handleLanguageChange = async (e) => {
+    const newLanguage = e.target.value;
+    setSelectedLanguage(newLanguage);
+
+    try {
+      await axios.post('http://localhost:5000/api/users/change-language', {
+        uid: userData.uid,
+        newLanguage: newLanguage
+      });
+      i18n.changeLanguage(newLanguage);
+
+      const updatedUser = { ...user, language: newLanguage };
+      setUser(updatedUser);
+
+    } catch (err) {
+      console.error("Error updating language:", err);
+    }
   };
 
   return (
@@ -66,9 +93,15 @@ const AccountScout = () => {
           <div className="info-row language-row">
             <div className="language-top">
               <span className="label">{t("AccountScout.Language")}</span>
-              <span className="value">{userData?.language}</span>
+              <select
+                className="grey-pill-btn align-right"
+                value={selectedLanguage}
+                onChange={handleLanguageChange}
+              >
+                <option value="en">English</option>
+                <option value="nl">Nederlands</option>
+              </select>
             </div>
-            <button className="grey-pill-btn align-right" onClick={() => navigate("/change_language")}>{t("AccountScout.ChangeLanguage")}</button> {/* Change to dropdown, dont know how to change into db without adding page like email */}
           </div>
 
         </section>
