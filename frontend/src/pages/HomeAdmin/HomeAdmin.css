@@ -8,28 +8,40 @@
   min-height: 100%; /* Ensures it fills full vertical screen on mobile if empty */
 }
 
-/* Empty state styling for the dashboard */
-.admin-home-content .empty-state {
-  text-align: center;
-  margin-top: 60px;
-  color: #888;
-  background-color: #ffffff;
-  padding: 30px;
+/* Clear clickable shortcut cards */
+.admin-shortcut-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 24px 32px;
   border-radius: 12px;
-  width: 90%;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.admin-home-content .empty-state p {
+/* Distinct hover feedback showing interactivity */
+.admin-shortcut-card:hover {
+  background-color: #f0f7ed; /* Soft brand green tint */
+  border-color: #57b021; /* Active accent border color */
+  box-shadow: 0 6px 16px rgba(87, 176, 33, 0.1);
+}
+
+.admin-shortcut-card .shortcut-title {
+  color: #152974; /* Standard brand dark blue font color */
   font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: #333;
+  font-weight: 600;
+  transition: color 0.2s ease;
 }
 
-.admin-home-content .empty-state span {
-  font-size: 14px;
-  display: block;
+.admin-shortcut-card:hover .shortcut-title {
+  color: #2e7d32; /* Shifting title font color upon hover activation */
+  text-decoration: underline;
 }
 
 /* Making the design layout responsive to different screens */
@@ -46,23 +58,15 @@
     background-color: #ffffff !important;
   }
 
-  .admin-home-content .empty-state {
-    width: 100% !important;
-    /* Keeps a clean, un-stretched text card centered perfectly in the screen */
-    max-width: 650px !important;
-    margin: 40px auto 0 auto !important;
-    border: 1px solid #e5e7eb !important; /* Matches account panel borders */
-  }
-
-  /* OPTIONAL GRID LAYER: If you add dashboard layout elements later */
+  /* Two-column layout on desktop to balance widescreen layout proportions */
   .admin-home-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 600px)) !important;
+    grid-template-columns: repeat(2, minmax(280px, 400px)) !important;
     justify-content: center !important;
-    gap: 30px !important;
+    gap: 24px !important;
     align-items: start !important;
     width: 100% !important;
-    max-width: 1250px !important; /* Standard cap to match account.css */
-    margin: 0 auto !important;
+    max-width: 850px !important;
+    margin: 60px auto 0 auto !important; /* Pushes the panels down slightly below layout header navs */
   }
 }
