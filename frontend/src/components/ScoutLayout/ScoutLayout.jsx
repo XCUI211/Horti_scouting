@@ -32,6 +32,20 @@ const ScoutLayout = ({ children, title }) => {
             <img src="/logo.png" alt="Vireo" className="header-logo" />
             <h1 className="header-title">{title}</h1>
           </div>
+
+          {/* Inline desktop navigation header items */}
+          <div className="desktop-nav-links">
+            <button className={`desktop-nav-item ${isActive('/scout_home') ? 'active' : ''}`} onClick={() => navigate('/scout_home')}>
+              {t("ScoutLayout.Home")}
+            </button>
+            <button className={`desktop-nav-item ${isActive('/maps') ? 'active' : ''}`} onClick={() => navigate('/maps')}>
+              {t("ScoutLayout.Maps")}
+            </button>
+            <button className={`desktop-nav-item ${isActive('/tasks') ? 'active' : ''}`} onClick={() => navigate('/tasks')}>
+              {t("ScoutLayout.Tasks")}
+            </button>
+          </div>
+
           {/* Profile Button - highlighted green only if on Account page */}
           <button
             className={`profile-btn ${isActive('/account_management_scout') ? 'active-profile' : ''}`}
@@ -56,10 +70,10 @@ const ScoutLayout = ({ children, title }) => {
             <MapPin size={22} />
             <span>{t("ScoutLayout.Maps")}</span>
           </button>
-{/*           <button className={`nav-item ${isActive('/notifications_scout') ? 'active' : ''}`} onClick={() => navigate('/notifications_scout')}> */}
-{/*             <Bell size={22} /> */}
-{/*             <span>{t("ScoutLayout.Notifications")}</span> */}
-{/*           </button> */}
+{/* <button className={`nav-item ${isActive('/notifications_scout') ? 'active' : ''}`} onClick={() => navigate('/notifications_scout')}> */}
+{/* <Bell size={22} /> */}
+{/* <span>{t("ScoutLayout.Notifications")}</span> */}
+{/* </button> */}
           <button className={`nav-item ${isActive('/tasks') ? 'active' : ''}`} onClick={() => navigate('/tasks')}>
             <ClipboardList size={22} />
             <span>{t("ScoutLayout.Tasks")}</span>

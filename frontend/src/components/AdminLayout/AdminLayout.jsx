@@ -24,6 +24,26 @@ const AdminLayout = ({ children, title }) => {
             <img src="/logo.png" alt="Vireo" className="header-logo" />
             <h1 className="header-title">{title}</h1>
           </div>
+
+          {/* Desktop/Tablet Inline Navigation Links */}
+          <div className="desktop-nav-links">
+            <button className={`desktop-nav-item ${isActive('/admin_home') ? 'active' : ''}`} onClick={() => navigate('/admin_home')}>
+              <span>{t("AdminLayout.Home")}</span>
+            </button>
+            <button className={`desktop-nav-item ${isActive('/maps') ? 'active' : ''}`} onClick={() => navigate('/maps')}>
+              <span>{t("AdminLayout.Maps")}</span>
+            </button>
+            <button className={`desktop-nav-item ${isActive('/reports_admin') ? 'active' : ''}`} onClick={() => navigate('/reports_admin')}>
+              <span>{t("AdminLayout.Reports")}</span>
+            </button>
+            <button className={`desktop-nav-item ${isActive('/scout_overview') ? 'active' : ''}`} onClick={() => navigate('/scout_overview')}>
+              <span>{t("AdminLayout.Scouts")}</span>
+            </button>
+            <button className={`desktop-nav-item ${isActive('/history') ? 'active' : ''}`} onClick={() => navigate('/history')}>
+              <span>{t("AdminLayout.History")}</span>
+            </button>
+          </div>
+
           {/* Profile Button - highlighted green only if on Account page */}
           <button
             className={`profile-btn ${isActive('/account_management_admin') ? 'active-profile' : ''}`}

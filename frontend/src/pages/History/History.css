@@ -1,5 +1,5 @@
-/* Home-specific content styling */
-.admin-home-content {
+/* Page content styling */
+.admin-plant-history-content {
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -7,8 +7,7 @@
   width: 100%;
 }
 
-/* Empty state styling for the dashboard */
-.admin-home-content .empty-state {
+.admin-plant-history-content .empty-state {
   text-align: center;
   margin-top: 60px;
   color: #888;
@@ -20,14 +19,14 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.admin-home-content .empty-state p {
+.admin-plant-history-content .empty-state p {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 5px;
   color: #333;
 }
 
-.admin-home-content .empty-state span {
+.admin-plant-history-content .empty-state span {
   font-size: 14px;
   display: block;
 }

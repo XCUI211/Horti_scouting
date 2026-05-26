@@ -103,7 +103,7 @@
   width: fit-content;
 }
 
-.account-container .green-pill-btn:hover {
+.green-pill-btn:hover {
   opacity: 0.9;
 }
 
@@ -122,4 +122,85 @@
 
 .account-container .temp-logout:hover {
   background-color: #fff1f1;
+}
+
+/* Making the design layout responsive to different screens */
+
+/* for phone */
+.account-sections-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* for wider sizes */
+@media (min-width: 768px) {
+  .account-container {
+    width: 100vw !important;  /* 100 of viewport width */
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 30px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* Centers the inner child grids horizontally on page */
+  }
+
+  /* Grid layout container dynamically shifts layout styles */
+  .account-sections-grid {
+    display: grid !important;
+    /* Forces the grid columns to only take up what they actually need up to 600px each */
+    grid-template-columns: repeat(auto-fit, minmax(350px, 600px)) !important;
+    justify-content: center !important; /* Centers the column tracks within the container area */
+    gap: 30px !important;
+    align-items: start !important;
+    width: 100% !important;
+    max-width: 1250px !important; /* Standard layout cap for dual-column widescreen dashboard view */
+    margin: 0 auto !important;
+  }
+
+  /* Force individual layout cards to enforce a strict max-width limit */
+  .account-container .account-section {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04) !important;
+    background-color: #ffffff !important;
+    overflow: hidden !important;
+    margin-bottom: 0 !important;
+    width: 100% !important;
+    max-width: 650px !important; /* Hard constraint stops single-card panels from stretching out layout */
+  }
+
+  .account-container .section-title {
+    border-top: none !important;
+    font-size: 20px !important;
+    padding: 18px !important;
+  }
+
+  /* Corrects layout stretching for the different email and language layout sections */
+  .account-container .email-row,
+  .account-container .language-row {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 20px !important;
+  }
+
+  .account-container .email-top,
+  .account-container .language-top {
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    gap: 15px !important;
+    align-items: center !important;
+  }
+
+  .account-container .align-right {
+    align-self: center !important;
+  }
+
+  .account-container .temp-logout {
+    margin: 40px auto 0 auto !important;
+    width: fit-content !important;
+    padding: 12px 60px !important;
+  }
 }

@@ -74,3 +74,44 @@
     font-style: italic;
     padding: 10px 0;
 }
+
+/* Making the design layout responsive to different screens */
+@media (min-width: 768px) {
+    .scout-overview-page-wrapper {
+        width: 100vw !important;  /* Forces wrapper to span full viewport edge-to-edge */
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 30px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important; /* Horizontally centers the cards-list grid track */
+        min-height: 100% !important;
+        background-color: transparent !important;
+    }
+
+    /* Grid layout container dynamically shifts layout styles */
+    .scout-overview-cards-list {
+        display: grid !important;
+        /* Dynamic columns: fits cards up to 600px each, mirroring account-sections-grid */
+        grid-template-columns: repeat(auto-fit, minmax(350px, 600px)) !important;
+        justify-content: center !important; /* Centers columns within the 1250px cap window */
+        gap: 30px !important;               /* Matches spacing look of previous views */
+        align-items: start !important;
+        width: 100% !important;
+        max-width: 1250px !important;       /* Hard cap stops wide grid stretching on large monitors */
+        box-sizing: border-box !important;
+    }
+
+    /* Force individual layout cards to enforce a strict max-width limit */
+    .scout-overview-card-item {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important; /* Smooth curvature style to match account page dashboard layout */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04) !important; /* Matches account.css styling precisely */
+        background-color: #ffffff !important;
+        overflow: hidden !important;
+        width: 100% !important;
+        max-width: 650px !important;    /* Restricts single standalone card scaling limits */
+        box-sizing: border-box !important;
+    }
+}

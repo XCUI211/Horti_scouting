@@ -58,36 +58,42 @@ const AccountAdmin = () => {
     <AdminLayout title={t("AccountAdmin.YourAccount")}>
       <div className="account-container">
 
-        {/* Manage your account */}
-        <section className="account-section">
-          <h2 className="section-title">{t("AccountAdmin.manYour")}</h2>
+        {/* This wrapper groups the sections together to form a side-by-side layout on tablets and laptops */}
+        <div className="account-sections-grid">
 
-          <div className="info-row">
-            <span className="label">{t("AccountAdmin.Username")}:</span>
-            <span className="value">{userData?.username || "loading..."}</span>
-          </div>
+          {/* Manage your account */}
+          <section className="account-section">
+            <h2 className="section-title">{t("AccountAdmin.manYour")}</h2>
 
-          <div className="info-row">
-            <span className="label">{t("AccountAdmin.Role")}:</span>
-            <span className="value">{userData?.role || "loading..."}</span>
-          </div>
-
-          <div className="info-row stackable">
-            <span className="label">{t("AccountAdmin.Password")}:</span>
-            <button className="grey-pill-btn" onClick={() => navigate("/change_password")}>{t("AccountAdmin.ChangePassword")}</button>
-          </div>
-
-          <div className="info-row email-row">
-            <div className="email-top">
-              <span className="label">{t("AccountAdmin.Email")}</span>
-              <span className="value">{userData?.email || "not set"}</span>
+            <div className="info-row">
+              <span className="label">{t("AccountAdmin.Username")}:</span>
+              <span className="value">{userData?.username || "loading..."}</span>
             </div>
-            <button className="grey-pill-btn align-right" onClick={() => navigate("/change_email")}>{t("AccountAdmin.ChangeEmail")}</button>
-          </div>
 
-          <div className="info-row language-row">
-            <div className="language-top">
-              <span className="label">{t("AccountAdmin.Language")}</span>
+            <div className="info-row">
+              <span className="label">{t("AccountAdmin.Role")}:</span>
+              <span className="value">{userData?.role || "loading..."}</span>
+            </div>
+
+            <div className="info-row stackable">
+              <span className="label">{t("AccountAdmin.Password")}:</span>
+              <button className="grey-pill-btn" onClick={() => navigate("/change_password")}>{t("AccountAdmin.ChangePassword")}</button>
+            </div>
+
+            <div className="info-row email-row">
+              <div className="email-top">
+                <span className="label">{t("AccountAdmin.Email")}</span>
+                <span className="value">{userData?.email || "not set"}</span>
+              </div>
+              <button className="grey-pill-btn align-right" onClick={() => navigate("/change_email")}>{t("AccountAdmin.ChangeEmail")}</button>
+            </div>
+
+            <div className="info-row language-row">
+              <div className="language-top">
+                <span className="label">{t("AccountAdmin.Language")}</span>
+              </div> {/* <-- Close the top div early so it only holds the label */}
+
+              {/* Now the dropdown is a direct child and will be pushed to the right! */}
               <select
                 className="grey-pill-btn align-right"
                 value={selectedLanguage}
@@ -97,35 +103,35 @@ const AccountAdmin = () => {
                 <option value="nl">Nederlands</option>
               </select>
             </div>
-            
-          </div>
-        </section>
+          </section>
 
-        {/* Manage scout accounts */}
-        <section className="account-section">
-          <h2 className="section-title">{t("AccountAdmin.manScout")}</h2>
+          {/* Manage scout accounts */}
+          <section className="account-section">
+            <h2 className="section-title">{t("AccountAdmin.manScout")}</h2>
 
-          <div className="info-row stackable">
-            <span className="label">{t("AccountAdmin.newScout")}:</span>
-            <button className="green-pill-btn" onClick={() => navigate("/create")}>{t("AccountAdmin.newScoutAcc")}</button>
-          </div>
+            <div className="info-row stackable">
+              <span className="label">{t("AccountAdmin.newScout")}:</span>
+              <button className="green-pill-btn" onClick={() => navigate("/create")}>{t("AccountAdmin.newScoutAcc")}</button>
+            </div>
 
-          <div className="info-row stackable">
-            <span className="label">{t("AccountAdmin.EditScoutInfo")}</span>
-            <button className="grey-pill-btn" onClick={() => navigate("/scout_maps_assign")}>{t("AccountAdmin.EditScout")}</button>
-          </div>
+            <div className="info-row stackable">
+              <span className="label">{t("AccountAdmin.EditScoutInfo")}</span>
+              <button className="grey-pill-btn" onClick={() => navigate("/scout_maps_assign")}>{t("AccountAdmin.EditScout")}</button>
+            </div>
 
-          <div className="info-row stackable">
-            <span className="label">{t("AccountAdmin.ResPass")}</span>
-            <button className="grey-pill-btn" onClick={() => navigate("/reset_scout_password")}>{t("AccountAdmin.ResScoutPass")}</button>
-          </div>
-        </section>
+            <div className="info-row stackable">
+              <span className="label">{t("AccountAdmin.ResPass")}</span>
+              <button className="grey-pill-btn" onClick={() => navigate("/reset_scout_password")}>{t("AccountAdmin.ResScoutPass")}</button>
+            </div>
+          </section>
+
+        </div>
 
         {/* Log out */}
         <button className="temp-logout" onClick={handleLogout}>
           {t("AccountAdmin.LogOut")}
         </button>
-        
+
       </div>
     </AdminLayout>
   );
