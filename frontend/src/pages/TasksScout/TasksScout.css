@@ -1,6 +1,8 @@
 .task-scout-vireo-page-wrapper {
-    background-color: #fff;
+    background-color: #ffffff; /* Matched to the white background of previous dashboard pages */
     width: 100%;
+    min-height: 100vh; /* Ensures it fills full vertical screen on mobile if empty */
+    box-sizing: border-box;
 }
 
 .task-scout-vireo-item-group {
@@ -84,4 +86,43 @@
     padding: 50px 20px;
     color: #999;
     font-size: 0.95rem;
+}
+
+/* Making the design layout responsive to different screens */
+@media (min-width: 768px) {
+    .task-scout-vireo-page-wrapper {
+        width: 100vw !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 30px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+
+        /* FIX 1: Change from 'center' to 'stretch' so children expand horizontally */
+        align-items: stretch !important;
+        background-color: #ffffff !important;
+    }
+
+    .task-scout-vireo-item-group {
+        /* FIX 2: Force full width utilization with a larger, healthier max-width cap */
+        width: 100% !important;
+        max-width: 900px !important;
+
+        /* Keeps the wider card perfectly centered on the screen */
+        margin: 40px auto 0 auto !important;
+
+        border: 1px solid #e5e7eb !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04) !important;
+        background-color: #ffffff !important;
+        overflow: hidden !important;
+    }
+
+    /* Expanding the card contents cleanly for wider views */
+    .task-scout-vireo-row {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 24px 30px !important;
+    }
 }

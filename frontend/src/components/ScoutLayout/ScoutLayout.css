@@ -32,7 +32,6 @@
   display: none;
 }
 
-/* Applies the phony look on Desktop/Tablets (good while we're developing phone view first) */
 @media (min-width: 768px) {  /* only gets triggered for big screens */
   .scout-mobile-wrapper .pwa-shell {
     width: 100% !important;
