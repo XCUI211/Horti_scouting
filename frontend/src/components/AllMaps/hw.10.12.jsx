@@ -2,60 +2,50 @@ import React, { useState, useEffect } from 'react';
 import mapData from './hw10.12.json'; 
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
-import { useTranslation } from "react-i18next";
 
 const HW1012Map = ({ focusedReport }) => {
   const [selectedCell, setSelectedCell] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
 
-  const { t, i18n } = useTranslation(); //i18n for local language
-
   const mapId = "HW 10.12";
 
   const staticCells = [
-    "Tranportbaan",    // 原表里就是这个拼写
+    "Tranportbaan",    
     "Transport",
     "Deur naar kas 2",
     "Deur naar kas 3",
     "1100",
     "Piramides",
     "Bakken"
-    // 注: F1/F2/G1/G3 等特殊编号格子目前保留为可点击。
-    // 如果这些是标注而非可 scout 的区域, 把它们加到这里。
   ];
 
-  const getDisplayLabel = (label) => {
-    const translations = {
-      "Tranportbaan": t("hw1012.TransportBelt"),
-      "Transport": t("hw1012.Transport"),
-      "Deur naar kas 2": t("hw1012.DoorToGreenhouse2"),
-      "Deur naar kas 3": t("hw1012.DoorToGreenhouse3"),
-      "Piramides": t("hw1012.Pyramids"),
-      "Bakken": t("hw1012.Trays"),
-    };
-
-    return translations[label] || label;
-  };
-
+  // 1. 获取状态：支持 block_key 精准匹配
   useEffect(() => {
-    fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent(mapId)}`)
+    fetch(`http://localhost:8000/api/reports?map_id=${encodeURIComponent(mapId)}`)
       .then(res => res.json())
       .then(data => {
         if (data.status !== 'success') return;
         const statuses = {};
         data.data.forEach(report => {
-          if (report.status === 'approved' || !statuses[report.cell_name]) {
-            statuses[report.cell_name] = report.status;
+          const key = report.block_key || report.cell_name;
+          const currentStatus = statuses[key];
+
+          if (report.status === 'approved') {
+            statuses[key] = 'status-approved';
+          } else if (report.status === 'pending' && currentStatus !== 'status-approved') {
+            statuses[key] = 'status-pending';
           }
         });
         setCellStatuses(statuses);
       });
-  }, []);
+  }, [mapId]);
 
   useEffect(() => {
     if (focusedReport) {
-      // focusedReport 来自后端, 字段是 cell_name; modal 用的是 label
-      setSelectedCell({ label: focusedReport.cell_name });
+      setSelectedCell({ 
+        label: focusedReport.cell_name,
+        block_key: focusedReport.block_key 
+      });
     }
   }, [focusedReport]);
 
@@ -83,20 +73,28 @@ const HW1012Map = ({ focusedReport }) => {
 
         const labelStr = String(label);
         const isStatic = staticCells.includes(labelStr);
-        const status = cellStatuses[labelStr];
+        
+        const blockKey = `${mapId}::${labelStr}::${r}:${c}`;
+        const statusClass = cellStatuses[blockKey] || cellStatuses[labelStr] || '';
+
+        const isSelected = selectedCell?.block_key === blockKey || 
+                          (!selectedCell?.block_key && selectedCell?.label === labelStr);
 
         cells.push(
           <div
             key={`${r}-${c}`}
-            className={`grid-cell merged-block ${isStatic ? 'static-block' : 'clickable-block'} ${status || ''} ${selectedCell?.label === labelStr ? 'selected' : ''}`}
+            className={`grid-cell merged-block ${isStatic ? 'static-block' : 'clickable-block'} ${statusClass} ${isSelected ? 'selected' : ''}`}
             style={{ 
               gridRow: `span ${height}`, 
               gridColumn: `span ${width}`,
               backgroundColor: typeof label === 'number' && !isStatic ? '#e8f5e9' : undefined 
             }}
-            onClick={isStatic ? null : () => setSelectedCell({ label: labelStr })}
+            onClick={isStatic ? null : () => setSelectedCell({ 
+              label: labelStr,
+              block_key: blockKey 
+            })}
           >
-             {getDisplayLabel(labelStr)}
+            {labelStr}
           </div>
         );
       });
@@ -107,13 +105,12 @@ const HW1012Map = ({ focusedReport }) => {
 
   return (
     <div className="map-container">
-      <h2>{t("hw1012.Header")}</h2>
+      <h2>HW 10.12 - Scouting Map</h2>
       <div
         className="merged-grid-container"
         style={{ 
           display: 'grid',
-          gridTemplateColumns: `repeat(${mapData[0].length}, minmax(32px, 1fr))`,
-          gridAutoRows: 'minmax(50px, auto)'
+          gridTemplateColumns: `repeat(${mapData[0].length}, minmax(40px, 1fr))` 
         }}
       >
         {renderGrid()}

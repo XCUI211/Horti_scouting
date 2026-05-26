@@ -14,9 +14,21 @@ MAP_CONFIG = [{"map_name": "Rijsenhout",
                "json_file": "hw53.json",
                "exclude": ["HW 53", "water ruimte", "schuur/ketelhuis", "wkk/kunstmest unit", "21"]},
 
+              {"map_name": "HW 10.11",
+               "json_file": "hw10.11.json",
+               "exclude": []},
+
               {"map_name": "HW 10.12",
                "json_file": "hw10.12.json",
                "exclude": ["Tranportbaan", "Transport", "Deur naar kas 2", "Deur naar kas 3", "1100", "Piramides", "Bakken"]},
+
+              {"map_name": "HW 10.13",
+               "json_file": "hw10.13.json",
+               "exclude": []},
+
+              {"map_name": "HW 10.14",
+               "json_file": "hw10.14.json",
+               "exclude": []},
 
               {"map_name": "HW 10.15",
                "json_file": "hw10.15.json",

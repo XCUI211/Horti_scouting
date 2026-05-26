@@ -2,29 +2,30 @@ import React, { useState, useEffect } from 'react';
 import mapData from './hw.15.json';
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
-import { useTranslation } from "react-i18next";
 
 const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
 
-  const { t, i18n } = useTranslation(); //i18n for local language
-
-  const isClickable = (labelStr) => /^\d+$/.test(labelStr.trim());
+  const isClickable = (labelStr) => {
+    const str = labelStr.trim();
+    return /^\d+(\.\d+)?$/.test(str) || /^[A-Z][^a-zA-Z]*$/.test(str);
+  };
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/reports?map_id=${mapName}`)
+    fetch(`http://localhost:8000/api/reports?map_id=${mapName}`)
       .then(res => res.json())
       .then(data => {
         if (data.status !== 'success') return;
         const statusMap = {};
         data.data.forEach(report => {
-          const currentStatus = statusMap[report.cell_name];
+          const key = report.block_key || report.cell_name;
+          const currentStatus = statusMap[key];
           if (report.status === 'approved') {
-            statusMap[report.cell_name] = 'approved';
+            statusMap[key] = 'approved';
           } else if (report.status === 'pending' && currentStatus !== 'approved') {
-            statusMap[report.cell_name] = 'pending';
+            statusMap[key] = 'pending';
           }
         });
         setCellStatuses(statusMap);
@@ -37,6 +38,12 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
       for (let r = 0; r < mapData.length; r++) {
         for (let c = 0; c < mapData[r].length; c++) {
           if (mapData[r][c] !== null && String(mapData[r][c]).trim() === String(focusedReport.cell_name)) {
+            const currentBlockKey = `${mapName}::${String(mapData[r][c]).trim()}::${r}:${c}`;
+            
+            if (focusedReport.block_key && focusedReport.block_key !== currentBlockKey) {
+              continue;
+            }
+
             const { width, height } = getCellSpan(r, c, mapData[r][c]);
             const bounds = {
               label: String(mapData[r][c]).trim(),
@@ -44,6 +51,7 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
               startCol: c,
               width,
               height,
+              block_key: focusedReport.block_key || currentBlockKey
             };
             setSelectedGroup(bounds);
             setViewingReport(focusedReport);
@@ -52,7 +60,7 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
         }
       }
     }
-  }, [focusedReport]);
+  }, [focusedReport, mapName]);
 
   const getCellSpan = (row, col, label) => {
     let width = 1, height = 1;
@@ -143,10 +151,15 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
 
         const labelStr = String(label).trim();
         const clickable = isClickable(labelStr);
+        const blockKey = `${mapName}::${labelStr}::${r}:${c}`;
 
         let statusClass = '';
-        if (cellStatuses[labelStr] === 'pending') statusClass = 'status-pending';
-        if (cellStatuses[labelStr] === 'approved') statusClass = 'status-approved';
+        const currentStatus = cellStatuses[blockKey] || cellStatuses[labelStr];
+        if (currentStatus === 'pending') statusClass = 'status-pending';
+        if (currentStatus === 'approved') statusClass = 'status-approved';
+
+        const isSelected = selectedGroup?.block_key === blockKey || 
+                          (!selectedGroup?.block_key && selectedGroup?.label === labelStr && selectedGroup?.startRow === r && selectedGroup?.startCol === c);
 
         cells.push(
           <div
@@ -156,7 +169,7 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
               'merged-block',
               clickable ? 'clickable-block' : 'static-block',
               statusClass,
-              selectedGroup?.label === labelStr ? 'selected' : '',
+              isSelected ? 'selected' : '',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -166,7 +179,7 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
               backgroundColor: clickable ? '#e8f5e9' : undefined,
             }}
             onClick={clickable ? () => {
-              setSelectedGroup({ label: labelStr, startRow: r, startCol: c, width, height });
+              setSelectedGroup({ label: labelStr, startRow: r, startCol: c, width, height, block_key: blockKey });
               setViewingReport(null);
             } : undefined}
           >

@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
-  
   const [cellStatuses, setCellStatuses] = useState({});
 
   const { t, i18n } = useTranslation(); //i18n for local language
@@ -37,25 +36,33 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
         if (data.status === 'success') {
           const statusMap = {};
           data.data.forEach(report => {
-            const currentStatus = statusMap[report.cell_name];
+            const key = report.block_key || report.cell_name;
+            const currentStatus = statusMap[key];
             if (report.status === 'approved') {
-              statusMap[report.cell_name] = 'approved';
+              statusMap[key] = 'approved';
             } else if (report.status === 'pending' && currentStatus !== 'approved') {
-              statusMap[report.cell_name] = 'pending';
+              statusMap[key] = 'pending';
             }
           });
           setCellStatuses(statusMap);
         }
       })
       .catch(err => console.error("Failed to fetch map statuses:", err));
-  }, []);
+  }, [mapName]);
 
   useEffect(() => {
     if (focusedReport) {
       for (let r = 0; r < mapData.length; r++) {
         for (let c = 0; c < mapData[r].length; c++) {
           if (mapData[r][c] === focusedReport.cell_name) {
+            const currentBlockKey = `${mapName}::${mapData[r][c]}::${r}:${c}`;
+            
+            if (focusedReport.block_key && focusedReport.block_key !== currentBlockKey) {
+              continue;
+            }
+
             const bounds = getMergedBounds(r, c, focusedReport.cell_name);
+            bounds.block_key = focusedReport.block_key || currentBlockKey;
             setSelectedGroup(bounds);
             setViewingReport(focusedReport);
             return;
@@ -63,7 +70,7 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
         }
       }
     }
-  }, [focusedReport]);
+  }, [focusedReport, mapName]);
 
   const getMergedBounds = (r, c, label) => {
     if (!label || typeof label === 'number') return null;
@@ -87,21 +94,26 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
         }
 
         const isUnclickable = unclickableLabels.includes(bounds.label);
+        const blockKey = `${mapName}::${bounds.label}::${rIdx}:${cIdx}`;
         
         let statusClass = '';
-        if (cellStatuses[bounds.label] === 'pending') statusClass = 'status-pending';
-        if (cellStatuses[bounds.label] === 'approved') statusClass = 'status-approved';
+        const currentStatus = cellStatuses[blockKey] || cellStatuses[bounds.label];
+        if (currentStatus === 'pending') statusClass = 'status-pending';
+        if (currentStatus === 'approved') statusClass = 'status-approved';
+
+        const isSelected = selectedGroup?.block_key === blockKey || 
+                          (!selectedGroup?.block_key && selectedGroup?.label === bounds.label && selectedGroup?.startRow === rIdx && selectedGroup?.startCol === cIdx);
 
         gridElements.push(
           <div
             key={`${rIdx}-${cIdx}`}
-            className={`grid-cell merged-block ${isUnclickable ? 'static-block' : 'clickable-block'} ${selectedGroup?.label === bounds.label ? 'selected' : ''} ${statusClass}`}
+            className={`grid-cell merged-block ${isUnclickable ? 'static-block' : 'clickable-block'} ${isSelected ? 'selected' : ''} ${statusClass}`}
             style={{
               gridRow: `span ${bounds.height}`,
               gridColumn: `span ${bounds.width}`
             }}
             onClick={isUnclickable ? null : () => {
-              setSelectedGroup(bounds);
+              setSelectedGroup({ ...bounds, block_key: blockKey });
               setViewingReport(null);
             }}
           >
