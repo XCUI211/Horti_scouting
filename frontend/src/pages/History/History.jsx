@@ -9,7 +9,7 @@ const History = () => {
 
   return (
     <AdminLayout title={t("History.Title")}>
-      <div className="admin-home-content">
+      <div className="admin-plant-history-content">
         <PestHistory />
       </div>
     </AdminLayout>
