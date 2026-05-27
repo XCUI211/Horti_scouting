@@ -12,7 +12,7 @@ const AccountAdmin = () => {
   const { user, setUser, logout } = useAuth();
   const [selectedLanguage, setSelectedLanguage] = useState(user?.language || "nl");
   const [password, setPassword] = useState("");
-  const { t, i18n } = useTranslation(); //i18n for local language
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     if (user && user.uid) {
@@ -31,10 +31,9 @@ const AccountAdmin = () => {
     }
   }, [user, navigate, i18n]);
 
-  // Log out function
   const handleLogout = () => {
-    logout();  // removes the user info from the browser
-    navigate('/');  // navigates back to the first app page
+    logout();
+    navigate('/');
   };
 
   const handleLanguageChange = async (e) => {
@@ -94,9 +93,8 @@ const AccountAdmin = () => {
             <div className="info-row language-row">
               <div className="language-top">
                 <span className="label">{t("AccountAdmin.Language")}</span>
-              </div> {/* <-- Close the top div early so it only holds the label */}
+              </div>
 
-              {/* Now the dropdown is a direct child and will be pushed to the right! */}
               <select
                 className="grey-pill-btn align-right"
                 value={selectedLanguage}
@@ -106,29 +104,29 @@ const AccountAdmin = () => {
                 <option value="nl">Nederlands</option>
               </select>
             </div>
-          </div>
-          
-        </section>
+          </section>
 
-        {/* Manage scout accounts */}
-        <section className="account-section">
-          <h2 className="section-title">{t("AccountAdmin.manScout")}</h2>
+          {/* Manage scout accounts */}
+          <section className="account-section">
+            <h2 className="section-title">{t("AccountAdmin.manScout")}</h2>
 
-          <div className="info-row stackable">
-            <span className="label">{t("AccountAdmin.newScout")}:</span>
-            <button className="green-pill-btn" onClick={() => navigate("/create")}>{t("AccountAdmin.newScoutAcc")}</button>
-          </div>
+            <div className="info-row stackable">
+              <span className="label">{t("AccountAdmin.newScout")}:</span>
+              <button className="green-pill-btn" onClick={() => navigate("/create")}>{t("AccountAdmin.newScoutAcc")}</button>
+            </div>
 
-          <div className="info-row stackable">
-            <span className="label">{t("AccountAdmin.EditScoutInfo")}</span>
-            <button className="grey-pill-btn" onClick={() => navigate("/scout_maps_assign")}>{t("AccountAdmin.EditScout")}</button>
-          </div>
+            <div className="info-row stackable">
+              <span className="label">{t("AccountAdmin.EditScoutInfo")}</span>
+              <button className="grey-pill-btn" onClick={() => navigate("/scout_maps_assign")}>{t("AccountAdmin.EditScout")}</button>
+            </div>
 
-          <div className="info-row stackable">
-            <span className="label">{t("AccountAdmin.ResPass")}</span>
-            <button className="grey-pill-btn" onClick={() => navigate("/reset_scout_password")}>{t("AccountAdmin.ResScoutPass")}</button>
-          </div>
-        </section>
+            <div className="info-row stackable">
+              <span className="label">{t("AccountAdmin.ResPass")}</span>
+              <button className="grey-pill-btn" onClick={() => navigate("/reset_scout_password")}>{t("AccountAdmin.ResScoutPass")}</button>
+            </div>
+          </section>
+
+        </div> {/* <-- This correctly closes account-sections-grid */}
 
         {/* Log out */}
         <button className="temp-logout" onClick={handleLogout}>
