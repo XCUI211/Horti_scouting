@@ -90,9 +90,11 @@ const AccountScout = () => {
             </button>
           </div>
 
-          <div className="info-row language-row">
-            <div className="language-top">
-              <span className="label">{t("AccountScout.Language")}</span>
+           <div className="info-row language-row">
+              <div className="language-top">
+                <span className="label">{t("AccountAdmin.Language")}</span>
+              </div>
+
               <select
                 className="grey-pill-btn align-right"
                 value={selectedLanguage}
@@ -101,8 +103,8 @@ const AccountScout = () => {
                 <option value="en">English</option>
                 <option value="nl">Nederlands</option>
               </select>
-            </div>
-          </div>
+           </div>
+
 
         </section>
 

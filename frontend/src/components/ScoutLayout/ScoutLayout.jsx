@@ -38,7 +38,7 @@ const ScoutLayout = ({ children, title }) => {
             <button className={`desktop-nav-item ${isActive('/scout_home') ? 'active' : ''}`} onClick={() => navigate('/scout_home')}>
               {t("ScoutLayout.Home")}
             </button>
-            <button className={`desktop-nav-item ${isActive('/maps') ? 'active' : ''}`} onClick={() => navigate('/maps')}>
+            <button className={`desktop-nav-item ${isActive('/scout_maps') ? 'active' : ''}`} onClick={() => navigate('/scout_maps')}>
               {t("ScoutLayout.Maps")}
             </button>
             <button className={`desktop-nav-item ${isActive('/tasks') ? 'active' : ''}`} onClick={() => navigate('/tasks')}>

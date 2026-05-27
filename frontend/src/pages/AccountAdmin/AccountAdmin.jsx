@@ -12,7 +12,7 @@ const AccountAdmin = () => {
   const { user, setUser, logout } = useAuth();
   const [selectedLanguage, setSelectedLanguage] = useState(user?.language || "nl");
   const [password, setPassword] = useState("");
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(); //i18n for local language
 
   useEffect(() => {
     if (user && user.uid) {
@@ -31,9 +31,10 @@ const AccountAdmin = () => {
     }
   }, [user, navigate, i18n]);
 
+  // Log out function
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    logout();  // removes the user info from the browser
+    navigate('/');  // navigates back to the first app page
   };
 
   const handleLanguageChange = async (e) => {
@@ -126,7 +127,7 @@ const AccountAdmin = () => {
             </div>
           </section>
 
-        </div> {/* <-- This correctly closes account-sections-grid */}
+        </div>
 
         {/* Log out */}
         <button className="temp-logout" onClick={handleLogout}>
