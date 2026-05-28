@@ -140,7 +140,7 @@
   },
 
   "ScoutPasswordReset": {
-    "PageTitle": "Reset scout password",
+    "PageTitle": "Reset Scout Password",
     "SelectScout": "Select scout",
     "StartTyping": "Username...",
     "TemporaryPassword": "Temporary password",

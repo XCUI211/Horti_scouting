@@ -33,7 +33,7 @@
 }
 
 /* Applies the phony look on Desktop/Tablets (good while we're developing phone view first) */
-@media (min-width: 768px) {  /* only gets triggered for big screens */
+@media (min-width: 1024px) {  /* only gets triggered for big screens */
   .admin-mobile-wrapper .pwa-shell {
     width: 100% !important;
     max-width: 100% !important; /* Allows layout expansion across tablets and computers */
@@ -58,15 +58,15 @@
   }
 
   /* Expose inline nav bar links up inside the header panel */
-  .desktop-nav-links {
+  .admin-mobile-wrapper .desktop-nav-links {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     margin-left: auto;
-    margin-right: 30px;
+    margin-right: 20px;
   }
 
-  .desktop-nav-item {
+  .admin-mobile-wrapper .desktop-nav-links .desktop-nav-item {
     background: none;
     border: none;
     padding: 8px 16px;
@@ -78,7 +78,7 @@
     transition: all 0.2s;
   }
 
-  .desktop-nav-item.active {
+  .admin-mobile-wrapper .desktop-nav-links .desktop-nav-item.active {
     background-color: #dcedc8;
     color: #57b021;
   }
@@ -111,6 +111,7 @@
 .admin-mobile-wrapper .header-logo {
   height: 40px;
   width: auto;
+  flex-shrink: 0; /* Ensures the logo stays intact no matter what */
 }
 
 .admin-mobile-wrapper .header-title {
@@ -119,6 +120,7 @@
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.5px;
+  line-height: 1; /* Centers the text vertically with the logo */
 }
 
 /* Circular User Profile Button (top right) */
@@ -129,6 +131,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 
   /* Fixed dimensions for a perfect circle */
   width: 48px;
