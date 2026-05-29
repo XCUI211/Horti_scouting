@@ -31,7 +31,7 @@ const TasksScout = () => {
 
     // Navigates to maps
     const handleRedo = (task) => {
-        navigate(`/maps/`, {
+        navigate(`/scout_maps/`, {
             state: { redoReportId: task.rid }
         });
     };
