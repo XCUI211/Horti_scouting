@@ -24,6 +24,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   const [bugCount, setBugCount] = useState('');
 
   const [adminComment, setAdminComment] = useState('');
+  const [adminBanner, setAdminBanner] = useState(null);
+  const [localReportStatus, setLocalReportStatus] = useState(reportData?.status || '');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showSubmittedPopup, setShowSubmittedPopup] = useState(false);
@@ -63,6 +65,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   useEffect(() => {
     if (reportData) {
       setAdminComment(reportData.admin_comment || '');
+      setLocalReportStatus(reportData.status || '');
+      setAdminBanner(null);
     }
   }, [reportData]);
 
@@ -70,6 +74,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
     if (isOpen) {
       setError('');
       setSuccess('');
+      setAdminBanner(null);
       setShowSubmittedPopup(false);
       setView('info');
     }
@@ -247,20 +252,33 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   };
 
   const handleUpdateStatus = async (newStatus) => {
+    setAdminBanner(null);
+
     try {
       const response = await fetch(`http://localhost:5000/api/reports/${reportData.report_id}/approve`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, admin_comment: adminComment }),
       });
-      if (response.ok) {
-        alert(t("ScoutReportModal.ReportMarkedAs") + ` ${newStatus.toUpperCase()}!`);
-        window.location.reload();
-      } else {
-        alert(t("ScoutReportModal.FailedToUpdateStatus"));
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || t("ScoutReportModal.FailedToUpdateStatus"));
       }
-    } catch {
-      alert(t("ScoutReportModal.NetworkErrorUpdatingReport"));
+
+      setLocalReportStatus(newStatus);
+      setAdminBanner({
+        type: newStatus === 'approved' ? 'success' : 'danger',
+        message: newStatus === 'approved'
+          ? 'Report approved successfully.'
+          : 'Report declined successfully.',
+      });
+    } catch (err) {
+      setAdminBanner({
+        type: 'danger',
+        message: err.message || t("ScoutReportModal.NetworkErrorUpdatingReport"),
+      });
     }
   };
 
@@ -299,6 +317,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
     );
   }
 
+  const currentReportStatus = localReportStatus || reportData?.status;
+
   // ---- ADMIN APPROVAL VIEW ----
   if (reportData) {
     return (
@@ -308,6 +328,21 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
             <h3 style={{ margin: 0, color: '#1976d2' }}>{t("ScoutReportModal.AdminApproval")}</h3>
           </div>
           <div style={styles.body}>
+            {adminBanner && (
+              <div style={{
+                padding: '12px 14px',
+                borderRadius: '8px',
+                marginBottom: '14px',
+                fontWeight: 700,
+                fontSize: '14px',
+                background: adminBanner.type === 'success' ? '#e8f5e9' : '#ffebee',
+                color: adminBanner.type === 'success' ? '#2e7d32' : '#c62828',
+                border: `1px solid ${adminBanner.type === 'success' ? '#a5d6a7' : '#ef9a9a'}`,
+              }}>
+                {adminBanner.message}
+              </div>
+            )}
+
             <div style={{ background: '#f5f5f5', padding: '14px', borderRadius: '8px', marginBottom: '14px', border: '1px solid #ddd' }}>
               <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{t("ScoutReportModal.IssueDetails")}</h4>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Location")}:</strong> {reportData.cell_name}</p>
@@ -326,7 +361,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                 placeholder={t("ScoutReportModal.LeaveAComment")}
               />
             </div>
-            {reportData.status === 'pending' ? (
+            {currentReportStatus === 'pending' ? (
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                 <button style={styles.btnAccept} onClick={() => handleUpdateStatus('approved')}>{t("ScoutReportModal.Accept")}</button>
                 <button style={styles.btnReject} onClick={() => handleUpdateStatus('rejected')}>{t("ScoutReportModal.Reject")}</button>
@@ -334,11 +369,11 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
             ) : (
               <div style={{
                 textAlign: 'center', padding: '10px',
-                background: reportData.status === 'approved' ? '#e8f5e9' : '#ffebee',
-                color: reportData.status === 'approved' ? '#2e7d32' : '#c62828',
+                background: currentReportStatus === 'approved' ? '#e8f5e9' : '#ffebee',
+                color: currentReportStatus === 'approved' ? '#2e7d32' : '#c62828',
                 borderRadius: '6px', marginBottom: '10px', fontWeight: 'bold',
               }}>
-                {t("ScoutReportModal.ThisReportHasBeen")} {reportData.status.toUpperCase()}.
+                {t("ScoutReportModal.ThisReportHasBeen")} {currentReportStatus === 'rejected' ? 'DECLINED' : currentReportStatus.toUpperCase()}.
               </div>
             )}
           </div>
