@@ -2,7 +2,7 @@
   "test.translation": "Dit is een test vertaling",
 
   "AdminLayout": {
-    "Home": "Thuis",
+    "Home": "Home",
     "Maps": "Plattegronden",
     "Notifications": "Notificaties",
     "Scouts": "Scouts",
@@ -11,7 +11,7 @@
   },
 
   "ScoutLayout": {
-    "Home": "Thuis",
+    "Home": "Home",
     "Maps": "Plattegronden",
     "Notifications": "Notificaties",
     "Tasks": "Taken"
@@ -152,12 +152,12 @@
   },
 
   "ScoutOverview": {
-    "PageTitle": "",
-    "AwaitingApproval": "",
-    "StatusApproved": "",
-    "StatusRejected": "",
-    "Loading": "",
-    "NoReports": ""
+    "PageTitle": "Scout Overzicht",
+    "AwaitingApproval": "Goedkeuring afwachten",
+    "StatusApproved": "Klaar",
+    "StatusRejected": "Opnieuw",
+    "Loading": "Scout data aan het laden...",
+    "NoReports": "Geen recente rapporten voor deze scout"
   },
 
   "TasksScout": {
@@ -166,10 +166,10 @@
     "NoReports": "Je hebt nog geen rapporten ingediend.",
     "Redo": "Opnieuw",
     "Done": "Klaar",
-    "AwaitingApproval": "Wacht op goedkeuring",
+    "AwaitingApproval": "Goedkeuring afwachten",
     "StatusApproved": "Klaar",
     "StatusRejected": "Opnieuw",
-    "StatusPending": "Wacht op goedkeuring",
+    "StatusPending": "Goedkeuring afwachten",
     "AdminNote": "Beheerder opmerking"
   },
 

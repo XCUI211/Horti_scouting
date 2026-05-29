@@ -76,8 +76,8 @@ function MapViewScouts() {
     window.sessionStorage.setItem(MAP_STORAGE_KEY, name);
   };
 
-  if (loading) return <ScoutLayout title="Maps"><p>{t("MapviewScouts.Loading")}</p></ScoutLayout>;
-  if (!currentMap) return <ScoutLayout title="Maps"><p>{t("MapviewScouts.NoMaps")}</p></ScoutLayout>;
+  if (loading) return <ScoutLayout title="Maps"><p>{t("MapViewScouts.Loading")}</p></ScoutLayout>;
+  if (!currentMap) return <ScoutLayout title="Maps"><p>{t("MapViewScouts.NoMaps")}</p></ScoutLayout>;
 
   const CurrentMap = assignedMaps[currentMap];
 

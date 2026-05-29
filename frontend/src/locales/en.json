@@ -4,6 +4,7 @@
   "AdminLayout": {
     "Home": "Home",
     "Maps": "Maps",
+    "Notifications": "Notifications",
     "Scouts": "Scouts",
     "History": "History",
     "Reports": "Reports"
