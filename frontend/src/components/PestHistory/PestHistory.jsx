@@ -37,6 +37,9 @@ export default function PestHistory() {const { t } = useTranslation();
                                        const [detailLoading, setDetailLoading] = useState(false);
                                        const [detailError, setDetailError] = useState(null);
                                        const [detailData, setDetailData] = useState(null);
+                                       const [comparisonData, setComparisonData] = useState([]);
+                                       const [comparisonLoading, setComparisonLoading] = useState(true);
+                                       const [comparisonError, setComparisonError] = useState(null);
 
   // Whenever the selected time period or map changes, retrieve the reports for that specific filter
   useEffect(() => {
@@ -140,6 +143,57 @@ export default function PestHistory() {const { t } = useTranslation();
 
     return () => controller.abort();
   }, [selectedPest, period, selectedMap]);
+
+    useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchComparison = async () => {
+      try {
+        setComparisonLoading(true);
+
+        const response = await axios.get(
+          'http://localhost:5000/api/analytics/pest-week-comparison',
+          {
+            signal: controller.signal,
+            params: {
+              map_id: selectedMap,
+            },
+          }
+        );
+
+        if (response.data.status === 'success') {
+          setComparisonData(response.data.data || []);
+          setComparisonError(null);
+        } else {
+          setComparisonData([]);
+          setComparisonError(response.data.message || 'Failed to load weekly comparison');
+        }
+      } catch (err) {
+        if (err.name === 'CanceledError' || err.name === 'AbortError') return;
+
+        console.error('Error fetching weekly comparison:', err);
+        setComparisonData([]);
+        setComparisonError(err.response?.data?.message || err.message || 'Failed to load weekly comparison');
+      } finally {
+        setComparisonLoading(false);
+      }
+    };
+
+    fetchComparison();
+
+    return () => controller.abort();
+  }, [selectedMap]);
+    const getComparisonStatusLabel = (status) => {
+    if (status === 'improved') return 'Improved';
+    if (status === 'worse') return 'Worse';
+    if (status === 'new_issue') return 'New issue';
+    return 'No change';
+  };
+
+  const getDifferenceText = (difference) => {
+    if (difference > 0) return `+${difference}`;
+    return String(difference);
+  };
 
   // Whenever the time period is changed, also reset the selected pest and the pest details, since said information
   // is based on the selected time period
@@ -306,6 +360,82 @@ export default function PestHistory() {const { t } = useTranslation();
                 </div>
               </div>
             ) : null}
+          </div>
+
+          <div className="pest-comparison-card">
+            <div className="pest-comparison-header">
+              <div>
+                <div className="pest-history-detail-kicker">Week comparison</div>
+                <h3 className="pest-history-detail-title">
+                  This week vs last week
+                </h3>
+              </div>
+
+              <div className="pest-comparison-scope">
+                {selectedMap === 'all' ? 'All maps' : selectedMap}
+              </div>
+            </div>
+
+            <p className="pest-history-subtitle">
+              Compares approved pest reports on the same map and floor. This helps highlight whether treatment may have reduced the issue.
+            </p>
+
+            {comparisonLoading ? (
+              <div className="pest-history-state">Loading weekly comparison...</div>
+            ) : comparisonError ? (
+              <div className="pest-history-state error">Error: {comparisonError}</div>
+            ) : comparisonData.length === 0 ? (
+              <div className="pest-history-state empty">
+                No approved pest reports found for this week or last week.
+              </div>
+            ) : (
+              <div className="pest-comparison-table-wrapper">
+                <table className="pest-comparison-table">
+                  <thead>
+                    <tr>
+                      <th>Map</th>
+                      <th>Floor</th>
+                      <th>Pest</th>
+                      <th>Last week</th>
+                      <th>This week</th>
+                      <th>Difference</th>
+                      <th>Severity</th>
+                      <th>Treatment</th>
+                      <th>Result</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {comparisonData.map((item) => (
+                      <tr key={`${item.map_id}-${item.cell_name}-${item.pest_type}`}>
+                        <td>{item.map_id}</td>
+                        <td>{item.cell_name}</td>
+                        <td>{formatPestName(item.pest_type)}</td>
+                        <td>{item.previous_reports}</td>
+                        <td>{item.current_reports}</td>
+                        <td className={item.report_difference > 0 ? 'pest-comparison-worse' : item.report_difference < 0 ? 'pest-comparison-improved' : ''}>
+                          {getDifferenceText(item.report_difference)}
+                        </td>
+                        <td>
+                          {item.previous_avg_severity ?? '-'} → {item.current_avg_severity ?? '-'}
+                        </td>
+                        <td>
+                          {item.previous_treatment_used ? 'Used last week' : 'No treatment last week'}
+                        </td>
+                        <td>
+                          <span className={`pest-comparison-badge ${item.status}`}>
+                            {getComparisonStatusLabel(item.status)}
+                          </span>
+                          <div className="pest-comparison-effect">
+                            {item.treatment_effect}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </>
       )}
