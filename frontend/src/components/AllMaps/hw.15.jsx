@@ -63,30 +63,36 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
   }, [focusedReport, mapName]);
 
   const getCellSpan = (row, col, label) => {
-    let width = 1, height = 1;
-    if (label === null || label === '') return { width, height };
+    let width = 1;
+    let height = 1;
+
+    if (label === null || label === '') {
+      return { width, height };
+    }
 
     const labelStr = String(label).trim();
-    const isNumberCell = /^\d+$/.test(labelStr);
 
     while (col + width < mapData[row].length) {
       const nextCell = mapData[row][col + width];
+
       if (nextCell === null || nextCell === '') break;
       if (String(nextCell).trim() !== labelStr) break;
-      if (isNumberCell && width >= 2) break;
+
       width++;
     }
 
-    if (!isNumberCell) {
-      while (row + height < mapData.length) {
-        const nextRowMatches = Array.from({ length: width }, (_, i) => {
-          const cellBelow = mapData[row + height][col + i];
-          if (cellBelow === null || cellBelow === '') return false;
-          return String(cellBelow).trim() === labelStr;
-        }).every(Boolean);
-        if (!nextRowMatches) break;
-        height++;
-      }
+    while (row + height < mapData.length) {
+      const nextRowMatches = Array.from({ length: width }, (_, i) => {
+        const cellBelow = mapData[row + height][col + i];
+
+        if (cellBelow === null || cellBelow === '') return false;
+
+        return String(cellBelow).trim() === labelStr;
+      }).every(Boolean);
+
+      if (!nextRowMatches) break;
+
+      height++;
     }
 
     return { width, height };
