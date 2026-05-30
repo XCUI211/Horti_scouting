@@ -4,6 +4,7 @@ import axios from 'axios';
 import { formatPestName, getPestColor } from '../../constants/pestNames';
 import './PestHistory.css';
 import { useTranslation } from "react-i18next";
+import { MAP_ORDER } from '../../constants/mapOrder';
 
 const PERIOD_KEYS = [
     { key: 'week', labelKey: 'PestHistory.Periods.Week' },
@@ -28,6 +29,7 @@ function PestHistoryTooltip({ active, payload }) {
 // of the pest when overing over one of the options in the bar plot.
 export default function PestHistory() {const { t } = useTranslation();
                                        const [period, setPeriod] = useState('month');
+                                       const [selectedMap, setSelectedMap] = useState('all');
                                        const [data, setData] = useState([]);
                                        const [loading, setLoading] = useState(true);
                                        const [error, setError] = useState(null);
@@ -36,70 +38,108 @@ export default function PestHistory() {const { t } = useTranslation();
                                        const [detailError, setDetailError] = useState(null);
                                        const [detailData, setDetailData] = useState(null);
 
-  // Whenever the selected time period changes, retrieve the reports for that specific time period
-  useEffect(() => {const controller = new AbortController();
+  // Whenever the selected time period or map changes, retrieve the reports for that specific filter
+  useEffect(() => {
+    const controller = new AbortController();
+
     const fetchHistory = async () => {
-      try {setLoading(true);
-           const response = await axios.get(`http://localhost:5000/api/analytics/pest-history?period=${period}`, {
-           signal: controller.signal});
+      try {
+        setLoading(true);
+
+        const response = await axios.get(
+          'http://localhost:5000/api/analytics/pest-history',
+          {
+            signal: controller.signal,
+            params: {
+              period,
+              map_id: selectedMap,
+            },
+          }
+        );
 
         if (response.data.status === 'success') {
-          const chartData = (response.data.data || []).map((item) => ({name: formatPestName(item.pest_type),
-                                                                                    internalName: item.pest_type,
-                                                                                    value: Number(item.count)}));
+          const chartData = (response.data.data || []).map((item) => ({
+            name: formatPestName(item.pest_type),
+            internalName: item.pest_type,
+            value: Number(item.count),
+          }));
+
           setData(chartData);
-          setError(null)}
+          setError(null);
+        } else {
+          setError(response.data.message || 'Failed to load pest history');
+          setData([]);
+        }
+      } catch (err) {
+        if (err.name === 'CanceledError' || err.name === 'AbortError') return;
 
-        else {setError(response.data.message || 'Failed to load pest history');
-              setData([])}
-
+        console.error('Error fetching pest history:', err);
+        setError(err.response?.data?.message || err.message || 'Failed to load pest history');
+        setData([]);
+      } finally {
+        setLoading(false);
       }
-
-      // Make sure not everything comes crashing down if a new time-period button is pressed before the previous
-      // request was completed
-      catch (err) {if (err.name === 'CanceledError' || err.name === 'AbortError') return;
-                   console.error('Error fetching pest history:', err);
-                   setError(err.response?.data?.message || err.message || 'Failed to load pest history');
-                   setData([])}
-      finally {setLoading(false);}
     };
 
     fetchHistory();
+
     return () => controller.abort();
-  }, [period]);
+  }, [period, selectedMap]);
+
+  useEffect(() => {
+    setSelectedPest(null);
+    setDetailData(null);
+    setDetailError(null);
+  }, [period, selectedMap]);
 
   const totalCount = useMemo(() => data.reduce((sum, item) => sum + item.value, 0), [data]);
   const chartHeight = Math.max(260, data.length * 44 + 40);
 
-  useEffect(() => {if (!selectedPest) {return}
+  useEffect(() => {
+    if (!selectedPest) {
+      return;
+    }
+
     const controller = new AbortController();
+
     const fetchDetails = async () => {
+      try {
+        setDetailLoading(true);
 
-      // Pretty much the same for the previously used useEffect, but now for retrieving the pest information after
-      // clicking on one of the pests in the bar plot
-      try {setDetailLoading(true);
-           const response = await axios.get(
-          `http://localhost:5000/api/analytics/pest-history-details?period=${period}&pest_type=${encodeURIComponent(selectedPest.internalName)}`,
-          { signal: controller.signal });
+        const response = await axios.get(
+          'http://localhost:5000/api/analytics/pest-history-details',
+          {
+            signal: controller.signal,
+            params: {
+              period,
+              pest_type: selectedPest.internalName,
+              map_id: selectedMap,
+            },
+          }
+        );
 
-          if (response.data.status === 'success') {setDetailData(response.data.data);
-                                                   setDetailError(null)}
-          else {setDetailData(null);
-                setDetailError(response.data.message || 'Failed to load pest details')}
+        if (response.data.status === 'success') {
+          setDetailData(response.data.data);
+          setDetailError(null);
+        } else {
+          setDetailData(null);
+          setDetailError(response.data.message || 'Failed to load pest details');
+        }
+      } catch (err) {
+        if (err.name === 'CanceledError' || err.name === 'AbortError') return;
+
+        console.error('Error fetching pest details:', err);
+        setDetailData(null);
+        setDetailError(err.response?.data?.message || err.message || 'Failed to load pest details');
+      } finally {
+        setDetailLoading(false);
       }
-
-      // Same as previous part as well: if a new pest is picked before the previous request could be completed
-      // hide the error
-      catch (err) {if (err.name === 'CanceledError' || err.name === 'AbortError') return;
-                   console.error('Error fetching pest details:', err);
-                   setDetailData(null);
-                   setDetailError(err.response?.data?.message || err.message || 'Failed to load pest details')}
-      finally {setDetailLoading(false)}
     };
 
     fetchDetails();
+
     return () => controller.abort();
-  }, [selectedPest, period]);
+  }, [selectedPest, period, selectedMap]);
 
   // Whenever the time period is changed, also reset the selected pest and the pest details, since said information
   // is based on the selected time period
@@ -111,20 +151,38 @@ export default function PestHistory() {const { t } = useTranslation();
           <p className="pest-history-subtitle">Bar chart of pest counts for the selected time period.</p>
         </div>
 
-        <div className="pest-history-periods" role="tablist" aria-label={t?.('PestHistory.Periods.Label', 'Pest history period')}>
-          {PERIOD_KEYS.map((item) => {
-            const label = t(item.labelKey, { defaultValue: item.key.charAt(0).toUpperCase() + item.key.slice(1) });
-            return (
-              <button
-                key={item.key}
-                type="button"
-                className={`pest-history-period-btn ${period === item.key ? 'active' : ''}`}
-                onClick={() => setPeriod(item.key)}
-              >
-                {label}
-              </button>
-            );
-          })}
+        <div className="pest-history-controls">
+          <label className="pest-history-map-filter">
+            <span>Map</span>
+            <select
+              value={selectedMap}
+              onChange={(event) => setSelectedMap(event.target.value)}
+            >
+              <option value="all">All maps</option>
+              {MAP_ORDER.map((mapName) => (
+                <option key={mapName} value={mapName}>
+                  {mapName}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="pest-history-periods" role="tablist" aria-label={t?.('PestHistory.Periods.Label', 'Pest history period')}>
+            {PERIOD_KEYS.map((item) => {
+              const label = t(item.labelKey, { defaultValue: item.key.charAt(0).toUpperCase() + item.key.slice(1) });
+
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={`pest-history-period-btn ${period === item.key ? 'active' : ''}`}
+                  onClick={() => setPeriod(item.key)}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -165,7 +223,7 @@ export default function PestHistory() {const { t } = useTranslation();
           </div>
 
           <div className="pest-history-summary">
-            <p>Total pest reports: {totalCount}</p>
+            <p> Total pest reports: {totalCount} {selectedMap === 'all' ? ' (All maps)' : ` (${selectedMap})`} </p>
           </div>
 
            <div className="pest-history-detail-card">
