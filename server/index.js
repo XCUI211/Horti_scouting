@@ -646,6 +646,153 @@ app.get('/api/analytics/pest-history-details', async (req, res) => {
     }
 });
 
+// GET request to compare approved pest reports between this week and last week
+// Optional map_id filter: all, HW 15, HW 10.15, etc.
+app.get('/api/analytics/pest-week-comparison', async (req, res) => {
+    try {
+        const mapId = req.query.map_id || 'all';
+
+        const params = [];
+        let mapClause = '';
+
+        if (mapId && mapId !== 'all') {
+            params.push(mapId);
+            mapClause = `AND m.name = $${params.length}`;
+        }
+
+        const sql = `
+            WITH expanded_reports AS (
+                SELECT
+                    m.name AS map_id,
+                    f.name AS cell_name,
+                    UNNEST(fr.pest_types) AS pest_type,
+                    fr.pest_severity,
+                    fr.bug_count,
+                    fr.biology_used,
+                    fr.chemicals_used,
+                    CASE
+                        WHEN fr.report_time >= date_trunc('week', NOW())
+                        THEN 'current'
+                        ELSE 'previous'
+                    END AS week_bucket
+                FROM floor_reports fr
+                JOIN floors f ON fr.fid = f.fid
+                JOIN maps m ON f.mid = m.mid
+                WHERE fr.pests_found = true
+                  AND fr.pest_types IS NOT NULL
+                  AND fr.approval_status = 'approved'
+                  AND fr.report_time >= date_trunc('week', NOW()) - INTERVAL '7 days'
+                  AND fr.report_time < date_trunc('week', NOW()) + INTERVAL '7 days'
+                  ${mapClause}
+            )
+            SELECT
+                map_id,
+                cell_name,
+                pest_type,
+
+                COUNT(*) FILTER (WHERE week_bucket = 'previous') AS previous_reports,
+                COUNT(*) FILTER (WHERE week_bucket = 'current') AS current_reports,
+
+                COALESCE(SUM(bug_count) FILTER (WHERE week_bucket = 'previous'), 0) AS previous_bug_count,
+                COALESCE(SUM(bug_count) FILTER (WHERE week_bucket = 'current'), 0) AS current_bug_count,
+
+                ROUND((AVG(pest_severity) FILTER (WHERE week_bucket = 'previous'))::numeric, 1) AS previous_avg_severity,
+                ROUND((AVG(pest_severity) FILTER (WHERE week_bucket = 'current'))::numeric, 1) AS current_avg_severity,
+
+                COALESCE(
+                    BOOL_OR(COALESCE(biology_used, false) OR COALESCE(chemicals_used, false))
+                    FILTER (WHERE week_bucket = 'previous'),
+                    false
+                ) AS previous_treatment_used,
+
+                COALESCE(
+                    BOOL_OR(COALESCE(biology_used, false) OR COALESCE(chemicals_used, false))
+                    FILTER (WHERE week_bucket = 'current'),
+                    false
+                ) AS current_treatment_used
+
+            FROM expanded_reports
+            GROUP BY map_id, cell_name, pest_type
+            ORDER BY map_id ASC, cell_name ASC, pest_type ASC
+        `;
+
+        const result = await pool.query(sql, params);
+
+        const rows = result.rows.map((row) => {
+            const previousReports = Number(row.previous_reports || 0);
+            const currentReports = Number(row.current_reports || 0);
+            const previousBugCount = Number(row.previous_bug_count || 0);
+            const currentBugCount = Number(row.current_bug_count || 0);
+
+            const reportDifference = currentReports - previousReports;
+            const bugCountDifference = currentBugCount - previousBugCount;
+
+            let status = 'no_change';
+
+            if (previousReports === 0 && currentReports > 0) {
+                status = 'new_issue';
+            } else if (previousReports > 0 && currentReports === 0) {
+                status = 'improved';
+            } else if (currentReports < previousReports) {
+                status = 'improved';
+            } else if (currentReports > previousReports) {
+                status = 'worse';
+            }
+
+            let treatmentEffect = 'No treatment recorded last week';
+
+            if (row.previous_treatment_used) {
+                if (status === 'improved') {
+                    treatmentEffect = 'Treatment may have worked';
+                } else if (status === 'worse') {
+                    treatmentEffect = 'Treatment did not reduce reports';
+                } else if (status === 'no_change') {
+                    treatmentEffect = 'Treatment result unclear';
+                } else if (status === 'new_issue') {
+                    treatmentEffect = 'New issue this week';
+                }
+            }
+
+            return {
+                map_id: row.map_id,
+                cell_name: row.cell_name,
+                pest_type: row.pest_type,
+
+                previous_reports: previousReports,
+                current_reports: currentReports,
+                report_difference: reportDifference,
+
+                previous_bug_count: previousBugCount,
+                current_bug_count: currentBugCount,
+                bug_count_difference: bugCountDifference,
+
+                previous_avg_severity: row.previous_avg_severity,
+                current_avg_severity: row.current_avg_severity,
+
+                previous_treatment_used: row.previous_treatment_used,
+                current_treatment_used: row.current_treatment_used,
+
+                status,
+                treatment_effect: treatmentEffect
+            };
+        });
+
+        res.json({
+            status: 'success',
+            map_id: mapId,
+            current_week_start: null,
+            previous_week_start: null,
+            data: rows
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            message: err.message
+        });
+    }
+});
+
 // GET request to fetch scouts and their recent report history for the scout overview page
 app.get('/api/admin/scouts-reports-summary', async (req, res) => {
     try {
