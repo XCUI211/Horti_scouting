@@ -461,8 +461,7 @@ app.post('/api/admin/assign-maps', async (req, res) => {
 
         // Inserts new assignments (this includes old map assignments that haven't been deleted) if any are selected
         if (mapIds && mapIds.length > 0) {
-            const insertValues = mapIds.map(mid => `(${scoutUid}, ${mid})`).join(',');
-            await client.query(`INSERT INTO user_maps (uid, mid) VALUES ${insertValues}`);
+          await client.query(`INSERT INTO user_maps (uid, mid) SELECT $1, unnest($2::int[])`, [scoutUid, mapIds]);
         }
 
         await client.query('COMMIT');  // saves the transaction

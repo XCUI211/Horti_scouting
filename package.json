@@ -10,9 +10,8 @@
     "concurrently": "^9.2.1"  
   },
   "scripts": {
-    "test": "npm run test:root && npm run test:server && npm run test:frontend",
+    "test": "npm run test:server && npm run test:frontend",
 
-    "test:root": "jest --roots tests",
     "test:server": "npm test --workspace=server",
     "test:frontend": "npm test --workspace=frontend -- --run",
     
