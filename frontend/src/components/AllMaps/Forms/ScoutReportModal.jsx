@@ -9,6 +9,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   const [pestsFound, setPestsFound] = useState('');
   const [pestType, setPestType] = useState([]);
   const [pestSeverity, setPestSeverity] = useState('');
+  const [plantName, setPlantName] = useState('');
+  const [supplier, setSupplier] = useState('');
 
   const [biologyUsed, setBiologyUsed] = useState('');
   const [biologyTypes, setBiologyTypes] = useState([]);
@@ -73,7 +75,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       setShowSubmittedPopup(false);
       setView('info');
     }
-  }, [isOpen, cellInfo]);
+  }, [isOpen, cellInfo, reportData]);
 
   // Try to resolve fID from cell info when modal opens, but allow manual override if it fails or if reportData
   // is provided (admin view).
@@ -219,6 +221,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
         body: JSON.stringify({
           fid: Number(fid),
           uid: Number(user?.uid),
+          plant_name: plantName.trim(),
+          supplier: supplier.trim(),
           pests_found: !pestType.includes('none') && pestType.length > 0,
           pest_types: pestsFound === 'true' && pestType.length > 0 ? pestType : null,
           pest_severity: pestType.includes('none') || pestSeverity === '' ? null : Number(pestSeverity),
@@ -311,6 +315,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
             <div style={{ background: '#f5f5f5', padding: '14px', borderRadius: '8px', marginBottom: '14px', border: '1px solid #ddd' }}>
               <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{t("ScoutReportModal.IssueDetails")}</h4>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Location")}:</strong> {reportData.cell_name}</p>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Plant")}:</strong> {reportData.plant_name}</p>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Supplier")}:</strong> {reportData.supplier}</p>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Severity")}:</strong> {t("ScoutReportModal.Level")} {reportData.severity}</p>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.DateReported")}:</strong> {reportData.entry_date}</p>
               <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '10px 0' }} />
@@ -377,6 +383,12 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                   </div>
                   <div style={{ fontSize: '13px' }}>
                     <strong>{t("ScoutReportModal.Reporter")}:</strong> {latestApproved.reporter_name}
+                  </div>
+                  <div style={{ fontSize: '13px' }}>
+                    <strong>{t("ScoutReportModal.Plant")}:</strong> {latestApproved.plant_name}
+                  </div>
+                  <div style={{ fontSize: '13px' }}>
+                    <strong>{t("ScoutReportModal.Supplier")}:</strong> {latestApproved.supplier}
                   </div>
                   {Array.isArray(latestApproved.pest_types) && latestApproved.pest_types.length > 0 && (
                     <div style={{ fontSize: '13px' }}>
@@ -463,6 +475,26 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                 type="text"
                 value={user?.username || ''}
                 disabled
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>{t("ScoutReportModal.Plant")}</label>
+              <input
+                style={styles.input}
+                type="text"
+                value={plantName}
+                onChange={(e) => setPlantName(e.target.value)}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>{t("ScoutReportModal.Supplier")}</label>
+              <input
+                style={styles.input}
+                type="text"
+                value={supplier}
+                onChange={(e) => setSupplier(e.target.value)}
               />
             </div>
 

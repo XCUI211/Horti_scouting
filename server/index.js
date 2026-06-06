@@ -128,6 +128,8 @@ app.get('/api/reports', async (req, res) => {
         const baseQuery = `
             SELECT fr.rid              AS report_id,
                    f.name              AS cell_name,
+                   fr.plant_name       AS plant_name,
+                   fr.supplier         AS supplier,
                    m.name              AS map_id,
                    fr.pest_severity    AS severity,
                    fr.pest_types       AS pest_types,
@@ -267,20 +269,25 @@ app.post('/api/createaccount', async (req, res) => {
 
 app.post('/api/floorreports', async (req, res) => {
     const {fid, uid,
+           plant_name, supplier,
            pests_found, pest_types, pest_severity,
            biology_used, biology_types,
            chemicals_used, chemicals_types,
            behandelaar,
            potmaat, oppotweek, teelduur_weeks,
            trap_number, bug_count
-          } = req.body;  // get data from the frontend
+    } = req.body;  // get data from the frontend
 
+    const normalizedPlantName = typeof plant_name === 'string' ? plant_name.trim() : '';
+    const normalizedSupplier = typeof supplier === 'string' ? supplier.trim() : '';
     try {const newReport = await pool.query(
             `INSERT INTO floor_reports
-            (fid, uid, pests_found, pest_types, pest_severity, biology_used, biology_types, chemicals_used, chemicals_types, behandelaar, potmaat, oppotweek, teelduur_weeks, trap_number, bug_count, approval_status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending')
+            (fid, uid, plant_name, supplier, pests_found, pest_types, pest_severity, biology_used, biology_types, chemicals_used, chemicals_types, behandelaar, potmaat, oppotweek, teelduur_weeks, trap_number, bug_count, approval_status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'pending')
             RETURNING *`,
             [fid, uid,
+                normalizedPlantName,
+                normalizedSupplier,
                 pests_found,
                 pest_types || null,
                 pest_severity ?? null,
@@ -567,6 +574,8 @@ app.get('/api/analytics/pest-history-details', async (req, res) => {
             SELECT
                 fr.rid AS report_id,
                 f.name AS cell_name,
+                fr.plant_name AS plant_name,
+                fr.supplier AS supplier,
                 m.name AS map_id,
                 fr.pest_severity AS severity,
                 fr.pest_types AS pest_types,
@@ -648,6 +657,8 @@ app.get('/api/scout/tasks/:uid', async (req, res) => {
                 fr.approval_status as status,
                 fr.comment,
                 f.name as section_name,
+                fr.plant_name as plant_name,
+                fr.supplier as supplier,
                 m.name as map_name,
                 m.mid,
                 f.fid
@@ -656,7 +667,7 @@ app.get('/api/scout/tasks/:uid', async (req, res) => {
             JOIN maps m ON f.mid = m.mid
             WHERE fr.uid = $1
             ORDER BY fr.report_time DESC
-        `, [uid]);
+        `,[uid]);
 
         res.json(result.rows);
     } catch (err) {

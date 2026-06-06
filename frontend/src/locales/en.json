@@ -280,6 +280,8 @@
     "AdminApproval": "Admin Approval View",
     "IssueDetails": "Issue Details",
     "Location": "Location",
+    "Plant": "Plant",
+    "Supplier": "Supplier",
     "Severity": "Severity",
     "Level": "Level",
     "DateReported": "Date Reported",
