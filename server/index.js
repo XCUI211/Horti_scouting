@@ -278,23 +278,33 @@ app.post('/api/floorreports', async (req, res) => {
            trap_number, bug_count
     } = req.body;  // get data from the frontend
 
-    const normalizedPlantName = typeof plant_name === 'string' ? plant_name.trim() : '';
-    const normalizedSupplier = typeof supplier === 'string' ? supplier.trim() : '';
+    const normalizedBiologyTypes = Array.isArray(biology_types)
+        ? biology_types.filter((item) => typeof item === 'string' && item !== '')
+        : typeof biology_types === 'string' && biology_types !== ''
+            ? [biology_types]
+            : null;
+
+    const normalizedChemicalsTypes = Array.isArray(chemicals_types)
+        ? chemicals_types.filter((item) => typeof item === 'string' && item !== '')
+        : typeof chemicals_types === 'string' && chemicals_types !== ''
+            ? [chemicals_types]
+            : null;
+
     try {const newReport = await pool.query(
             `INSERT INTO floor_reports
             (fid, uid, plant_name, supplier, pests_found, pest_types, pest_severity, biology_used, biology_types, chemicals_used, chemicals_types, behandelaar, potmaat, oppotweek, teelduur_weeks, trap_number, bug_count, approval_status)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'pending')
             RETURNING *`,
             [fid, uid,
-                normalizedPlantName,
-                normalizedSupplier,
+                plant_name || '',
+                supplier || '',
                 pests_found,
                 pest_types || null,
                 pest_severity ?? null,
                 biology_used,
-                biology_types || null,
+                normalizedBiologyTypes,
                 chemicals_used,
-                chemicals_types || null,
+                normalizedChemicalsTypes,
                 behandelaar || null,
                 potmaat || null,
                 oppotweek ?? null,
