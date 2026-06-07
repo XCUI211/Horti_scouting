@@ -48,7 +48,10 @@ const HW53Map = ({ focusedReport }) => {
   useEffect(() => {
     if (focusedReport) {
       // focusedReport 来自后端, 字段是 cell_name; modal 用的是 label
-      setSelectedCell({ label: focusedReport.cell_name });
+      setSelectedCell({
+        label: focusedReport.cell_name,
+        block_key: focusedReport.block_key,
+      });
     }
   }, [focusedReport]);
 
@@ -77,17 +80,20 @@ const HW53Map = ({ focusedReport }) => {
         const labelStr = String(label);
         const isStatic = staticCells.includes(labelStr);
         const status = cellStatuses[labelStr];
+        const blockKey = `${mapId}::${labelStr}::${r}:${c}`;
 
         cells.push(
           <div
             key={`${r}-${c}`}
-            className={`grid-cell merged-block ${isStatic ? 'static-block' : 'clickable-block'} ${status || ''} ${selectedCell?.label === labelStr ? 'selected' : ''}`}
+            className={`grid-cell merged-block ${isStatic ? 'static-block' : 'clickable-block'} ${status || ''} ${
+              selectedCell?.block_key === blockKey || (!selectedCell?.block_key && selectedCell?.label === labelStr) ? 'selected' : ''
+            }`}
             style={{ 
               gridRow: `span ${height}`, 
               gridColumn: `span ${width}`,
               backgroundColor: typeof label === 'number' && !isStatic ? '#e8f5e9' : undefined 
             }}
-            onClick={isStatic ? null : () => setSelectedCell({ label: labelStr })}
+            onClick={isStatic ? null : () => setSelectedCell({ label: labelStr, block_key: blockKey })}
           >
             {getDisplayLabel(labelStr)}
           </div>

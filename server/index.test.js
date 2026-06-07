@@ -1045,6 +1045,18 @@ describe("GET /api/reports", () => {
     );
   });
 
+  it("filters by block_key", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).get("/api/reports?map_id=Greenhouse 1&cell_name=Section A&block_key=Greenhouse 1::Section A::0:0");
+
+    expect(res.statusCode).toBe(200);
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining("f.block_key = $3"),
+      ["Greenhouse 1", "Section A", "Greenhouse 1::Section A::0:0"]
+    );
+  });
+
   it("returns 500 when query fails", async () => {
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
     mockQuery.mockRejectedValueOnce(new Error("DB failed"));
@@ -1068,6 +1080,31 @@ describe("GET /api/floors/resolve", () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ status: "success", fid: 5 });
+  });
+
+  it("returns fid when floor is found by block_key", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ fid: 6 }] });
+
+    const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A&block_key=Greenhouse 1::Section A::0:0");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ status: "success", fid: 6 });
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining("f.block_key = $3"),
+      ["Greenhouse 1", "Section A", "Greenhouse 1::Section A::0:0"]
+    );
+  });
+
+  it("returns 409 when label-only floor resolution is ambiguous", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [{ fid: 5 }, { fid: 6 }] });
+
+    const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A");
+
+    expect(res.statusCode).toBe(409);
+    expect(res.body).toEqual({
+      status: "ambiguous",
+      message: "Multiple floors match this map_name and cell_name; provide block_key",
+    });
   });
 
   it("returns 400 when map_name is missing", async () => {

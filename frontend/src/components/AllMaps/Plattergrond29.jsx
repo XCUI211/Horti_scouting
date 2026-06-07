@@ -72,7 +72,8 @@ const Plattergrond29 = ({ focusedReport }) => {
 
         const key = String(label);
         const isStatic = !label || STATIC_CELLS.includes(key);
-        const isSelected = selectedCell?.cell_name === key;
+        const blockKey = `HW 29::${key}::${r}:${c}`;
+        const isSelected = selectedCell?.block_key === blockKey || selectedCell?.cell_name === key;
 
         return (
           <div
@@ -87,7 +88,7 @@ const Plattergrond29 = ({ focusedReport }) => {
             // Stretch a cell for multiple row and column if needed
             style={{ gridRow: `span ${h}`, gridColumn: `span ${w}` }}
             // Click and fill the form 
-            onClick={isStatic ? null : () => setSelectedCell({ label: key })}
+            onClick={isStatic ? null : () => setSelectedCell({ label: key, block_key: blockKey })}
           >
             {label}
           </div>

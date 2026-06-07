@@ -26,8 +26,11 @@ CREATE TABLE user_maps (
 CREATE TABLE floors (
     fid         SERIAL      PRIMARY KEY,                                        -- unique floor ID number
     mid         INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,    -- foreign key to maps table; one section has many floors
-    name        VARCHAR(50) NOT NULL                                           -- name of the floor
+    name        VARCHAR(50) NOT NULL,                                          -- visible name of the floor/cell
+    block_key   VARCHAR(150)                                                   -- stable map::name::row:col key for duplicate visible names
 );
+
+CREATE UNIQUE INDEX floors_mid_block_key_unique ON floors (mid, block_key) WHERE block_key IS NOT NULL;
 
 CREATE TABLE floor_reports (
     rid             SERIAL      PRIMARY KEY,                                                             -- unique report ID number

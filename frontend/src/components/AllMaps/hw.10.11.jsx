@@ -37,13 +37,21 @@ const HW1011Map = ({ focusedReport, mapName = "HW 10.11" }) => {
       for (let r = 0; r < mapData.length; r++) {
         for (let c = 0; c < mapData[r].length; c++) {
           if (mapData[r][c] !== null && String(mapData[r][c]).trim() === String(focusedReport.cell_name)) {
+            const labelStr = String(mapData[r][c]).trim();
+            const currentBlockKey = `${mapName}::${labelStr}::${r}:${c}`;
+
+            if (focusedReport.block_key && focusedReport.block_key !== currentBlockKey) {
+              continue;
+            }
+
             const { width, height } = getCellSpan(r, c, mapData[r][c]);
             const bounds = {
-              label: String(mapData[r][c]).trim(),
+              label: labelStr,
               startRow: r,
               startCol: c,
               width,
               height,
+              block_key: focusedReport.block_key || currentBlockKey,
             };
             setSelectedGroup(bounds);
             setViewingReport(focusedReport);
@@ -52,7 +60,7 @@ const HW1011Map = ({ focusedReport, mapName = "HW 10.11" }) => {
         }
       }
     }
-  }, [focusedReport]);
+  }, [focusedReport, mapName]);
   const getCellSpan = (row, col, label) => {
     let width = 1, height = 1;
     if (label === null || label === '') return { width, height };
@@ -160,7 +168,8 @@ const HW1011Map = ({ focusedReport, mapName = "HW 10.11" }) => {
               'merged-block',
               clickable ? 'clickable-block' : 'static-block',
               statusClass,
-              (selectedGroup?.label === labelStr && selectedGroup?.startRow === r && selectedGroup?.startCol === c) ? 'selected' : '',
+              (selectedGroup?.block_key === blockKey ||
+                (!selectedGroup?.block_key && selectedGroup?.label === labelStr && selectedGroup?.startRow === r && selectedGroup?.startCol === c)) ? 'selected' : '',
             ]
               .filter(Boolean)
               .join(' ')}

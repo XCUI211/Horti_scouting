@@ -47,7 +47,14 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
       for (let r = 0; r < mapData.length; r++) {
         for (let c = 0; c < mapData[r].length; c++) {
           if (String(mapData[r][c]) === focusedReport.cell_name) {
+            const currentBlockKey = `${mapName}::${String(mapData[r][c])}::${r}:${c}`;
+
+            if (focusedReport.block_key && focusedReport.block_key !== currentBlockKey) {
+              continue;
+            }
+
             const bounds = getMergedBounds(r, c, mapData[r][c]);
+            bounds.block_key = focusedReport.block_key || currentBlockKey;
             setSelectedGroup(bounds);
             setViewingReport(focusedReport);
             return;
@@ -55,7 +62,7 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
         }
       }
     }
-  }, [focusedReport]);
+  }, [focusedReport, mapName]);
 
   const getMergedBounds = (r, c, label) => {
     if (label === null || label === '') return null;
@@ -69,7 +76,15 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
       if (!nextRowMatches) break;
       maxR++;
     }
-    return { label: String(label), startRow: r, startCol: c, width: maxC - c + 1, height: maxR - r + 1 };
+    const labelStr = String(label);
+    return {
+      label: labelStr,
+      startRow: r,
+      startCol: c,
+      width: maxC - c + 1,
+      height: maxR - r + 1,
+      block_key: `${mapName}::${labelStr}::${r}:${c}`,
+    };
   };
 
   const getNullSpan = (row, col) => {
@@ -140,7 +155,7 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
       gridElements.push(
         <div
           key={`${rIdx}-${cIdx}`}
-          className={`grid-cell merged-block ${isUnclickable ? 'static-block' : 'clickable-block'} ${selectedGroup?.label === bounds.label ? 'selected' : ''} ${statusClass}`}
+          className={`grid-cell merged-block ${isUnclickable ? 'static-block' : 'clickable-block'} ${selectedGroup?.block_key === bounds.block_key ? 'selected' : ''} ${statusClass}`}
           style={{
             gridRow: `span ${bounds.height}`,
             gridColumn: `span ${bounds.width}`,

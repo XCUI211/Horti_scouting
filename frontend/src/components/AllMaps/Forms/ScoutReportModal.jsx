@@ -39,6 +39,8 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
   const { t, i18n } = useTranslation(); //i18n for local language
   const { user } = useAuth();
+  const cellLabel = cellInfo?.label || cellInfo?.cell_name || '';
+  const cellBlockKey = cellInfo?.block_key || '';
 
   const pestOptions = [
     { value: 'red_spider_mite', label: t("ScoutReportModal.RedSpiderMite") },
@@ -99,23 +101,35 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
   useEffect(() => {
     if (!isOpen || !cellInfo || reportData) return;
 
-    fetch(`http://localhost:5000/api/floors/resolve?map_name=${encodeURIComponent(mapName)}&cell_name=${encodeURIComponent(cellInfo.label)}`)
+    const params = new URLSearchParams({
+      map_name: mapName,
+      cell_name: cellLabel,
+    });
+    if (cellBlockKey) params.set('block_key', cellBlockKey);
+
+    fetch(`http://localhost:5000/api/floors/resolve?${params.toString()}`)
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok || data.status !== 'success' || data.fid == null) {
-          throw new Error(`FloorID resolve failed for ${mapName} / ${cellInfo.label}`);
+          throw new Error(`FloorID resolve failed for ${mapName} / ${cellLabel}`);
         }
         setFid(String(data.fid));
       })
       .catch((err) => {
         setError(err.message); // strict: show error, no fallback typing
       });
-  }, [isOpen, cellInfo, mapName, reportData]);
+  }, [isOpen, cellInfo, cellLabel, cellBlockKey, mapName, reportData]);
 
   useEffect(() => {
     if (!isOpen || !cellInfo || reportData) return;
     setHistoryLoading(true);
-    fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent(mapName)}&cell_name=${encodeURIComponent(cellInfo.label)}`)
+    const params = new URLSearchParams({
+      map_id: mapName,
+      cell_name: cellLabel,
+    });
+    if (cellBlockKey) params.set('block_key', cellBlockKey);
+
+    fetch(`http://localhost:5000/api/reports?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') setHistory(data.data);
@@ -123,7 +137,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       })
       .catch(() => setHistory([]))
       .finally(() => setHistoryLoading(false));
-  }, [isOpen, cellInfo, mapName, reportData]);
+  }, [isOpen, cellInfo, cellLabel, cellBlockKey, mapName, reportData]);
 
   const latestApproved = history.find(r => r.status === 'approved');
   const statusColors = {
@@ -281,8 +295,8 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       setAdminBanner({
         type: newStatus === 'approved' ? 'success' : 'danger',
         message: newStatus === 'approved'
-          ? 'Report approved successfully.'
-          : 'Report declined successfully.',
+          ? t("ScoutReportModal.ReportApprovedSuccessfully")
+          : t("ScoutReportModal.ReportDeclinedSuccessfully"),
       });
       
       if (onReportApproved && (newStatus === 'approved' || newStatus === 'rejected')) {
@@ -334,6 +348,11 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
   }
 
   const currentReportStatus = localReportStatus || reportData?.status;
+  const getAdminStatusLabel = (status) => {
+    if (status === 'approved') return t("ScoutReportModal.Approved");
+    if (status === 'rejected') return t("ScoutReportModal.Declined");
+    return status;
+  };
 
   // ---- ADMIN APPROVAL VIEW ----
   if (reportData) {
@@ -391,7 +410,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
                 color: currentReportStatus === 'approved' ? '#2e7d32' : '#c62828',
                 borderRadius: '6px', marginBottom: '10px', fontWeight: 'bold',
               }}>
-                {t("ScoutReportModal.ThisReportHasBeen")} {currentReportStatus === 'rejected' ? 'DECLINED' : currentReportStatus.toUpperCase()}.
+                {t("ScoutReportModal.ThisReportHasBeen")} {getAdminStatusLabel(currentReportStatus)}.
               </div>
             )}
           </div>
@@ -410,7 +429,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
         <div style={styles.modal}>
           <div style={styles.infoHeader}>
             <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CellInfo")}</h3>
-            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2, width: '100%', textAlign: 'center' }}>{mapName} · {cellInfo.label}</span>
+            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2, width: '100%', textAlign: 'center' }}>{mapName} · {cellLabel}</span>
           </div>
           <div style={styles.body}>
             <div style={{ marginBottom: '16px' }}>
@@ -507,7 +526,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       <div style={styles.modal}>
         <div style={styles.infoHeader}>
           <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CreateFloorReport")}</h3>
-            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2 }}>{mapName} · {cellInfo.label}</span>
+            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2 }}>{mapName} · {cellLabel}</span>
         </div>
         <form onSubmit={handleSubmit} style={{ display: 'contents' }}>
           <div style={styles.body}>
@@ -744,3 +763,4 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     </div>
   );
 }
+

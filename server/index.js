@@ -123,11 +123,12 @@ app.get('/api/users/:uid', async (req, res) => {
 // ---------- Reports endpoints (used by map cell coloring + admin dashboard) ----------
 // Returns floor reports joined with floor / map / user info, shaped for the frontend map components.
 app.get('/api/reports', async (req, res) => {
-    const { map_id, cell_name } = req.query;
+    const { map_id, cell_name, block_key } = req.query;
     try {
         const baseQuery = `
             SELECT fr.rid              AS report_id,
                    f.name              AS cell_name,
+                   f.block_key         AS block_key,
                    fr.plant_name       AS plant_name,
                    fr.supplier         AS supplier,
                    m.name              AS map_id,
@@ -146,6 +147,7 @@ app.get('/api/reports', async (req, res) => {
         const params = [];
         if (map_id) { params.push(map_id); conditions.push(`m.name = $${params.length}`); }
         if (cell_name) { params.push(cell_name); conditions.push(`f.name = $${params.length}`); }
+        if (block_key) { params.push(block_key); conditions.push(`f.block_key = $${params.length}`); }
         const where = conditions.length ? ' WHERE ' + conditions.join(' AND ') : '';
         const result = await pool.query(baseQuery + where + ' ORDER BY fr.report_time DESC', params);
         res.json({ status: 'success', data: result.rows });
@@ -159,19 +161,30 @@ app.get('/api/reports', async (req, res) => {
 // if it exists. This is used when submitting a new report to link it to the correct floor. Said query joins the floors
 // and maps tables to find the matching floor based on the provided map and cell names.
 app.get('/api/floors/resolve', async (req, res) => {
-    const { map_name, cell_name } = req.query;
+    const { map_name, cell_name, block_key } = req.query;
 
     if (!map_name || !cell_name) {return res.status(400).json({ status: 'error', message: 'map_name and cell_name are required' });}
+
+    const params = [map_name, cell_name];
+    const blockKeyClause = block_key ? ` AND f.block_key = $3` : '';
+    if (block_key) params.push(block_key);
 
     try {const result = await pool.query(
             `SELECT f.fid
              FROM floors f
              JOIN maps m ON f.mid = m.mid
-             WHERE m.name = $1 AND f.name = $2
-             LIMIT 1`,
-            [map_name, cell_name]);
+             WHERE m.name = $1 AND f.name = $2${blockKeyClause}
+             ORDER BY f.fid
+             LIMIT ${block_key ? 1 : 2}`,
+            params);
 
         if (result.rows.length === 0) {return res.status(404).json({ status: 'not_found', message: 'Floor not found' });}
+        if (!block_key && result.rows.length > 1) {
+            return res.status(409).json({
+                status: 'ambiguous',
+                message: 'Multiple floors match this map_name and cell_name; provide block_key'
+            });
+        }
             res.json({ status: 'success', fid: result.rows[0].fid })}
         catch (err) {console.error(err);
                     res.status(500).json({ status: 'error', message: err.message })}
