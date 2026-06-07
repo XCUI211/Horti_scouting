@@ -296,8 +296,49 @@ describe("POST /api/floorreports", () => {
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({ message: "Floor report created successfully!" });
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining("report_batch_id"),
+      expect.arrayContaining([null])
+    );
   });
 
+});
+
+describe("POST /api/floorreports/bulk", () => {
+  it("creates one floor report for each fid", async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ id: 1 }] })
+      .mockResolvedValueOnce({ rows: [{ id: 2 }] });
+
+    const res = await request(app).post("/api/floorreports/bulk").send({
+      fids: [1, 2],
+      uid: 2,
+      pests_found: true,
+      biology_used: false,
+      chemicals_used: true,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      message: "Floor reports created successfully!",
+      count: 2,
+      report_batch_id: expect.any(String),
+    });
+    expect(mockQuery).toHaveBeenCalledTimes(2);
+    const firstParams = mockQuery.mock.calls[0][1];
+    const secondParams = mockQuery.mock.calls[1][1];
+    expect(firstParams[17]).toEqual(expect.any(String));
+    expect(secondParams[17]).toBe(firstParams[17]);
+  });
+
+  it("returns 400 when fids are missing", async () => {
+    const res = await request(app).post("/api/floorreports/bulk").send({
+      uid: 2,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ message: "fids are required" });
+  });
 });
 
 
@@ -1143,6 +1184,65 @@ describe("GET /api/floors/resolve", () => {
   });
 });
 
+describe("POST /api/floors/resolve-many", () => {
+  it("returns fids ordered like the requested cells", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        { fid: 6, block_key: "Greenhouse 1::Section B::0:1" },
+        { fid: 5, block_key: "Greenhouse 1::Section A::0:0" },
+      ],
+    });
+
+    const res = await request(app).post("/api/floors/resolve-many").send({
+      map_name: "Greenhouse 1",
+      cells: [
+        { cell_name: "Section A", block_key: "Greenhouse 1::Section A::0:0" },
+        { cell_name: "Section B", block_key: "Greenhouse 1::Section B::0:1" },
+      ],
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ status: "success", fids: [5, 6] });
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining("f.block_key = ANY($2::text[])"),
+      [
+        "Greenhouse 1",
+        ["Greenhouse 1::Section A::0:0", "Greenhouse 1::Section B::0:1"],
+      ]
+    );
+  });
+
+  it("returns 400 when a cell is missing block_key", async () => {
+    const res = await request(app).post("/api/floors/resolve-many").send({
+      map_name: "Greenhouse 1",
+      cells: [{ cell_name: "Section A" }],
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ status: "error", message: "Every cell must include block_key" });
+  });
+
+  it("returns 404 when a requested block_key is not found", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [{ fid: 5, block_key: "Greenhouse 1::Section A::0:0" }],
+    });
+
+    const res = await request(app).post("/api/floors/resolve-many").send({
+      map_name: "Greenhouse 1",
+      cells: [
+        { cell_name: "Section A", block_key: "Greenhouse 1::Section A::0:0" },
+        { cell_name: "Section B", block_key: "Greenhouse 1::Section B::0:1" },
+      ],
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({
+      status: "not_found",
+      message: "Floor not found for Greenhouse 1::Section B::0:1",
+    });
+  });
+});
+
 
 // ---------- Approve Report ----------
 describe("PUT /api/reports/:id/approve", () => {
@@ -1159,6 +1259,32 @@ describe("PUT /api/reports/:id/approve", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.status).toBe("success");
     expect(res.body.data.approval_status).toBe("approved");
+  });
+
+  it("approves every report in the same batch", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        { rid: 1, approval_status: "approved", report_batch_id: "11111111-1111-1111-1111-111111111111" },
+        { rid: 2, approval_status: "approved", report_batch_id: "11111111-1111-1111-1111-111111111111" },
+      ],
+    });
+
+    const res = await request(app).put("/api/reports/1/approve").send({
+      status: "approved",
+      admin_comment: "Batch approved",
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.affected_count).toBe(2);
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining("target_report"),
+      ["approved", "Batch approved", "1"]
+    );
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining("report_batch_id = (SELECT report_batch_id FROM target_report)"),
+      ["approved", "Batch approved", "1"]
+    );
   });
 
   it("rejects a report with a comment", async () => {

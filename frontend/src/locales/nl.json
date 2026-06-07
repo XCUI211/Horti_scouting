@@ -248,7 +248,10 @@
     "Severity": "Ernst",
     "Level": "Level",
     "Date": "Datum",
-    "LocateReview": "Localiseer & Beoordeel"
+    "LocateReview": "Localiseer & Beoordeel",
+    "BatchReport": "Multi-select rapport",
+    "Sections": "secties",
+    "ReviewBatch": "Beoordeel batch"
   },
 
   "ScoutReportModal": {
@@ -281,6 +284,8 @@
     "Other": "Anders",
     "FloorReportSubmittedSuccessfully": "Vloer rapport succesvol ingediend",
     "ReportSubmitted": "Rapport ingediend!",
+    "SelectedSections": "{{count}} geselecteerde secties",
+    "ApplyingToSelectedSections": "Dit rapport wordt toegepast op {{count}} geselecteerde secties.",
     "CouldNotSubmitFloorReport": "Kon rapport niet indienen",
     "NetworkError": "Network error",
     "ReportMarkedAs": "Rapport gemarkeerd als",
@@ -302,6 +307,8 @@
     "LeaveAComment": "Laat een opmerking achter...",
     "Accept": "Accepteer",
     "Reject": "Weiger",
+    "AcceptAll": "Alles accepteren",
+    "RejectAll": "Alles weigeren",
     "ThisReportHasBeen": "Dit rapport is",
     "Close": "Sluiten",
     "CellInfo": "Cell INformatie",
@@ -341,6 +348,15 @@
     "BugCount": "Hoeveelheid insecten",
     "Back": "Terug",
     "SubmitReport": "Raport indienen"
+  },
+
+  "MapMultiSelect": {
+    "Enable": "Multi-select",
+    "Disable": "Multi-select afsluiten",
+    "SelectedCount": "{{count}} / {{total}} geselecteerd",
+    "SelectAll": "Alles selecteren",
+    "Clear": "Wissen",
+    "CreateReport": "Rapport maken"
   },
 
   "Rijsenhout": {

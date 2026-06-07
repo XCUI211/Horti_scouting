@@ -15,7 +15,7 @@ export default function AdminDashboardPage() {
   const [selectedReport, setSelectedReport] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation(); //i18n for local language
+  const { t } = useTranslation();
   const handleLocate = (report) => {setSelectedReport(report)};
   const handleReportApproved = () => {setSelectedReport(null);setRefreshTrigger(prev => prev + 1)};
 
@@ -40,7 +40,7 @@ export default function AdminDashboardPage() {
         isOpen={!!selectedReport}
         onClose={() => setSelectedReport(null)}
         onReportApproved={handleReportApproved}
-        cellInfo={selectedReport ? { label: selectedReport.cell_name } : null}
+        cellInfo={selectedReport ? { label: selectedReport.cell_name, block_key: selectedReport.block_key } : null}
         reportData={selectedReport}
         mapName={selectedReport?.map_id || ''}/>
     </AdminLayout>

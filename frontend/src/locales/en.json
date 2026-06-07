@@ -248,7 +248,10 @@
     "Severity": "Severity",
     "Level": "Level",
     "Date": "Date",
-    "LocateReview": "Locate & Review"
+    "LocateReview": "Locate & Review",
+    "BatchReport": "Multi-select report",
+    "Sections": "sections",
+    "ReviewBatch": "Review Batch"
   },
 
   "ScoutReportModal": {
@@ -281,6 +284,8 @@
     "Other": "Other",
     "FloorReportSubmittedSuccessfully": "Floor report submitted successfully.",
     "ReportSubmitted": "Report submitted!",
+    "SelectedSections": "{{count}} selected sections",
+    "ApplyingToSelectedSections": "This report will be applied to {{count}} selected sections.",
     "CouldNotSubmitFloorReport": "Could not submit Floor report",
     "NetworkError": "Network error",
     "ReportMarkedAs": "Report marked as",
@@ -302,6 +307,8 @@
     "LeaveAComment": "Leave a comment...",
     "Accept": "Accept",
     "Reject": "Reject",
+    "AcceptAll": "Accept all",
+    "RejectAll": "Reject all",
     "ThisReportHasBeen": "This report has been",
     "Close": "Close",
     "CellInfo": "Cell Info",
@@ -341,6 +348,15 @@
     "BugCount": "Bug Count",
     "Back": "Back",
     "SubmitReport": "Submit Report"
+  },
+
+  "MapMultiSelect": {
+    "Enable": "Multi-select",
+    "Disable": "Exit multi-select",
+    "SelectedCount": "{{count}} / {{total}} selected",
+    "SelectAll": "Select all",
+    "Clear": "Clear",
+    "CreateReport": "Create report"
   },
 
   "Comment": {
