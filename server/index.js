@@ -519,67 +519,101 @@ app.get('/api/admin/scouts-maps-overview', async (req, res) => {
 
 // GET request to fetch pest history for a selectable period
 // period can be: week, month, year, all
+// GET request to fetch pest history for a selectable period and optional map
+// period can be: week, month, year, all
+// map_id can be: all, HW 15, HW 10.15, etc.
 app.get('/api/analytics/pest-history', async (req, res) => {
-    try {const period = (req.query.period || 'month').toLowerCase();
-        const periodMap = {week: "INTERVAL '7 days'",
-                             month: "INTERVAL '1 month'",
-                             year: "INTERVAL '1 year'"};
+    try {
+        const period = (req.query.period || 'month').toLowerCase();
+        const mapId = req.query.map_id || 'all';
 
-        // The below query counts how often each pest type was reported in a certain selected time period
-        // This is used to show the most common pest types in the history frontend page
+        const periodMap = {
+            week: "INTERVAL '7 days'",
+            month: "INTERVAL '1 month'",
+            year: "INTERVAL '1 year'"
+        };
+
         const intervalSql = periodMap[period] || null;
-        const sql = intervalSql
-            ? `
-                SELECT pest_type, COUNT(*) as count
-                FROM (
-                    SELECT UNNEST(pest_types) as pest_type
-                    FROM floor_reports
-                    WHERE report_time >= NOW() - ${intervalSql}
-                      AND pests_found = true
-                      AND pest_types IS NOT NULL
-                      AND approval_status = 'approved'
-                ) as expanded_pests
-                GROUP BY pest_type
-                ORDER BY count DESC, pest_type ASC
-              `
-            : `
-                SELECT pest_type, COUNT(*) as count
-                FROM (
-                    SELECT UNNEST(pest_types) as pest_type
-                    FROM floor_reports
-                    WHERE pests_found = true
-                      AND pest_types IS NOT NULL
-                      AND approval_status = 'approved'
-                ) as expanded_pests
-                GROUP BY pest_type
-                ORDER BY count DESC, pest_type ASC
-              `;
+        const periodClause = intervalSql
+            ? `AND fr.report_time >= NOW() - ${intervalSql}`
+            : '';
 
-        const result = await pool.query(sql);
-        res.json({status: 'success', data: result.rows, period})}
+        const params = [];
+        let mapClause = '';
 
-    catch (err) {console.error(err);
-                 res.status(500).json({ status: 'error', message: err.message })}
+        if (mapId && mapId !== 'all') {
+            params.push(mapId);
+            mapClause = `AND m.name = $${params.length}`;
+        }
+
+        const sql = `
+            SELECT pest_type, COUNT(*) AS count
+            FROM (
+                SELECT UNNEST(fr.pest_types) AS pest_type
+                FROM floor_reports fr
+                JOIN floors f ON fr.fid = f.fid
+                JOIN maps m ON f.mid = m.mid
+                WHERE fr.pests_found = true
+                  AND fr.pest_types IS NOT NULL
+                  AND fr.approval_status = 'approved'
+                  ${periodClause}
+                  ${mapClause}
+            ) AS expanded_pests
+            GROUP BY pest_type
+            ORDER BY count DESC, pest_type ASC
+        `;
+
+        const result = await pool.query(sql, params);
+
+        res.json({
+            status: 'success',
+            data: result.rows,
+            period,
+            map_id: mapId
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            message: err.message
+        });
+    }
 });
 
 // GET request to fetch detailed information for one specific pest type in a selectable period
+// GET request to fetch detailed information for one specific pest type in a selectable period and optional map
 app.get('/api/analytics/pest-history-details', async (req, res) => {
-    // First it is checked whether the pest_type is provided; if not, an error is returned
-    try {const { pest_type } = req.query;
-         const period = (req.query.period || 'month').toLowerCase();
+    try {
+        const { pest_type } = req.query;
+        const period = (req.query.period || 'month').toLowerCase();
+        const mapId = req.query.map_id || 'all';
 
         if (!pest_type) {
-            return res.status(400).json({ status: 'error', message: 'pest_type is required' })}
+            return res.status(400).json({
+                status: 'error',
+                message: 'pest_type is required'
+            });
+        }
 
-        // If no error, .period is used to query the SQL database on that specific time range
-        const periodMap = {week: "INTERVAL '7 days'",
-                                month: "INTERVAL '1 month'",
-                                year: "INTERVAL '1 year'"};
+        const periodMap = {
+            week: "INTERVAL '7 days'",
+            month: "INTERVAL '1 month'",
+            year: "INTERVAL '1 year'"
+        };
 
         const intervalSql = periodMap[period] || null;
-        const periodClause = intervalSql ? `AND fr.report_time >= NOW() - ${intervalSql}` : '';
+        const periodClause = intervalSql
+            ? `AND fr.report_time >= NOW() - ${intervalSql}`
+            : '';
 
-        // Retrieved reports of the specific pest type based on the given time period
+        const params = [pest_type];
+        let mapClause = '';
+
+        if (mapId && mapId !== 'all') {
+            params.push(mapId);
+            mapClause = `AND m.name = $${params.length}`;
+        }
+
         const historyQuery = `
             SELECT
                 fr.rid AS report_id,
@@ -601,24 +635,180 @@ app.get('/api/analytics/pest-history-details', async (req, res) => {
             JOIN maps m ON f.mid = m.mid
             JOIN users u ON fr.uid = u.uid
             WHERE fr.pests_found = true
-                AND fr.approval_status = 'approved'
-                AND fr.pest_types IS NOT NULL
-                AND $1 = ANY(fr.pest_types)
-                ${periodClause}
+              AND fr.approval_status = 'approved'
+              AND fr.pest_types IS NOT NULL
+              AND $1 = ANY(fr.pest_types)
+              ${periodClause}
+              ${mapClause}
             ORDER BY fr.report_time DESC
         `;
 
-        const historyResult = await pool.query(historyQuery, [pest_type]);
+        const historyResult = await pool.query(historyQuery, params);
 
-        res.json({status: 'success',
-                        data: {pestType: pest_type,
-                               history: historyResult.rows,
-                               historyCount: historyResult.rows.length}}
-        );
+        res.json({
+            status: 'success',
+            data: {
+                pestType: pest_type,
+                history: historyResult.rows,
+                historyCount: historyResult.rows.length
+            },
+            period,
+            map_id: mapId
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            message: err.message
+        });
     }
+});
 
-    catch (err) {console.error(err);
-        res.status(500).json({ status: 'error', message: err.message })}
+// GET request to compare approved pest reports between this week and last week
+// Optional map_id filter: all, HW 15, HW 10.15, etc.
+app.get('/api/analytics/pest-week-comparison', async (req, res) => {
+    try {
+        const mapId = req.query.map_id || 'all';
+
+        const params = [];
+        let mapClause = '';
+
+        if (mapId && mapId !== 'all') {
+            params.push(mapId);
+            mapClause = `AND m.name = $${params.length}`;
+        }
+
+        const sql = `
+            WITH expanded_reports AS (
+                SELECT
+                    m.name AS map_id,
+                    f.name AS cell_name,
+                    UNNEST(fr.pest_types) AS pest_type,
+                    fr.pest_severity,
+                    fr.bug_count,
+                    fr.biology_used,
+                    fr.chemicals_used,
+                    CASE
+                        WHEN fr.report_time >= date_trunc('week', NOW())
+                        THEN 'current'
+                        ELSE 'previous'
+                    END AS week_bucket
+                FROM floor_reports fr
+                JOIN floors f ON fr.fid = f.fid
+                JOIN maps m ON f.mid = m.mid
+                WHERE fr.pests_found = true
+                  AND fr.pest_types IS NOT NULL
+                  AND fr.approval_status = 'approved'
+                  AND fr.report_time >= date_trunc('week', NOW()) - INTERVAL '7 days'
+                  AND fr.report_time < date_trunc('week', NOW()) + INTERVAL '7 days'
+                  ${mapClause}
+            )
+            SELECT
+                map_id,
+                cell_name,
+                pest_type,
+
+                COUNT(*) FILTER (WHERE week_bucket = 'previous') AS previous_reports,
+                COUNT(*) FILTER (WHERE week_bucket = 'current') AS current_reports,
+
+                COALESCE(SUM(bug_count) FILTER (WHERE week_bucket = 'previous'), 0) AS previous_bug_count,
+                COALESCE(SUM(bug_count) FILTER (WHERE week_bucket = 'current'), 0) AS current_bug_count,
+
+                ROUND((AVG(pest_severity) FILTER (WHERE week_bucket = 'previous'))::numeric, 1) AS previous_avg_severity,
+                ROUND((AVG(pest_severity) FILTER (WHERE week_bucket = 'current'))::numeric, 1) AS current_avg_severity,
+
+                COALESCE(
+                    BOOL_OR(COALESCE(biology_used, false) OR COALESCE(chemicals_used, false))
+                    FILTER (WHERE week_bucket = 'previous'),
+                    false
+                ) AS previous_treatment_used,
+
+                COALESCE(
+                    BOOL_OR(COALESCE(biology_used, false) OR COALESCE(chemicals_used, false))
+                    FILTER (WHERE week_bucket = 'current'),
+                    false
+                ) AS current_treatment_used
+
+            FROM expanded_reports
+            GROUP BY map_id, cell_name, pest_type
+            ORDER BY map_id ASC, cell_name ASC, pest_type ASC
+        `;
+
+        const result = await pool.query(sql, params);
+
+        const rows = result.rows.map((row) => {
+            const previousReports = Number(row.previous_reports || 0);
+            const currentReports = Number(row.current_reports || 0);
+            const previousBugCount = Number(row.previous_bug_count || 0);
+            const currentBugCount = Number(row.current_bug_count || 0);
+
+            const reportDifference = currentReports - previousReports;
+            const bugCountDifference = currentBugCount - previousBugCount;
+
+            let status = 'no_change';
+
+            if (previousReports === 0 && currentReports > 0) {
+                status = 'new_issue';
+            } else if (previousReports > 0 && currentReports === 0) {
+                status = 'improved';
+            } else if (currentReports < previousReports) {
+                status = 'improved';
+            } else if (currentReports > previousReports) {
+                status = 'worse';
+            }
+
+            let treatmentEffect = 'No treatment recorded last week';
+
+            if (row.previous_treatment_used) {
+                if (status === 'improved') {
+                    treatmentEffect = 'Treatment may have worked';
+                } else if (status === 'worse') {
+                    treatmentEffect = 'Treatment did not reduce reports';
+                } else if (status === 'no_change') {
+                    treatmentEffect = 'Treatment result unclear';
+                } else if (status === 'new_issue') {
+                    treatmentEffect = 'New issue this week';
+                }
+            }
+
+            return {
+                map_id: row.map_id,
+                cell_name: row.cell_name,
+                pest_type: row.pest_type,
+
+                previous_reports: previousReports,
+                current_reports: currentReports,
+                report_difference: reportDifference,
+
+                previous_bug_count: previousBugCount,
+                current_bug_count: currentBugCount,
+                bug_count_difference: bugCountDifference,
+
+                previous_avg_severity: row.previous_avg_severity,
+                current_avg_severity: row.current_avg_severity,
+
+                previous_treatment_used: row.previous_treatment_used,
+                current_treatment_used: row.current_treatment_used,
+
+                status,
+                treatment_effect: treatmentEffect
+            };
+        });
+
+        res.json({
+            status: 'success',
+            map_id: mapId,
+            current_week_start: null,
+            previous_week_start: null,
+            data: rows
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            message: err.message
+        });
+    }
 });
 
 // GET request to fetch scouts and their recent report history for the scout overview page

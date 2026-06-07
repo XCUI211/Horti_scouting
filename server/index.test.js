@@ -684,6 +684,7 @@ describe("GET /api/analytics/pest-history", () => {
         { pest_type: "mite", count: "2" },
       ],
       period: "month",
+      map_id: "all",
     });
   });
  
@@ -774,6 +775,8 @@ describe("GET /api/analytics/pest-history-details", () => {
         ],
         historyCount: 1,
       },
+      period: "month",
+      map_id: "all",
     });
   });
  

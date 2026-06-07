@@ -138,3 +138,144 @@
   font-size: 12px;
   color: #666;
 }
+
+.pest-history-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.pest-history-map-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.pest-history-map-filter select {
+  min-width: 160px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: white;
+  cursor: pointer;
+}
+
+@media (max-width: 800px) {
+  .pest-history-controls {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .pest-history-map-filter,
+  .pest-history-map-filter select {
+    width: 100%;
+  }
+}
+
+.pest-comparison-card {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+}
+
+.pest-comparison-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pest-comparison-scope {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f7f7f7;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.pest-comparison-table-wrapper {
+  margin-top: 14px;
+  overflow-x: auto;
+}
+
+.pest-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.pest-comparison-table th,
+.pest-comparison-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+
+.pest-comparison-table th {
+  background: #f7f7f7;
+  font-weight: 700;
+  color: #333;
+}
+
+.pest-comparison-improved {
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.pest-comparison-worse {
+  color: #c62828;
+  font-weight: 700;
+}
+
+.pest-comparison-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pest-comparison-badge.improved {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pest-comparison-badge.worse {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.pest-comparison-badge.no_change {
+  background: #eeeeee;
+  color: #555;
+}
+
+.pest-comparison-badge.new_issue {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.pest-comparison-effect {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #555;
+}
+
+@media (max-width: 800px) {
+  .pest-comparison-header {
+    flex-direction: column;
+  }
+
+  .pest-comparison-table {
+    min-width: 900px;
+  }
+}
