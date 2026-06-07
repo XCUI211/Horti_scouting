@@ -26,14 +26,16 @@ CREATE TABLE user_maps (
 CREATE TABLE floors (
     fid         SERIAL      PRIMARY KEY,                                        -- unique floor ID number
     mid         INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,    -- foreign key to maps table; one section has many floors
-    name        VARCHAR(50) NOT NULL,                                           -- name of the floor
-    plant_name  VARCHAR(50) NOT NULL                                            -- name of the plant in the floor
+    name        VARCHAR(50) NOT NULL                                           -- name of the floor
 );
 
 CREATE TABLE floor_reports (
     rid             SERIAL      PRIMARY KEY,                                                             -- unique report ID number
     fid             INT         NOT NULL REFERENCES floors (fid) ON DELETE CASCADE,                      -- foreign key
     uid             INT         NOT NULL REFERENCES users (uid),                                         -- foreign key to users table; one user can have many reports
+
+    plant_name  VARCHAR(50) NOT NULL,                                                                    -- name of the plant in the floor
+    supplier    VARCHAR(100) NOT NULL,                                                                   -- supplier of the plant
 
     pests_found     BOOLEAN     NOT NULL,                                                                -- whether pests were found in the floor
     pest_types      TEXT[],                                                                              -- type of pest found (if applicable)

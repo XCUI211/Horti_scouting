@@ -33,7 +33,7 @@ const AdminLayout = ({ children, title }) => {
             <button className={`desktop-nav-item ${isActive('/maps') ? 'active' : ''}`} onClick={() => navigate('/maps')}>
               <span>{t("AdminLayout.Maps")}</span>
             </button>
-            <button className={`desktop-nav-item ${isActive('/reports_admin') ? 'active' : ''}`} onClick={() => navigate('/reports_admin')}>
+            <button className={`desktop-nav-item ${isActive('/reports') ? 'active' : ''}`} onClick={() => navigate('/reports')}>
               <span>{t("AdminLayout.Reports")}</span>
             </button>
             <button className={`desktop-nav-item ${isActive('/scout_overview') ? 'active' : ''}`} onClick={() => navigate('/scout_overview')}>
@@ -68,7 +68,7 @@ const AdminLayout = ({ children, title }) => {
             <MapPin size={22} />
             <span>{t("AdminLayout.Maps")}</span>
           </button>
-          <button className={`nav-item ${isActive('/reports_admin') ? 'active' : ''}`} onClick={() => navigate('/reports_admin')}>
+          <button className={`nav-item ${isActive('/reports') ? 'active' : ''}`} onClick={() => navigate('/reports')}>
             <BookText size={22} />
             <span>{t("AdminLayout.Reports")}</span>
           </button>

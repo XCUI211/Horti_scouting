@@ -141,8 +141,8 @@ def main():
         lines.append(f"-- {map_name}")
         for label in labels:
             lines.append(
-                "INSERT INTO floors (mid, name, plant_name) "
-                f"SELECT m.mid, {sql_quote(label)}, {sql_quote('Unknown')} "
+                "INSERT INTO floors (mid, name) "
+                f"SELECT m.mid, {sql_quote(label)} "
                 "FROM maps m "
                 f"WHERE m.name = {sql_quote(map_name)} "
                 "AND NOT EXISTS ("

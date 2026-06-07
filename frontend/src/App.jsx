@@ -18,6 +18,7 @@ import AdminDashboardPage from "./pages/AdminDashboard/AdminDashboardPage";
 import History from "./pages/History/History.jsx";
 import ScoutOverview from "./pages/ScoutOverview/ScoutOverview";
 import TasksScout from "./pages/TasksScout/TasksScout";
+import ReportsAdmin from "./pages/ReportsAdmin/ReportsAdmin";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
       <Route path="/history" element={<ProtectedRoute role="admin"><History /></ProtectedRoute>} />
       <Route path="/scout_overview" element={<ProtectedRoute role="admin"><ScoutOverview /></ProtectedRoute>} />
       <Route path="/maps" element={<ProtectedRoute role="admin"><MapView /></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute role="admin"><ReportsAdmin /></ProtectedRoute>} />
 
       {/* Scout-only routes */}
       <Route path="/scout_home" element={<ProtectedRoute role="scout"><HomeScout /></ProtectedRoute>} />
