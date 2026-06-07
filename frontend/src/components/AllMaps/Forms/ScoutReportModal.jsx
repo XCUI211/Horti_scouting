@@ -9,11 +9,14 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
   const [pestsFound, setPestsFound] = useState('');
   const [pestType, setPestType] = useState([]);
   const [pestSeverity, setPestSeverity] = useState('');
+  const [plantName, setPlantName] = useState('');
+  const [supplier, setSupplier] = useState('');
 
   const [biologyUsed, setBiologyUsed] = useState('');
   const [biologyTypes, setBiologyTypes] = useState([]);
+  const [biologyOther, setBiologyOther] = useState('');
   const [chemicalsUsed, setChemicalsUsed] = useState('');
-  const [chemicalsTypes, setChemicalsTypes] = useState([]);
+  const [chemicalsTypes, setChemicalsTypes] = useState('');
   const [behandelaar, setBehandelaar] = useState('');
 
   const [potmaat, setPotmaat] = useState('');
@@ -54,12 +57,16 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
     { value: 'bio1', label: t("ScoutReportModal.Bio1") },
     { value: 'bio2', label: t("ScoutReportModal.Bio2") },
     { value: 'bio3', label: t("ScoutReportModal.Bio3") },
-  ];
-
-  const chemicalsOptions = [
-    { value: 'chem1', label: t("ScoutReportModal.Chem1") },
-    { value: 'chem2', label: t("ScoutReportModal.Chem2") },
-    { value: 'chem3', label: t("ScoutReportModal.Chem3") },
+    { value: 'bio4', label: t("ScoutReportModal.Bio4") },
+    { value: 'bio5', label: t("ScoutReportModal.Bio5") },
+    { value: 'bio6', label: t("ScoutReportModal.Bio6") },
+    { value: 'bio7', label: t("ScoutReportModal.Bio7") },
+    { value: 'bio8', label: t("ScoutReportModal.Bio8") },
+    { value: 'bio9', label: t("ScoutReportModal.Bio9") },
+    { value: 'bio10', label: t("ScoutReportModal.Bio10") },
+    { value: 'bio11', label: t("ScoutReportModal.Bio11") },
+    { value: 'bio12', label: t("ScoutReportModal.Bio12") },
+    { value: 'bio13', label: t("ScoutReportModal.Bio13") },
   ];
 
   useEffect(() => {
@@ -77,8 +84,15 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
       setAdminBanner(null);
       setShowSubmittedPopup(false);
       setView('info');
+      if (!reportData) {
+        setPlantName('');
+        setSupplier('');
+        setBiologyTypes([]);
+        setBiologyOther('');
+        setChemicalsTypes('');
+      }
     }
-  }, [isOpen, cellInfo]);
+  }, [isOpen, cellInfo, reportData]);
 
   // Try to resolve fID from cell info when modal opens, but allow manual override if it fails or if reportData
   // is provided (admin view).
@@ -198,14 +212,6 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
     }
   };
 
-  const toggleChemicals = (value) => {
-    if (chemicalsTypes.includes(value)) {
-      setChemicalsTypes(chemicalsTypes.filter(c => c !== value));
-    } else {
-      setChemicalsTypes([...chemicalsTypes, value]);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -224,13 +230,17 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
         body: JSON.stringify({
           fid: Number(fid),
           uid: Number(user?.uid),
+          plant_name: plantName.trim(),
+          supplier: supplier.trim(),
           pests_found: !pestType.includes('none') && pestType.length > 0,
           pest_types: pestsFound === 'true' && pestType.length > 0 ? pestType : null,
           pest_severity: pestType.includes('none') || pestSeverity === '' ? null : Number(pestSeverity),
           biology_used: biologyUsed === 'true',
-          biology_types: biologyUsed === 'true' && biologyTypes.length > 0 ? biologyTypes : null,
+          biology_types: biologyUsed === 'true' && (biologyTypes.length > 0 || biologyOther !== '')
+            ? [...biologyTypes.filter(b => b !== 'other'),
+               ...(biologyTypes.includes('other') && biologyOther !== '' ? [biologyOther] : []),] : null,
           chemicals_used: chemicalsUsed === 'true',
-          chemicals_types: chemicalsUsed === 'true' && chemicalsTypes.length > 0 ? chemicalsTypes : null,
+          chemicals_types: chemicalsUsed === 'true' ? chemicalsTypes : null,
           behandelaar: biologyUsed === 'true' || chemicalsUsed === 'true' ? behandelaar || null : null,
           potmaat: potmaat || null,
           oppotweek: oppotweek === '' ? null : Number(oppotweek),
@@ -346,6 +356,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
             <div style={{ background: '#f5f5f5', padding: '14px', borderRadius: '8px', marginBottom: '14px', border: '1px solid #ddd' }}>
               <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{t("ScoutReportModal.IssueDetails")}</h4>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Location")}:</strong> {reportData.cell_name}</p>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Plant")}:</strong> {reportData.plant_name}</p>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Supplier")}:</strong> {reportData.supplier}</p>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Severity")}:</strong> {t("ScoutReportModal.Level")} {reportData.severity}</p>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.DateReported")}:</strong> {reportData.entry_date}</p>
               <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '10px 0' }} />
@@ -412,6 +424,12 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                   </div>
                   <div style={{ fontSize: '13px' }}>
                     <strong>{t("ScoutReportModal.Reporter")}:</strong> {latestApproved.reporter_name}
+                  </div>
+                  <div style={{ fontSize: '13px' }}>
+                    <strong>{t("ScoutReportModal.Plant")}:</strong> {latestApproved.plant_name}
+                  </div>
+                  <div style={{ fontSize: '13px' }}>
+                    <strong>{t("ScoutReportModal.Supplier")}:</strong> {latestApproved.supplier}
                   </div>
                   {Array.isArray(latestApproved.pest_types) && latestApproved.pest_types.length > 0 && (
                     <div style={{ fontSize: '13px' }}>
@@ -502,6 +520,26 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
             </div>
 
             <div style={styles.formGroup}>
+              <label style={styles.label}>{t("ScoutReportModal.Plant")}</label>
+              <input
+                style={styles.input}
+                type="text"
+                value={plantName}
+                onChange={(e) => setPlantName(e.target.value)}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>{t("ScoutReportModal.Supplier")}</label>
+              <input
+                style={styles.input}
+                type="text"
+                value={supplier}
+                onChange={(e) => setSupplier(e.target.value)}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
               <label style={styles.label}>{t("ScoutReportModal.PestsFound")}</label>
               <select
                 style={styles.input}
@@ -563,7 +601,8 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                       const v = e.target.value;
                       setBiologyUsed(v);
                       if (v === 'false') {
-                        setBiologyTypes([]);
+                      setBiologyTypes([]);
+                        setBiologyOther('');
                         if (chemicalsUsed !== 'true') setBehandelaar('');
                       }
                     }}
@@ -589,7 +628,31 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                           <span>{b.label}</span>
                         </label>
                       ))}
+                      <label style={styles.checkboxItem}>
+                        <input
+                          type="checkbox"
+                          checked={biologyTypes.includes('other')}
+                          onChange={() => {
+                            if (biologyTypes.includes('other')) {
+                              setBiologyTypes(biologyTypes.filter(b => b !== 'other'));
+                              setBiologyOther('');
+                            } else {
+                              setBiologyTypes([...biologyTypes, 'other']);
+                            }
+                          }}
+                        />
+                        <span>{t("ScoutReportModal.Other")}</span>
+                      </label>
                     </div>
+                    {biologyTypes.includes('other') && (
+                      <input
+                        style={{ ...styles.input, marginTop: '8px' }}
+                        type="text"
+                        value={biologyOther}
+                        onChange={(e) => setBiologyOther(e.target.value)}
+                        placeholder={t("ScoutReportModal.Other")}
+                      />
+                    )}
                   </div>
                 )}
 
@@ -602,7 +665,7 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                       const v = e.target.value;
                       setChemicalsUsed(v);
                       if (v === 'false') {
-                        setChemicalsTypes([]);
+                        setChemicalsTypes('');
                         if (biologyUsed !== 'true') setBehandelaar('');
                       }
                     }}
@@ -617,18 +680,12 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
                 {chemicalsUsed === 'true' && (
                   <div style={styles.formGroup}>
                     <label style={styles.label}>{t("ScoutReportModal.ChemicalsType")}</label>
-                    <div style={styles.checkboxGroup}>
-                      {chemicalsOptions.map(c => (
-                        <label key={c.value} style={styles.checkboxItem}>
-                          <input
-                            type="checkbox"
-                            checked={chemicalsTypes.includes(c.value)}
-                            onChange={() => toggleChemicals(c.value)}
-                          />
-                          <span>{c.label}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <input
+                      style={styles.input}
+                      type="text"
+                      value={chemicalsTypes}
+                      onChange={(e) => setChemicalsTypes(e.target.value)}
+                    />
                   </div>
                 )}
 

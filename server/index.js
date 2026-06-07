@@ -128,6 +128,8 @@ app.get('/api/reports', async (req, res) => {
         const baseQuery = `
             SELECT fr.rid              AS report_id,
                    f.name              AS cell_name,
+                   fr.plant_name       AS plant_name,
+                   fr.supplier         AS supplier,
                    m.name              AS map_id,
                    fr.pest_severity    AS severity,
                    fr.pest_types       AS pest_types,
@@ -267,27 +269,42 @@ app.post('/api/createaccount', async (req, res) => {
 
 app.post('/api/floorreports', async (req, res) => {
     const {fid, uid,
+           plant_name, supplier,
            pests_found, pest_types, pest_severity,
            biology_used, biology_types,
            chemicals_used, chemicals_types,
            behandelaar,
            potmaat, oppotweek, teelduur_weeks,
            trap_number, bug_count
-          } = req.body;  // get data from the frontend
+    } = req.body;  // get data from the frontend
+
+    const normalizedBiologyTypes = Array.isArray(biology_types)
+        ? biology_types.filter((item) => typeof item === 'string' && item !== '')
+        : typeof biology_types === 'string' && biology_types !== ''
+            ? [biology_types]
+            : null;
+
+    const normalizedChemicalsTypes = Array.isArray(chemicals_types)
+        ? chemicals_types.filter((item) => typeof item === 'string' && item !== '')
+        : typeof chemicals_types === 'string' && chemicals_types !== ''
+            ? [chemicals_types]
+            : null;
 
     try {const newReport = await pool.query(
             `INSERT INTO floor_reports
-            (fid, uid, pests_found, pest_types, pest_severity, biology_used, biology_types, chemicals_used, chemicals_types, behandelaar, potmaat, oppotweek, teelduur_weeks, trap_number, bug_count, approval_status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 'pending')
+            (fid, uid, plant_name, supplier, pests_found, pest_types, pest_severity, biology_used, biology_types, chemicals_used, chemicals_types, behandelaar, potmaat, oppotweek, teelduur_weeks, trap_number, bug_count, approval_status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'pending')
             RETURNING *`,
             [fid, uid,
+                plant_name || '',
+                supplier || '',
                 pests_found,
                 pest_types || null,
                 pest_severity ?? null,
                 biology_used,
-                biology_types || null,
+                normalizedBiologyTypes,
                 chemicals_used,
-                chemicals_types || null,
+                normalizedChemicalsTypes,
                 behandelaar || null,
                 potmaat || null,
                 oppotweek ?? null,
@@ -461,8 +478,7 @@ app.post('/api/admin/assign-maps', async (req, res) => {
 
         // Inserts new assignments (this includes old map assignments that haven't been deleted) if any are selected
         if (mapIds && mapIds.length > 0) {
-            const insertValues = mapIds.map(mid => `(${scoutUid}, ${mid})`).join(',');
-            await client.query(`INSERT INTO user_maps (uid, mid) VALUES ${insertValues}`);
+          await client.query(`INSERT INTO user_maps (uid, mid) SELECT $1, unnest($2::int[])`, [scoutUid, mapIds]);
         }
 
         await client.query('COMMIT');  // saves the transaction
@@ -602,6 +618,8 @@ app.get('/api/analytics/pest-history-details', async (req, res) => {
             SELECT
                 fr.rid AS report_id,
                 f.name AS cell_name,
+                fr.plant_name AS plant_name,
+                fr.supplier AS supplier,
                 m.name AS map_id,
                 fr.pest_severity AS severity,
                 fr.pest_types AS pest_types,
@@ -839,6 +857,8 @@ app.get('/api/scout/tasks/:uid', async (req, res) => {
                 fr.approval_status as status,
                 fr.comment,
                 f.name as section_name,
+                fr.plant_name as plant_name,
+                fr.supplier as supplier,
                 m.name as map_name,
                 m.mid,
                 f.fid
@@ -847,7 +867,7 @@ app.get('/api/scout/tasks/:uid', async (req, res) => {
             JOIN maps m ON f.mid = m.mid
             WHERE fr.uid = $1
             ORDER BY fr.report_time DESC
-        `, [uid]);
+        `,[uid]);
 
         res.json(result.rows);
     } catch (err) {
