@@ -10,11 +10,14 @@ import '../MapView/MapView.css';
 // were some bugs with navigating between the pages when it was a tab. The Admin Dashboard is still accessible from the
 // MapView page, but it also has its own URL and page now.
 // NOTE: The AdminDashboard.jsx is still used, this page just wraps it and adds everything to make it a separate page.
+// NOTE: setRefreshTrigger is used to automatically update the AdminDashboard page when a report has been approved/declined.
 export default function AdminDashboardPage() {
   const [selectedReport, setSelectedReport] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation(); //i18n for local language
-  const handleLocate = (report) => {setSelectedReport(report);};
+  const handleLocate = (report) => {setSelectedReport(report)};
+  const handleReportApproved = () => {setSelectedReport(null);setRefreshTrigger(prev => prev + 1)};
 
   return (
     <AdminLayout title={t("Mapview.AdminDashboard")}>
@@ -30,12 +33,13 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="mapview-content">
-        <AdminDashboard onLocate={handleLocate} />
+        <AdminDashboard onLocate={handleLocate} refreshKey={refreshTrigger} />
       </div>
 
       <ScoutReportModal
         isOpen={!!selectedReport}
         onClose={() => setSelectedReport(null)}
+        onReportApproved={handleReportApproved}
         cellInfo={selectedReport ? { label: selectedReport.cell_name } : null}
         reportData={selectedReport}
         mapName={selectedReport?.map_id || ''}/>

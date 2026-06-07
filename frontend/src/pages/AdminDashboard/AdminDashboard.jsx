@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from "react-i18next";
 import { MAP_ORDER } from '../../constants/mapOrder';
 
-export default function AdminDashboard({ onLocate }) {
+export default function AdminDashboard({ onLocate, refreshKey = 0 }) {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedMaps, setExpandedMaps] = useState({});
@@ -20,7 +20,7 @@ export default function AdminDashboard({ onLocate }) {
       })
       .catch(err => console.error("Failed to fetch reports:", err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [refreshKey]);
 
   // Group reports by map_id to make the reports under each map togglable
   const groupedReports = reports.reduce((acc, report) => {

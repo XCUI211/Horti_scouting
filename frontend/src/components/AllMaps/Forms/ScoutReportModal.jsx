@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../context/AuthContext";
 import { formatPestNames } from "../../../constants/pestNames";
 
-export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData, mapName }) {
+export default function ScoutReportModal({ isOpen, onClose, onReportApproved, cellInfo, reportData, mapName }) {
   const [fid, setFid] = useState('');
 
   const [pestsFound, setPestsFound] = useState('');
@@ -284,6 +284,12 @@ export default function ScoutReportModal({ isOpen, onClose, cellInfo, reportData
           ? 'Report approved successfully.'
           : 'Report declined successfully.',
       });
+      
+      if (onReportApproved && (newStatus === 'approved' || newStatus === 'rejected')) {
+        setTimeout(() => {
+          onReportApproved();
+        }, 1000);
+      }
     } catch (err) {
       setAdminBanner({
         type: 'danger',

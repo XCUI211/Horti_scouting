@@ -94,7 +94,9 @@
   display: flex;
   justify-content: space-between;  /* pushes logo+title to left and user icon to the right */
   align-items: center;
-  height: 70px;
+  height: 80px;
+  min-height: 80px;
+  flex-shrink: 0;
   border-bottom: 1px solid #ddd;
   background-color: #ffffff;
   padding: 0 25px;  /* no top-bottom padding, adds left-right padding */
@@ -157,6 +159,7 @@
 /* Main Content Area */
 .admin-mobile-wrapper .pwa-main {
   flex-grow: 1;  /* makes the section take all the available space between header and bottom navigation bar */
+  min-height: 0;
   overflow-y: auto;  /* makes it scrollable */
   background-color: #fdfdfd;
   padding-bottom: 20px;  /* adds padding on the bottom to ensure content doesn't get cut off by navigation bar */
