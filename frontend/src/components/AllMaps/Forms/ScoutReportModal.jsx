@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../context/AuthContext";
 import { formatPestNames } from "../../../constants/pestNames";
 
-export default function ScoutReportModal({ isOpen, onClose, onReportApproved, cellInfo, reportData, mapName }) {
-  const [fid, setFid] = useState('');
+export default function ScoutReportModal({ isOpen, onClose, onReportApproved, cellInfo, reportData, mapName, selectedCells }) {
+  const [targetFids, setTargetFids] = useState([]);
 
   const [pestsFound, setPestsFound] = useState('');
   const [pestType, setPestType] = useState([]);
@@ -37,10 +37,32 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const { t, i18n } = useTranslation(); //i18n for local language
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const cellLabel = cellInfo?.label || cellInfo?.cell_name || '';
-  const cellBlockKey = cellInfo?.block_key || '';
+  const reportTargets = useMemo(() => {
+    const cells = Array.isArray(selectedCells) && selectedCells.length > 0 ? selectedCells : cellInfo ? [cellInfo] : [];
+    const seen = new Set();
+
+    return cells
+      .map((cell) => ({
+        ...cell,
+        label: cell?.label || cell?.cell_name || '',
+        block_key: cell?.block_key || '',
+      }))
+      .filter((cell) => cell.label)
+      .filter((cell) => {
+        const key = cell.block_key || `${cell.label}::${cell.startRow ?? ''}:${cell.startCol ?? ''}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }, [selectedCells, cellInfo]);
+  const hasSelectedTargets = Array.isArray(selectedCells) && selectedCells.length > 0;
+  const cellLabel = reportTargets[0]?.label || '';
+  const cellBlockKey = reportTargets[0]?.block_key || '';
+  const targetLabel = hasSelectedTargets
+    ? t("ScoutReportModal.SelectedSections", { count: reportTargets.length })
+    : cellLabel;
 
   const pestOptions = [
     { value: 'red_spider_mite', label: t("ScoutReportModal.RedSpiderMite") },
@@ -85,7 +107,8 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       setSuccess('');
       setAdminBanner(null);
       setShowSubmittedPopup(false);
-      setView('info');
+      setView(hasSelectedTargets ? 'form' : 'info');
+      setTargetFids([]);
       if (!reportData) {
         setPlantName('');
         setSupplier('');
@@ -94,34 +117,66 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
         setChemicalsTypes('');
       }
     }
-  }, [isOpen, cellInfo, reportData]);
+  }, [isOpen, cellInfo, reportData, hasSelectedTargets]);
 
   // Try to resolve fID from cell info when modal opens, but allow manual override if it fails or if reportData
   // is provided (admin view).
+  // ADDITION: the code below now also provides support for using multiple fID's in case mutliple cells are selected.
+  // In that case, multiple fID's will be sent to backend, after which seperate reports are created for each fID,
+  // thereby allowing for reporting multiple floors at once.
   useEffect(() => {
-    if (!isOpen || !cellInfo || reportData) return;
+    if (!isOpen || reportTargets.length === 0 || reportData) return;
 
-    const params = new URLSearchParams({
-      map_name: mapName,
-      cell_name: cellLabel,
-    });
-    if (cellBlockKey) params.set('block_key', cellBlockKey);
+    let cancelled = false;
+    const resolveTargets = async () => {
+      setTargetFids([]);
 
-    fetch(`http://localhost:5000/api/floors/resolve?${params.toString()}`)
-      .then(async (res) => {
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || data.status !== 'success' || data.fid == null) {
-          throw new Error(`FloorID resolve failed for ${mapName} / ${cellLabel}`);
-        }
-        setFid(String(data.fid));
-      })
-      .catch((err) => {
-        setError(err.message); // strict: show error, no fallback typing
+      if (reportTargets.length > 1) {
+        const response = await fetch('http://localhost:5000/api/floors/resolve-many', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({map_name: mapName,
+                                      cells: reportTargets.map((target) => ({
+                                      cell_name: target.label,
+                                      block_key: target.block_key})),
+                                      })});
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.status !== 'success' || !Array.isArray(data.fids) || data.fids.length === 0) {
+          throw new Error(data.message || `FloorID resolve failed for ${mapName}`);}
+
+        if (!cancelled) {const resolvedFids = data.fids.map((resolvedFid) => String(resolvedFid));
+                         setTargetFids(resolvedFids)}
+        return}
+
+      const target = reportTargets[0];
+      const params = new URLSearchParams({
+        map_name: mapName,
+        cell_name: target.label,
       });
-  }, [isOpen, cellInfo, cellLabel, cellBlockKey, mapName, reportData]);
+      if (target.block_key) params.set('block_key', target.block_key);
+
+      const response = await fetch(`http://localhost:5000/api/floors/resolve?${params.toString()}`);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.status !== 'success' || data.fid == null) {
+        throw new Error(data.message || `FloorID resolve failed for ${mapName} / ${target.label}`);
+      }
+
+      if (!cancelled) {const resolvedFid = String(data.fid);
+                       setTargetFids([resolvedFid])}};
+
+    resolveTargets().catch((err) => {
+      if (!cancelled) {setError(err.message); // strict: show error, no fallback typing
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, reportTargets, mapName, reportData]);
 
   useEffect(() => {
-    if (!isOpen || !cellInfo || reportData) return;
+    if (!isOpen || !cellInfo || reportData || hasSelectedTargets) return;
     setHistoryLoading(true);
     const params = new URLSearchParams({
       map_id: mapName,
@@ -137,7 +192,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       })
       .catch(() => setHistory([]))
       .finally(() => setHistoryLoading(false));
-  }, [isOpen, cellInfo, cellLabel, cellBlockKey, mapName, reportData]);
+  }, [isOpen, cellInfo, cellLabel, cellBlockKey, mapName, reportData, hasSelectedTargets]);
 
   const latestApproved = history.find(r => r.status === 'approved');
   const statusColors = {
@@ -232,36 +287,45 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     setSuccess('');
 
     // Do not accept reports without FloorID
-    if (!fid) {
+    const numericTargetFids = targetFids
+      .map((targetFid) => Number(targetFid))
+      .filter((targetFid) => Number.isFinite(targetFid));
+    if (numericTargetFids.length === 0) {
       setError("FloorID could not be loaded");
       return;
     }
 
+    // Adjusted to work with multi-select by allowing multiple fID's to be sent to the backend, which will then create a
+    // seperate report for each fID. In case multiple fID's are in the fIDs field, backend will ignore the single fID
+    // and use all other report information as usual
     try {
-      const response = await fetch('http://localhost:5000/api/floorreports', {
+      const reportPayload = {
+        uid: Number(user?.uid),
+        plant_name: plantName.trim(),
+        supplier: supplier.trim(),
+        pests_found: !pestType.includes('none') && pestType.length > 0,
+        pest_types: pestsFound === 'true' && pestType.length > 0 ? pestType : null,
+        pest_severity: pestType.includes('none') || pestSeverity === '' ? null : Number(pestSeverity),
+        biology_used: biologyUsed === 'true',
+        biology_types: biologyUsed === 'true' && (biologyTypes.length > 0 || biologyOther !== '')
+          ? [...biologyTypes.filter(b => b !== 'other'),
+             ...(biologyTypes.includes('other') && biologyOther !== '' ? [biologyOther] : []),] : null,
+        chemicals_used: chemicalsUsed === 'true',
+        chemicals_types: chemicalsUsed === 'true' ? chemicalsTypes : null,
+        behandelaar: biologyUsed === 'true' || chemicalsUsed === 'true' ? behandelaar || null : null,
+        potmaat: potmaat || null,
+        oppotweek: oppotweek === '' ? null : Number(oppotweek),
+        teelduur_weeks: teelduurWeeks === '' ? null : Number(teelduurWeeks),
+        trap_number: trapNumber || null,
+        bug_count: bugCount === '' ? null : Number(bugCount),
+      };
+      const isBulkSubmit = numericTargetFids.length > 1;
+      const response = await fetch(`http://localhost:5000/api/floorreports${isBulkSubmit ? '/bulk' : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fid: Number(fid),
-          uid: Number(user?.uid),
-          plant_name: plantName.trim(),
-          supplier: supplier.trim(),
-          pests_found: !pestType.includes('none') && pestType.length > 0,
-          pest_types: pestsFound === 'true' && pestType.length > 0 ? pestType : null,
-          pest_severity: pestType.includes('none') || pestSeverity === '' ? null : Number(pestSeverity),
-          biology_used: biologyUsed === 'true',
-          biology_types: biologyUsed === 'true' && (biologyTypes.length > 0 || biologyOther !== '')
-            ? [...biologyTypes.filter(b => b !== 'other'),
-               ...(biologyTypes.includes('other') && biologyOther !== '' ? [biologyOther] : []),] : null,
-          chemicals_used: chemicalsUsed === 'true',
-          chemicals_types: chemicalsUsed === 'true' ? chemicalsTypes : null,
-          behandelaar: biologyUsed === 'true' || chemicalsUsed === 'true' ? behandelaar || null : null,
-          potmaat: potmaat || null,
-          oppotweek: oppotweek === '' ? null : Number(oppotweek),
-          teelduur_weeks: teelduurWeeks === '' ? null : Number(teelduurWeeks),
-          trap_number: trapNumber || null,
-          bug_count: bugCount === '' ? null : Number(bugCount),
-        }),
+        body: JSON.stringify(isBulkSubmit
+          ? { ...reportPayload, fids: numericTargetFids }
+          : { ...reportPayload, fid: numericTargetFids[0] }),
       });
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
@@ -348,6 +412,8 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
   }
 
   const currentReportStatus = localReportStatus || reportData?.status;
+  const isBatchReport = Number(reportData?.batch_count || 1) > 1;
+  const batchCellNames = Array.isArray(reportData?.batch_cell_names) ? reportData.batch_cell_names : [];
   const getAdminStatusLabel = (status) => {
     if (status === 'approved') return t("ScoutReportModal.Approved");
     if (status === 'rejected') return t("ScoutReportModal.Declined");
@@ -380,7 +446,17 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
             <div style={{ background: '#f5f5f5', padding: '14px', borderRadius: '8px', marginBottom: '14px', border: '1px solid #ddd' }}>
               <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{t("ScoutReportModal.IssueDetails")}</h4>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Location")}:</strong> {reportData.cell_name}</p>
+              <p style={{ margin: '4px 0', fontSize: '14px' }}>
+                <strong>{t("ScoutReportModal.Location")}:</strong> {isBatchReport
+                  ? t("ScoutReportModal.SelectedSections", { count: reportData.batch_count })
+                  : reportData.cell_name}
+              </p>
+              {isBatchReport && (
+                <p style={{ margin: '4px 0', fontSize: '12px', color: '#666' }}>
+                  {batchCellNames.slice(0, 8).join(', ')}
+                  {batchCellNames.length > 8 ? ` +${batchCellNames.length - 8}` : ''}
+                </p>
+              )}
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Plant")}:</strong> {reportData.plant_name}</p>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Supplier")}:</strong> {reportData.supplier}</p>
               <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Severity")}:</strong> {t("ScoutReportModal.Level")} {reportData.severity}</p>
@@ -400,8 +476,12 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
             </div>
             {currentReportStatus === 'pending' ? (
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                <button style={styles.btnAccept} onClick={() => handleUpdateStatus('approved')}>{t("ScoutReportModal.Accept")}</button>
-                <button style={styles.btnReject} onClick={() => handleUpdateStatus('rejected')}>{t("ScoutReportModal.Reject")}</button>
+                <button style={styles.btnAccept} onClick={() => handleUpdateStatus('approved')}>
+                  {isBatchReport ? t("ScoutReportModal.AcceptAll") : t("ScoutReportModal.Accept")}
+                </button>
+                <button style={styles.btnReject} onClick={() => handleUpdateStatus('rejected')}>
+                  {isBatchReport ? t("ScoutReportModal.RejectAll") : t("ScoutReportModal.Reject")}
+                </button>
               </div>
             ) : (
               <div style={{
@@ -429,7 +509,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
         <div style={styles.modal}>
           <div style={styles.infoHeader}>
             <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CellInfo")}</h3>
-            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2, width: '100%', textAlign: 'center' }}>{mapName} · {cellLabel}</span>
+            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2, width: '100%', textAlign: 'center' }}>{mapName} · {targetLabel}</span>
           </div>
           <div style={styles.body}>
             <div style={{ marginBottom: '16px' }}>
@@ -526,12 +606,26 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       <div style={styles.modal}>
         <div style={styles.infoHeader}>
           <h3 style={{ margin: 0 }}>{t("ScoutReportModal.CreateFloorReport")}</h3>
-            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2 }}>{mapName} · {cellLabel}</span>
+            <span style={{ fontSize: '18px', color: '#333', fontWeight: 700, lineHeight: 1.2 }}>{mapName} · {targetLabel}</span>
         </div>
         <form onSubmit={handleSubmit} style={{ display: 'contents' }}>
           <div style={styles.body}>
             {error && <p style={{ color: 'red', fontWeight: 'bold', margin: '0 0 10px 0' }}>{error}</p>}
             {success && <p style={{ color: 'green', fontWeight: 'bold', margin: '0 0 10px 0' }}>{success}</p>}
+            {hasSelectedTargets && (
+              <div style={{
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1d4ed8',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                marginBottom: '14px',
+                fontSize: '13px',
+                fontWeight: 700,
+              }}>
+                {t("ScoutReportModal.ApplyingToSelectedSections", { count: reportTargets.length })}
+              </div>
+            )}
 
             {/*Name of scout (based on UID)*/}
             <div style={styles.formGroup}>
@@ -755,8 +849,10 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
           </div>
 
           <div style={styles.footer}>
-            <button type="button" style={styles.btnSecondary} onClick={() => setView('info')}>{t("ScoutReportModal.Back")}</button>
-            <button type="submit" style={styles.btnPrimary} disabled={!fid}>{t("ScoutReportModal.SubmitReport")}</button>
+            <button type="button" style={styles.btnSecondary} onClick={() => hasSelectedTargets ? onClose() : setView('info')}>
+              {hasSelectedTargets ? t("ScoutReportModal.Close") : t("ScoutReportModal.Back")}
+            </button>
+            <button type="submit" style={styles.btnPrimary} disabled={targetFids.length === 0}>{t("ScoutReportModal.SubmitReport")}</button>
           </div>
         </form>
       </div>

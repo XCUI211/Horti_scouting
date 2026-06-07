@@ -89,6 +89,70 @@
   z-index: 10;
 }
 
+/* BEGIN Multi-Select Toolbar CSS */
+.clickable-block.multi-selected {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+  border: 2px solid #2563eb !important;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.65);
+  z-index: 9;
+}
+
+.map-multiselect-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.map-multiselect-toolbar.active {
+  background: #eff6ff;
+}
+
+.map-multiselect-toggle,
+.map-multiselect-action,
+.map-multiselect-submit {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 10px;
+}
+
+.map-multiselect-toggle {
+  background: #1f2937;
+  color: #fff;
+}
+
+.map-multiselect-action {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.map-multiselect-submit {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.map-multiselect-action:disabled,
+.map-multiselect-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.map-multiselect-count {
+  color: #1f2937;
+  font-size: 12px;
+  font-weight: 700;
+}
+/* END Multi-Select Toolbar CSS */
+
+
 /* --- STATIC BLOCKS (Grey Areas) --- */
 .static-block {
   background: #f0f0f0 !important; /* Solid Grey */

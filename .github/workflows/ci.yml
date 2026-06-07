@@ -1,5 +1,10 @@
 name: Continuous Integration
-on: [pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
 jobs:
 
   root-check:  # General checks for entire project

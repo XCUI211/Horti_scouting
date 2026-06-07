@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');  // For password hashing
 const express = require('express');  // Express framework allows server to respond to internet requests
 const cors = require('cors');  // CORS (Cross-Origin Resource Sharing)
+const crypto = require('crypto');
 const { Pool } = require('pg');  // Imports PostgreSQL driver
 require('dotenv').config();  // Looks for the .env file for the secrets to access the database
 
@@ -27,6 +28,18 @@ const testDatabaseConnection = async () => {
     } catch (err) {
         console.error('Error acquiring client', err.stack);
     }
+};
+
+const ensureReportBatchColumn = async () => {
+    await pool.query(`
+        ALTER TABLE floor_reports
+        ADD COLUMN IF NOT EXISTS report_batch_id UUID
+    `);
+    await pool.query(`
+        CREATE INDEX IF NOT EXISTS floor_reports_report_batch_id_idx
+        ON floor_reports (report_batch_id)
+        WHERE report_batch_id IS NOT NULL
+    `);
 };
 
 // Simple confirmation that the server is working
@@ -137,7 +150,14 @@ app.get('/api/reports', async (req, res) => {
                    to_char(fr.report_time, 'YYYY-MM-DD') AS entry_date,
                    fr.approval_status  AS status,
                    u.username          AS reporter_name,
-                   fr.comment          AS admin_comment
+                   fr.comment          AS admin_comment,
+                   fr.report_batch_id  AS report_batch_id,
+                   COUNT(*) OVER (
+                       PARTITION BY COALESCE(fr.report_batch_id::text, fr.rid::text)
+                   )                   AS batch_count,
+                   ARRAY_AGG(f.name) OVER (
+                       PARTITION BY COALESCE(fr.report_batch_id::text, fr.rid::text)
+                   )                   AS batch_cell_names
             FROM floor_reports fr
             JOIN floors f ON fr.fid = f.fid
             JOIN maps m   ON f.mid  = m.mid
@@ -199,18 +219,70 @@ app.put('/api/reports/:id/approve', async (req, res) => {
     }
     try {
         const result = await pool.query(
-            `UPDATE floor_reports
+            `WITH target_report AS (
+                 SELECT report_batch_id
+                 FROM floor_reports
+                 WHERE rid = $3
+             )
+             UPDATE floor_reports
              SET approval_status = $1,
                  reviewed_at = CURRENT_TIMESTAMP,
                  comment = $2
              WHERE rid = $3
+                OR (
+                    report_batch_id IS NOT NULL
+                    AND report_batch_id = (SELECT report_batch_id FROM target_report)
+                )
              RETURNING *`,
             [status, admin_comment || null, id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Report not found' });
         }
-        res.json({ status: 'success', data: result.rows[0] });
+        res.json({ status: 'success', data: result.rows[0], affected_count: result.rows.length });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// POST request to allow for multi-selection of floors. Does so by accepting an array of floors (sent by frontend, from
+// ScoutReportModal.jsx), after which it makes sure all floors actually exist, and then returns an array of their fID's.
+// Note, this is only used when the multi-select mode is used and multiple fID's are sent here to backend.
+app.post('/api/floors/resolve-many', async (req, res) => {
+    const { map_name, cells } = req.body;
+
+    if (!map_name || !Array.isArray(cells) || cells.length === 0) {
+        return res.status(400).json({ status: 'error', message: 'map_name and cells are required' });
+    }
+
+    const blockKeys = cells.map((cell) => cell?.block_key).filter(Boolean);
+    if (blockKeys.length !== cells.length) {
+        return res.status(400).json({ status: 'error', message: 'Every cell must include block_key' });
+    }
+
+    try {
+        const result = await pool.query(
+            `SELECT f.fid, f.block_key
+             FROM floors f
+             JOIN maps m ON f.mid = m.mid
+             WHERE m.name = $1 AND f.block_key = ANY($2::text[])`,
+            [map_name, blockKeys]
+        );
+
+        const fidByBlockKey = new Map(result.rows.map((row) => [row.block_key, row.fid]));
+        const missingBlockKey = blockKeys.find((blockKey) => !fidByBlockKey.has(blockKey));
+        if (missingBlockKey) {
+            return res.status(404).json({
+                status: 'not_found',
+                message: `Floor not found for ${missingBlockKey}`
+            });
+        }
+
+        res.json({
+            status: 'success',
+            fids: blockKeys.map((blockKey) => fidByBlockKey.get(blockKey))
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ status: 'error', message: err.message });
@@ -220,6 +292,7 @@ app.put('/api/reports/:id/approve', async (req, res) => {
 // Start the server
 const startServer = async () => {
     await testDatabaseConnection();
+    await ensureReportBatchColumn();
 
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
@@ -280,54 +353,82 @@ app.post('/api/createaccount', async (req, res) => {
 });
 
 
+const FLOOR_REPORT_INSERT_SQL = `INSERT INTO floor_reports
+    (fid, uid, plant_name, supplier, pests_found, pest_types, pest_severity, biology_used, biology_types, chemicals_used, chemicals_types, behandelaar, potmaat, oppotweek, teelduur_weeks, trap_number, bug_count, approval_status, report_batch_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'pending', $18)
+    RETURNING *`;
+
+const normalizeStringArray = (value) => {
+    if (Array.isArray(value)) {
+        return value.filter((item) => typeof item === 'string' && item !== '');
+    }
+    if (typeof value === 'string' && value !== '') return [value];
+    return null;
+};
+
+// Function used to correctly order floor properties, based on an input fID, to match the SQL query for the insertion
+// of a new floor report. This is then used in the insertFloorReport function below, which is called when a user submits
+// a new floor report (either a single floor, or multiple in multi-select mode).
+const buildFloorReportParams = (fid, data) => [
+    fid,
+    data.uid,
+    data.plant_name || '',
+    data.supplier || '',
+    data.pests_found,
+    data.pest_types || null,
+    data.pest_severity ?? null,
+    data.biology_used,
+    normalizeStringArray(data.biology_types),
+    data.chemicals_used,
+    normalizeStringArray(data.chemicals_types),
+    data.behandelaar || null,
+    data.potmaat || null,
+    data.oppotweek ?? null,
+    data.teelduur_weeks ?? null,
+    data.trap_number || null,
+    data.bug_count ?? null,
+    data.report_batch_id || null,
+];
+
+const insertFloorReport = (fid, data) =>
+    pool.query(FLOOR_REPORT_INSERT_SQL, buildFloorReportParams(fid, data));
+
 app.post('/api/floorreports', async (req, res) => {
-    const {fid, uid,
-           plant_name, supplier,
-           pests_found, pest_types, pest_severity,
-           biology_used, biology_types,
-           chemicals_used, chemicals_types,
-           behandelaar,
-           potmaat, oppotweek, teelduur_weeks,
-           trap_number, bug_count
-    } = req.body;  // get data from the frontend
+    const { fid } = req.body;  // get data from the frontend
 
-    const normalizedBiologyTypes = Array.isArray(biology_types)
-        ? biology_types.filter((item) => typeof item === 'string' && item !== '')
-        : typeof biology_types === 'string' && biology_types !== ''
-            ? [biology_types]
-            : null;
-
-    const normalizedChemicalsTypes = Array.isArray(chemicals_types)
-        ? chemicals_types.filter((item) => typeof item === 'string' && item !== '')
-        : typeof chemicals_types === 'string' && chemicals_types !== ''
-            ? [chemicals_types]
-            : null;
-
-    try {const newReport = await pool.query(
-            `INSERT INTO floor_reports
-            (fid, uid, plant_name, supplier, pests_found, pest_types, pest_severity, biology_used, biology_types, chemicals_used, chemicals_types, behandelaar, potmaat, oppotweek, teelduur_weeks, trap_number, bug_count, approval_status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'pending')
-            RETURNING *`,
-            [fid, uid,
-                plant_name || '',
-                supplier || '',
-                pests_found,
-                pest_types || null,
-                pest_severity ?? null,
-                biology_used,
-                normalizedBiologyTypes,
-                chemicals_used,
-                normalizedChemicalsTypes,
-                behandelaar || null,
-                potmaat || null,
-                oppotweek ?? null,
-                teelduur_weeks ?? null,
-                trap_number || null,
-                bug_count ?? null]);
+    try {
+        await insertFloorReport(fid, req.body);
 
         // Sends success message back to frontend
         res.status(201).json({
             message: 'Floor report created successfully!'
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// POST request for actually creating multiple floor reports as one, based on an input array of multiple fID's.
+app.post('/api/floorreports/bulk', async (req, res) => {
+    const { fids } = req.body;
+
+    if (!Array.isArray(fids) || fids.length === 0) {
+        return res.status(400).json({ message: 'fids are required' });
+    }
+
+    try {
+        const reportBatchId = crypto.randomUUID();
+        await Promise.all(fids.map((fid) => insertFloorReport(fid, {
+            ...req.body,
+            report_batch_id: reportBatchId,
+        })));
+
+        res.status(201).json({
+            message: 'Floor reports created successfully!',
+            count: fids.length,
+            report_batch_id: reportBatchId
         });
 
     } catch (err) {
@@ -894,5 +995,6 @@ module.exports = {
     app,
     pool,
     startServer,
-    testDatabaseConnection
+    testDatabaseConnection,
+    ensureReportBatchColumn
 };

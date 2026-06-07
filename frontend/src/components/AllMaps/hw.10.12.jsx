@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import mapData from './hw10.12.json'; 
+import mapData from './hw10.12.json';
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
+import MapMultiSelectToolbar from './MapMultiSelectToolbar';
+import { useMapMultiSelect } from './useMapMultiSelect';
+import { getFocusedReportForCell } from './mapSelection';
 
 const HW1012Map = ({ focusedReport }) => {
   const [selectedCell, setSelectedCell] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
+  const {
+    multiSelectEnabled,
+    selectedCells,
+    multiReportCell,
+    toggleMultiSelectMode,
+    handleSelectableCellClick,
+    selectAllCells,
+    clearMultiSelection,
+    openMultiReport,
+    closeMultiReport,
+    isCellMultiSelected,
+  } = useMapMultiSelect({
+    clearSingleSelection: () => setSelectedCell(null),
+  });
 
   const mapId = "HW 10.12";
 
   const staticCells = [
-    "Tranportbaan",    
+    "Tranportbaan",
     "Transport",
     "Deur naar kas 2",
     "Deur naar kas 3",
@@ -42,9 +59,9 @@ const HW1012Map = ({ focusedReport }) => {
 
   useEffect(() => {
     if (focusedReport) {
-      setSelectedCell({ 
+      setSelectedCell({
         label: focusedReport.cell_name,
-        block_key: focusedReport.block_key 
+        block_key: focusedReport.block_key
       });
     }
   }, [focusedReport]);
@@ -57,7 +74,7 @@ const HW1012Map = ({ focusedReport }) => {
     return { width, height };
   };
 
-  const renderGrid = () => {
+  const renderGrid = (selectableCells = []) => {
     const rendered = new Set();
     const cells = [];
 
@@ -73,26 +90,26 @@ const HW1012Map = ({ focusedReport }) => {
 
         const labelStr = String(label);
         const isStatic = staticCells.includes(labelStr);
-        
+
         const blockKey = `${mapId}::${labelStr}::${r}:${c}`;
+        const cellInfo = { label: labelStr, startRow: r, startCol: c, width, height, block_key: blockKey };
+        if (!isStatic) selectableCells.push(cellInfo);
         const statusClass = cellStatuses[blockKey] || cellStatuses[labelStr] || '';
 
-        const isSelected = selectedCell?.block_key === blockKey || 
+        const isSelected = selectedCell?.block_key === blockKey ||
                           (!selectedCell?.block_key && selectedCell?.label === labelStr);
+        const isMultiSelected = !isStatic && isCellMultiSelected(cellInfo);
 
         cells.push(
           <div
             key={`${r}-${c}`}
-            className={`grid-cell merged-block ${isStatic ? 'static-block' : 'clickable-block'} ${statusClass} ${isSelected ? 'selected' : ''}`}
-            style={{ 
-              gridRow: `span ${height}`, 
+            className={`grid-cell merged-block ${isStatic ? 'static-block' : 'clickable-block'} ${statusClass} ${isSelected ? 'selected' : ''} ${isMultiSelected ? 'multi-selected' : ''}`}
+            style={{
+              gridRow: `span ${height}`,
               gridColumn: `span ${width}`,
-              backgroundColor: typeof label === 'number' && !isStatic ? '#e8f5e9' : undefined 
+              backgroundColor: typeof label === 'number' && !isStatic ? '#e8f5e9' : undefined
             }}
-            onClick={isStatic ? null : () => setSelectedCell({ 
-              label: labelStr,
-              block_key: blockKey 
-            })}
+            onClick={isStatic ? null : () => handleSelectableCellClick(cellInfo, setSelectedCell)}
           >
             {labelStr}
           </div>
@@ -103,25 +120,47 @@ const HW1012Map = ({ focusedReport }) => {
     return cells;
   };
 
+  const selectableCells = [];
+  const gridElements = renderGrid(selectableCells);
+  const modalCell = multiReportCell || selectedCell;
+  const handleCloseModal = () => {
+    setSelectedCell(null);
+    closeMultiReport({ reset: !!multiReportCell });
+  };
+
   return (
     <div className="map-container">
-      <h2>HW 10.12 - Scouting Map</h2>
-      <div
-        className="merged-grid-container"
-        style={{ 
-          display: 'grid',
-          gridTemplateColumns: `repeat(${mapData[0].length}, minmax(40px, 1fr))` 
-        }}
-      >
-        {renderGrid()}
+      {!focusedReport && (
+        <MapMultiSelectToolbar
+          enabled={multiSelectEnabled}
+          selectedCount={selectedCells.length}
+          totalCount={selectableCells.length}
+          onToggle={toggleMultiSelectMode}
+          onSelectAll={() => selectAllCells(selectableCells)}
+          onClear={clearMultiSelection}
+          onCreateReport={openMultiReport}
+        />
+      )}
+
+      <div className="map-viewport">
+        <div
+          className="merged-grid-container"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${mapData[0].length}, minmax(40px, 1fr))`
+          }}
+        >
+          {gridElements}
+        </div>
       </div>
 
       <ScoutReportModal
-        isOpen={!!selectedCell}
-        cellInfo={selectedCell}
+        isOpen={!!modalCell}
+        cellInfo={modalCell}
         mapName={mapId}
-        reportData={focusedReport?.cell_name === selectedCell?.label ? focusedReport : null}
-        onClose={() => setSelectedCell(null)}
+        reportData={multiReportCell ? null : getFocusedReportForCell(focusedReport, modalCell)}
+        onClose={handleCloseModal}
+        selectedCells={multiReportCell ? selectedCells : undefined}
       />
     </div>
   );

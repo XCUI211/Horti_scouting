@@ -58,9 +58,15 @@ CREATE TABLE floor_reports (
 
     report_time     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,                                      -- timestamp of the report
     approval_status VARCHAR(50) NOT NULL CHECK (approval_status IN ('pending', 'approved', 'rejected')), -- approval status of the report
+    report_batch_id UUID,                                                                                -- shared ID for reports created together with multi-select
     reviewed_at     TIMESTAMP,                                                                           -- timestamp of when the report was reviewed (approved/rejected)
     comment         TEXT                                                                                 -- optional comment from the admin when approving/rejecting the report
 );
+
+-- index to group reports by multi-select
+-- this is done to keep track of which reports belong to the same multi-select selection so that the admin
+-- can batch approve/reject them together
+CREATE INDEX floor_reports_report_batch_id_idx ON floor_reports (report_batch_id) WHERE report_batch_id IS NOT NULL;
 
 CREATE TABLE climate_computer (
     ccid                 SERIAL         PRIMARY KEY,                                            -- unique climate computer ID number

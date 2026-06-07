@@ -3,13 +3,32 @@ import mapData from './rijsenhout.json';
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
 import { useTranslation } from "react-i18next";
+import MapMultiSelectToolbar from './MapMultiSelectToolbar';
+import { useMapMultiSelect } from './useMapMultiSelect';
 
 const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
 
-  const { t, i18n } = useTranslation(); //i18n for local language
+  const { t } = useTranslation();
+  const {
+    multiSelectEnabled,
+    selectedCells,
+    multiReportCell,
+    toggleMultiSelectMode,
+    handleSelectableCellClick,
+    selectAllCells,
+    clearMultiSelection,
+    openMultiReport,
+    closeMultiReport,
+    isCellMultiSelected,
+  } = useMapMultiSelect({
+    clearSingleSelection: () => {
+      setSelectedGroup(null);
+      setViewingReport(null);
+    },
+  });
   
   const unclickableLabels = [
     "Rijsenhout", "Oppotruimte", "Raap plein", 
@@ -82,6 +101,7 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
 
   const renderedCells = new Set();
   const gridElements = [];
+  const selectableCells = [];
 
   mapData.forEach((row, rIdx) => {
     row.forEach((cell, cIdx) => {
@@ -95,6 +115,8 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
 
         const isUnclickable = unclickableLabels.includes(bounds.label);
         const blockKey = `${mapName}::${bounds.label}::${rIdx}:${cIdx}`;
+        const cellInfo = { ...bounds, block_key: blockKey };
+        if (!isUnclickable) selectableCells.push(cellInfo);
         
         let statusClass = '';
         const currentStatus = cellStatuses[blockKey] || cellStatuses[bounds.label];
@@ -103,19 +125,20 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
 
         const isSelected = selectedGroup?.block_key === blockKey || 
                           (!selectedGroup?.block_key && selectedGroup?.label === bounds.label && selectedGroup?.startRow === rIdx && selectedGroup?.startCol === cIdx);
+        const isMultiSelected = !isUnclickable && isCellMultiSelected(cellInfo);
 
         gridElements.push(
           <div
             key={`${rIdx}-${cIdx}`}
-            className={`grid-cell merged-block ${isUnclickable ? 'static-block' : 'clickable-block'} ${isSelected ? 'selected' : ''} ${statusClass}`}
+            className={`grid-cell merged-block ${isUnclickable ? 'static-block' : 'clickable-block'} ${isSelected ? 'selected' : ''} ${isMultiSelected ? 'multi-selected' : ''} ${statusClass}`}
             style={{
               gridRow: `span ${bounds.height}`,
               gridColumn: `span ${bounds.width}`
             }}
-            onClick={isUnclickable ? null : () => {
-              setSelectedGroup({ ...bounds, block_key: blockKey });
+            onClick={isUnclickable ? null : () => handleSelectableCellClick(cellInfo, (selectedCell) => {
+              setSelectedGroup(selectedCell);
               setViewingReport(null);
-            }}
+            })}
           >
             {getDisplayLabel(bounds.label)}
           </div>
@@ -127,18 +150,39 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
     });
   });
 
+  const modalCell = multiReportCell || selectedGroup;
+  const handleCloseModal = () => {
+    setSelectedGroup(null);
+    setViewingReport(null);
+    closeMultiReport({ reset: !!multiReportCell });
+  };
+
   return (
     <div className="map-container">
-      <div className="map-header">
-        <h2>{t("Rijsenhout.Header")}</h2>
-        <p className="mobile-hint">{t("Rijsenhout.MobileHint")}</p>
-      </div>
+      {!focusedReport && (
+        <MapMultiSelectToolbar
+          enabled={multiSelectEnabled}
+          selectedCount={selectedCells.length}
+          totalCount={selectableCells.length}
+          onToggle={toggleMultiSelectMode}
+          onSelectAll={() => selectAllCells(selectableCells)}
+          onClear={clearMultiSelection}
+          onCreateReport={openMultiReport}
+        />
+      )}
       <div className="map-viewport">
         <div className="merged-grid-container" style={{ display: 'grid', gridTemplateColumns: `repeat(${mapData[0].length}, minmax(70px, 1fr))`, gridAutoRows: 'minmax(45px, auto)' }}>
           {gridElements}
         </div>
       </div>
-      <ScoutReportModal isOpen={!!selectedGroup} onClose={() => { setSelectedGroup(null); setViewingReport(null); }} cellInfo={selectedGroup} reportData={viewingReport} mapName={mapName} />
+      <ScoutReportModal
+        isOpen={!!modalCell}
+        onClose={handleCloseModal}
+        cellInfo={modalCell}
+        reportData={multiReportCell ? null : viewingReport}
+        mapName={mapName}
+        selectedCells={multiReportCell ? selectedCells : undefined}
+      />
     </div>
   );
 };

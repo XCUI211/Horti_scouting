@@ -2,11 +2,30 @@ import React, { useState, useEffect } from 'react';
 import mapData from './hw.15.json';
 import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
+import MapMultiSelectToolbar from './MapMultiSelectToolbar';
+import { useMapMultiSelect } from './useMapMultiSelect';
 
 const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
+  const {
+    multiSelectEnabled,
+    selectedCells,
+    multiReportCell,
+    toggleMultiSelectMode,
+    handleSelectableCellClick,
+    selectAllCells,
+    clearMultiSelection,
+    openMultiReport,
+    closeMultiReport,
+    isCellMultiSelected,
+  } = useMapMultiSelect({
+    clearSingleSelection: () => {
+      setSelectedGroup(null);
+      setViewingReport(null);
+    },
+  });
 
   const isClickable = (labelStr) => {
     const str = labelStr.trim();
@@ -126,7 +145,7 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
     return { width, height };
   };
 
-  const renderGrid = () => {
+  const renderGrid = (selectableCells = []) => {
     const rendered = new Set();
     const cells = [];
 
@@ -158,6 +177,8 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
         const labelStr = String(label).trim();
         const clickable = isClickable(labelStr);
         const blockKey = `${mapName}::${labelStr}::${r}:${c}`;
+        const cellInfo = { label: labelStr, startRow: r, startCol: c, width, height, block_key: blockKey };
+        if (clickable) selectableCells.push(cellInfo);
 
         let statusClass = '';
         const currentStatus = cellStatuses[blockKey] || cellStatuses[labelStr];
@@ -166,6 +187,7 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
 
         const isSelected = selectedGroup?.block_key === blockKey || 
                           (!selectedGroup?.block_key && selectedGroup?.label === labelStr && selectedGroup?.startRow === r && selectedGroup?.startCol === c);
+        const isMultiSelected = clickable && isCellMultiSelected(cellInfo);
 
         cells.push(
           <div
@@ -176,6 +198,7 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
               clickable ? 'clickable-block' : 'static-block',
               statusClass,
               isSelected ? 'selected' : '',
+              isMultiSelected ? 'multi-selected' : '',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -184,10 +207,10 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
               gridColumn: `span ${width}`,
               backgroundColor: clickable ? '#e8f5e9' : undefined,
             }}
-            onClick={clickable ? () => {
-              setSelectedGroup({ label: labelStr, startRow: r, startCol: c, width, height, block_key: blockKey });
+            onClick={clickable ? () => handleSelectableCellClick(cellInfo, (selectedCell) => {
+              setSelectedGroup(selectedCell);
               setViewingReport(null);
-            } : undefined}
+            }) : undefined}
           >
             {labelStr}
           </div>
@@ -198,12 +221,28 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
     return cells;
   };
 
+  const selectableCells = [];
+  const gridElements = renderGrid(selectableCells);
+  const modalCell = multiReportCell || selectedGroup;
+  const handleCloseModal = () => {
+    setSelectedGroup(null);
+    setViewingReport(null);
+    closeMultiReport({ reset: !!multiReportCell });
+  };
+
   return (
     <div className="map-container">
-      <div className="map-header">
-        <h2>HW15 - Scouting Map</h2>
-        <p className="mobile-hint">Drag your finger to move the map • Tap a section to report</p>
-      </div>
+      {!focusedReport && (
+        <MapMultiSelectToolbar
+          enabled={multiSelectEnabled}
+          selectedCount={selectedCells.length}
+          totalCount={selectableCells.length}
+          onToggle={toggleMultiSelectMode}
+          onSelectAll={() => selectAllCells(selectableCells)}
+          onClear={clearMultiSelection}
+          onCreateReport={openMultiReport}
+        />
+      )}
 
       <div className="map-viewport">
         <div
@@ -214,16 +253,17 @@ const HW15Map = ({ focusedReport, mapName = "HW 15" }) => {
             gridAutoRows: '45px',
           }}
         >
-          {renderGrid()}
+          {gridElements}
         </div>
       </div>
 
       <ScoutReportModal
-        isOpen={!!selectedGroup}
-        onClose={() => { setSelectedGroup(null); setViewingReport(null); }}
-        cellInfo={selectedGroup}
-        reportData={viewingReport}
+        isOpen={!!modalCell}
+        onClose={handleCloseModal}
+        cellInfo={modalCell}
+        reportData={multiReportCell ? null : viewingReport}
         mapName={mapName}
+        selectedCells={multiReportCell ? selectedCells : undefined}
       />
     </div>
   );
