@@ -28,27 +28,25 @@ const Plattergrond29 = ({ focusedReport }) => {
   });
 
   // Load the data
-    useEffect(() => {
-      fetch('http://localhost:5000/api/reports')
-        .then(res => res.json())
-        .then(({ status, data }) => {
-          if (status !== 'success') {
-            return;
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent('HW 29')}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status !== 'success') return;
+        const statusMap = {};
+        data.data.forEach(report => {
+          const key = report.block_key || report.cell_name;
+          const currentStatus = statusMap[key];
+          if (report.status === 'approved') {
+            statusMap[key] = 'approved';
+          } else if (report.status === 'pending' && currentStatus !== 'approved') {
+            statusMap[key] = 'pending';
           }
-
-          const statuses = {};
-          data.forEach(({ cell_name, status }) => {
-            const name = String(cell_name);
-
-            // Overwrite the data if the form says the data is approved
-            if (status === 'approved' || !statuses[name]) {
-              statuses[name] = status;
-            }
-          });
-
-          setCellStatuses(statuses);
         });
-    }, []);
+        setCellStatuses(statusMap);
+      })
+      .catch(err => console.error('Failed to fetch map statuses:', err));
+  }, []);
 
     // Highlight a specific cell
     useEffect(() => {
@@ -94,6 +92,10 @@ const Plattergrond29 = ({ focusedReport }) => {
         if (!isStatic) selectableCells.push(cellInfo);
         const isSelected = selectedCell?.block_key === blockKey || selectedCell?.cell_name === key;
         const isMultiSelected = !isStatic && isCellMultiSelected(cellInfo);
+        const currentStatus = cellStatuses[blockKey] || cellStatuses[key];
+        const statusClass = currentStatus === 'approved' ? 'status-approved'
+                         : currentStatus === 'pending'  ? 'status-pending'
+                         : '';
 
         return (
           <div
@@ -102,7 +104,7 @@ const Plattergrond29 = ({ focusedReport }) => {
               'grid-cell',
               label ? 'merged-block' : 'empty',
               isStatic ? 'static-block' : 'clickable-block',
-              cellStatuses[key] || '',
+              statusClass,
               isSelected ? 'selected' : '',
               isMultiSelected ? 'multi-selected' : ''
             ].join(' ').trim()}
