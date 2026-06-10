@@ -92,7 +92,9 @@
   "HomeAdmin": {
     "Title": "Home",
     "Dashboard": "Admin dashboard",
-    "Description": "Inhoud voor kwaliteitscontrole van planten verschijnt hier."
+    "Description": "Inhoud voor kwaliteitscontrole van planten verschijnt hier.",
+    "AssignMapsTitle": "Plattegronden toekennen aan scouts",
+    "ViewReportsTitle": "Binnenkomende rapporten bekijken"
   },
 
   "HomeScout": {
@@ -177,11 +179,68 @@
     "Title": "Rapportgeschiedenis"
   },
 
+  "ReportsAdmin": {
+    "Title": "Rapporten",
+    "ViewSubmittedScoutReports": "Bekijk Ingediende Scout Rapporten",
+    "ViewSubmittedScoutReportsDescription": "Bekijk ingediende scoutobservaties en keur binnenkomende rapporten goed of af.",
+    "EmploymentManagement": "Medewerkersbeheer",
+    "Employee": "Medewerker",
+    "Status": "Status",
+    "Employed": "In dienst",
+    "Fired": "Ontslagen",
+    "Fire": "Ontslaan",
+    "Rehire": "Opnieuw aannemen",
+    "CreateNewRoofReport": "Nieuw dakrapport aanmaken",
+    "Location": "Locatie",
+    "NeedsToBePainted": "Moet geschilderd worden",
+    "NeedsToBeCleaned": "Moet schoongemaakt worden",
+    "WasAlreadyPainted": "Was al geschilderd",
+    "DateOptional": "Datum (optioneel)",
+    "Description": "Beschrijving",
+    "DescriptionPlaceholder": "Beschrijving...",
+    "SubmitRoofReport": "Dakrapport indienen",
+    "ActiveRoofStatusReports": "Actieve dakstatusrapporten",
+    "NoReportsAvailable": "Geen rapporten beschikbaar",
+    "NoRoofReports": "Geen dakrapporten om weer te geven.",
+    "RoofCondition": "Dakstatus",
+    "ReportedOn": "Gerapporteerd op",
+    "CreateNewClimateComputerReport": "Nieuw klimaatcomputer rapport aanmaken",
+    "Nursery": "Kwekerij",
+    "ClimateComputerNumber": "Klimaatcomputer nummer",
+    "ComputerPlaceholder": "bijv. Computer 1",
+    "Department": "Afdeling",
+    "DepartmentPlaceholder": "bijv. Sectie A",
+    "InsideTemperature": "Binnentemperatuur (per afdeling)",
+    "OutsideTemperature": "Buitentemperatuur",
+    "TemperaturePlaceholder": "C (-20 tot 60)",
+    "Humidity": "Luchtvochtigheid (per afdeling)",
+    "HumidityPlaceholder": "% (0 tot 100)",
+    "Light": "Licht (per afdeling)",
+    "LightPlaceholder": "Lux / W/m2 (0 tot 100000)",
+    "Notes": "Notities",
+    "NotesPlaceholder": "Aanvullende notities...",
+    "SubmitClimateReport": "Klimaatrapport indienen",
+    "ActiveClimateComputerReports": "Actieve klimaatcomputer rapporten",
+    "NoClimateDataAvailable": "Geen klimaatgegevens beschikbaar",
+    "NoClimateReports": "Geen klimaatcomputer rapporten om weer te geven.",
+    "Computer": "Computer",
+    "InsideTemp": "Binnentemp.",
+    "OutsideTemp": "Buitentemp.",
+    "HumidityLabel": "Luchtvochtigheid",
+    "LightLevel": "Lichtniveau",
+    "LoggedOn": "Vastgelegd op",
+    "InvalidDescription": "Voer een geldige beschrijving in zonder schadelijke tekens.",
+    "InvalidClimateInputs": "Controleer je tekstvelden op ongeldige of schadelijke tekens.",
+    "InvalidTemperature": "Temperatuurwaarden moeten tussen -20 C en 60 C liggen.",
+    "InvalidHumidity": "Luchtvochtigheid moet tussen 0% en 100% liggen.",
+    "InvalidLight": "Lichtwaarden moeten tussen 0 en 100.000 liggen."
+  },
+
   "PestHistory": {
     "Periods": {"Week": "Week",
-                "Month": "Month",
-                "Year": "Year",
-                "All": "All time"}
+                "Month": "Maand",
+                "Year": "Jaar",
+                "All": "Altijd"}
   },
 
   "SectionReport": {

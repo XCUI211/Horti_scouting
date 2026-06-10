@@ -92,7 +92,9 @@
   "HomeAdmin": {
     "Title": "Home",
     "Dashboard": "Admin dashboard",
-    "Description": "Content for plant quality control will appear here."
+    "Description": "Content for plant quality control will appear here.",
+    "AssignMapsTitle": "Assign maps to scouts",
+    "ViewReportsTitle": "View pending reports"
   },
 
   "HomeScout": {
@@ -175,6 +177,63 @@
 
   "History": {
     "Title": "Report History"
+  },
+
+  "ReportsAdmin": {
+    "Title": "Reports",
+    "ViewSubmittedScoutReports": "View Submitted Scout Reports",
+    "ViewSubmittedScoutReportsDescription": "Review submitted scout observations and approve or reject pending reports.",
+    "EmploymentManagement": "Employment Management",
+    "Employee": "Employee",
+    "Status": "Status",
+    "Employed": "Employed",
+    "Fired": "Fired",
+    "Fire": "Fire",
+    "Rehire": "Rehire",
+    "CreateNewRoofReport": "Create New Roof Report",
+    "Location": "Location",
+    "NeedsToBePainted": "Needs to be painted",
+    "NeedsToBeCleaned": "Needs to be cleaned",
+    "WasAlreadyPainted": "Was already painted",
+    "DateOptional": "Date (Optional)",
+    "Description": "Description",
+    "DescriptionPlaceholder": "Description...",
+    "SubmitRoofReport": "Submit Roof Report",
+    "ActiveRoofStatusReports": "Active Roof Status Reports",
+    "NoReportsAvailable": "No reports available",
+    "NoRoofReports": "No roof reports to display.",
+    "RoofCondition": "Roof Condition",
+    "ReportedOn": "Reported on",
+    "CreateNewClimateComputerReport": "Create New Climate Computer Report",
+    "Nursery": "Nursery",
+    "ClimateComputerNumber": "Climate computer number",
+    "ComputerPlaceholder": "e.g. Computer 1",
+    "Department": "Department",
+    "DepartmentPlaceholder": "e.g. Section A",
+    "InsideTemperature": "Inside temperature (per department)",
+    "OutsideTemperature": "Outside temperature",
+    "TemperaturePlaceholder": "C (-20 to 60)",
+    "Humidity": "Humidity (per department)",
+    "HumidityPlaceholder": "% (0 to 100)",
+    "Light": "Light (per department)",
+    "LightPlaceholder": "Lux / W/m2 (0 to 100000)",
+    "Notes": "Notes",
+    "NotesPlaceholder": "Additional notes...",
+    "SubmitClimateReport": "Submit Climate Report",
+    "ActiveClimateComputerReports": "Active Climate Computer Reports",
+    "NoClimateDataAvailable": "No climate data available",
+    "NoClimateReports": "No climate computer reports to display.",
+    "Computer": "Computer",
+    "InsideTemp": "Inside Temp",
+    "OutsideTemp": "Outside Temp",
+    "HumidityLabel": "Humidity",
+    "LightLevel": "Light Level",
+    "LoggedOn": "Logged on",
+    "InvalidDescription": "Please enter a valid description without harmful characters.",
+    "InvalidClimateInputs": "Please check your text inputs for invalid or harmful characters.",
+    "InvalidTemperature": "Temperature values must be between -20 C and 60 C.",
+    "InvalidHumidity": "Humidity must be between 0% and 100%.",
+    "InvalidLight": "Light levels must be between 0 and 100,000."
   },
 
   "PestHistory": {

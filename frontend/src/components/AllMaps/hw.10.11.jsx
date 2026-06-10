@@ -247,7 +247,7 @@ const HW1011Map = ({ focusedReport, mapName = "HW 10.11" }) => {
           limitToBounds={false}
           doubleClick={{ disabled: true }}
           wheel={{ disabled: false, step: 0.0004 }}
-          pinch={{ disabled: false, step: 0.05, allowPanning: true }}
+          pinch={{ disabled: false, step: 2.5, allowPanning: true }}
           panning={{ disabled: false, velocityDisabled: true }}
           autoAlignment={{ disabled: true }}
           velocityAnimation={{ disabled: true }}>

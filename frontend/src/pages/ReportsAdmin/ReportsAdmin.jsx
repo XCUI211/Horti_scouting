@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import AdminLayout from '../../components/AdminLayout/AdminLayout'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from "react-i18next"
 import { MAP_ORDER } from '../../constants/mapOrder'
 import axios from 'axios'
@@ -7,6 +8,7 @@ import './ReportsAdmin.css'
 
 const ReportsAdmin = ({ userData }) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   const [roofReports, setRoofReports] = useState([])
   const [newLocation, setNewLocation] = useState(MAP_ORDER[0] || '')
@@ -55,7 +57,7 @@ const ReportsAdmin = ({ userData }) => {
     const cleanDate = sanitizeInput(newDate)
 
     if (!cleanDescription) {
-      alert('Please enter a valid description without harmful characters.')
+      alert(t("ReportsAdmin.InvalidDescription"))
       return
     }
 
@@ -84,7 +86,7 @@ const ReportsAdmin = ({ userData }) => {
     const cleanNotes = sanitizeInput(newNotes)
 
     if (!cleanComputerNum || !cleanAfdeling) {
-      alert('Please check your text inputs for invalid or harmful characters.')
+      alert(t("ReportsAdmin.InvalidClimateInputs"))
       return
     }
 
@@ -95,17 +97,17 @@ const ReportsAdmin = ({ userData }) => {
 
     // Validate numeric inputs
     if (inside < -20 || inside > 60 || outside < -20 || outside > 60) {
-      alert('Temperature values must be between -20°C and 60°C.')
+      alert(t("ReportsAdmin.InvalidTemperature"))
       return
     }
 
     if (humid < 0 || humid > 100) {
-      alert('Humidity must be between 0% and 100%.')
+      alert(t("ReportsAdmin.InvalidHumidity"))
       return
     }
 
     if (lightVal < 0 || lightVal > 100000) {
-      alert('Light levels must be between 0 and 100,000.')
+      alert(t("ReportsAdmin.InvalidLight"))
       return
     }
 
@@ -145,24 +147,45 @@ const ReportsAdmin = ({ userData }) => {
       .catch(err => console.error(err));
   };
 
+  const getRoofConditionLabel = (condition) => ({
+    'Needs to be painted': t("ReportsAdmin.NeedsToBePainted"),
+    'Needs to be cleaned': t("ReportsAdmin.NeedsToBeCleaned"),
+    'Was already painted': t("ReportsAdmin.WasAlreadyPainted"),
+  }[condition] || condition);
+
   return (
-    <AdminLayout title="System Reports">
+    <AdminLayout title={t("ReportsAdmin.Title")}>
       <div className="reports-admin-vireo-container">
+        {/* Admin dashboard button */}
+        <div className="reports-admin-dashboard-card">
+          <div>
+            <h3 className="reports-admin-dashboard-title">{t("ReportsAdmin.ViewSubmittedScoutReports")}</h3>
+            <p className="reports-admin-dashboard-text">
+              {t("ReportsAdmin.ViewSubmittedScoutReportsDescription")}
+            </p>
+          </div>
+          <button
+            className="reports-admin-dashboard-btn"
+            onClick={() => navigate('/maps/admin_dashboard')}
+          >
+            {t("Mapview.AdminDashboard")}
+          </button>
+        </div>
 
         {/* Employment Management Integration */}
         <div className="reports-admin-vireo-section reports-admin-vireo-fullwidth">
           <div className="reports-admin-vireo-form-card">
-            <h3 className="reports-admin-vireo-form-title">Employment Management</h3>
+            <h3 className="reports-admin-vireo-form-title">{t("ReportsAdmin.EmploymentManagement")}</h3>
             <div className="reports-admin-vireo-employment-row">
               <span className="reports-admin-vireo-employment-text">
-                {userData?.name || 'Employee'} (Status: {userData?.is_employed ? 'Employed' : 'Fired'})
+                {userData?.name || t("ReportsAdmin.Employee")} ({t("ReportsAdmin.Status")}: {userData?.is_employed ? t("ReportsAdmin.Employed") : t("ReportsAdmin.Fired")})
               </span>
               <button
                 className="reports-admin-vireo-submit-btn"
                 style={{ marginTop: 0, padding: '6px 12px' }}
                 onClick={() => handleFireEmployee(userData?.uid)}
               >
-                {userData?.is_employed ? 'Fire' : 'Rehire'}
+                {userData?.is_employed ? t("ReportsAdmin.Fire") : t("ReportsAdmin.Rehire")}
               </button>
             </div>
           </div>
@@ -172,11 +195,11 @@ const ReportsAdmin = ({ userData }) => {
 
         <div className="reports-admin-vireo-section">
           <div className="reports-admin-vireo-form-card">
-            <h3 className="reports-admin-vireo-form-title">Create New Roof Report</h3>
+            <h3 className="reports-admin-vireo-form-title">{t("ReportsAdmin.CreateNewRoofReport")}</h3>
             <form onSubmit={handleSubmitReport} className="reports-admin-vireo-form">
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Location:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Location")}:</label>
                 <select
                   value={newLocation}
                   onChange={(e) => setNewLocation(e.target.value)}
@@ -191,20 +214,20 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Status:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Status")}:</label>
                 <select
                   value={newCondition}
                   onChange={(e) => setNewCondition(e.target.value)}
                   className="reports-admin-vireo-select"
                 >
-                  <option value="Needs to be painted">Needs to be painted</option>
-                  <option value="Needs to be cleaned">Needs to be cleaned</option> // Added as a wish from the client
-                  <option value="Was already painted">Was already painted</option>
+                  <option value="Needs to be painted">{t("ReportsAdmin.NeedsToBePainted")}</option>
+                  <option value="Needs to be cleaned">{t("ReportsAdmin.NeedsToBeCleaned")}</option>
+                  <option value="Was already painted">{t("ReportsAdmin.WasAlreadyPainted")}</option>
                 </select>
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Date (Optional):</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.DateOptional")}:</label>
                 <input
                   type="date"
                   value={newDate}
@@ -214,9 +237,9 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Description:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Description")}:</label>
                 <textarea
-                  placeholder="Description..."
+                  placeholder={t("ReportsAdmin.DescriptionPlaceholder")}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                   required
@@ -225,25 +248,25 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <button type="submit" className="reports-admin-vireo-submit-btn">
-                Submit Roof Report
+                {t("ReportsAdmin.SubmitRoofReport")}
               </button>
             </form>
           </div>
 
           <div className="reports-admin-vireo-list-container">
-            <h3 className="reports-admin-vireo-list-title">Active Roof Status Reports</h3>
+            <h3 className="reports-admin-vireo-list-title">{t("ReportsAdmin.ActiveRoofStatusReports")}</h3>
             {roofReports.length === 0 ? (
               <div className="reports-admin-vireo-empty-state">
-                <p className="reports-admin-vireo-empty-title">No reports available</p>
-                <span className="reports-admin-vireo-empty-subtitle">No roof reports to display.</span>
+                <p className="reports-admin-vireo-empty-title">{t("ReportsAdmin.NoReportsAvailable")}</p>
+                <span className="reports-admin-vireo-empty-subtitle">{t("ReportsAdmin.NoRoofReports")}</span>
               </div>
             ) : (
               roofReports.map((report) => (
                 <div key={report.id} className="reports-admin-vireo-report-card">
-                  <h4 className="reports-admin-vireo-card-title">Location: {report.location}</h4>
-                  <p className="reports-admin-vireo-card-text"><strong>Roof Condition:</strong> {report.condition}</p>
-                  <p className="reports-admin-vireo-card-text"><strong>Description:</strong> {report.description}</p>
-                  <p className="reports-admin-vireo-card-date">Reported on: {report.date}</p>
+                  <h4 className="reports-admin-vireo-card-title">{t("ReportsAdmin.Location")}: {report.location}</h4>
+                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.RoofCondition")}:</strong> {getRoofConditionLabel(report.condition)}</p>
+                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.Description")}:</strong> {report.description}</p>
+                  <p className="reports-admin-vireo-card-date">{t("ReportsAdmin.ReportedOn")}: {report.date}</p>
                 </div>
               ))
             )}
@@ -254,11 +277,11 @@ const ReportsAdmin = ({ userData }) => {
 
         <div className="reports-admin-vireo-section">
           <div className="reports-admin-vireo-form-card">
-            <h3 className="reports-admin-vireo-form-title">Create New Climaat Computer Report</h3>
+            <h3 className="reports-admin-vireo-form-title">{t("ReportsAdmin.CreateNewClimateComputerReport")}</h3>
             <form onSubmit={handleSubmitClimateReport} className="reports-admin-vireo-form">
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Nursery:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Nursery")}:</label>
                 <select
                   value={newNursery}
                   onChange={(e) => setNewNursery(e.target.value)}
@@ -273,10 +296,10 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Climaat Computer nummer:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.ClimateComputerNumber")}:</label>
                 <input
                   type="text"
-                  placeholder="e.g. Computer 1"
+                  placeholder={t("ReportsAdmin.ComputerPlaceholder")}
                   value={newComputerNum}
                   onChange={(e) => setNewComputerNum(e.target.value)}
                   required
@@ -285,10 +308,10 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Afdeling:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Department")}:</label>
                 <input
                   type="text"
-                  placeholder="e.g. Section A"
+                  placeholder={t("ReportsAdmin.DepartmentPlaceholder")}
                   value={newAfdeling}
                   onChange={(e) => setNewAfdeling(e.target.value)}
                   required
@@ -297,13 +320,13 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Inside temperature (per afdeling):</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.InsideTemperature")}:</label>
                 <input
                   type="number"
                   step="0.01"
                   min="-20"
                   max="60"
-                  placeholder="°C (-20 to 60)"
+                  placeholder={t("ReportsAdmin.TemperaturePlaceholder")}
                   value={newInsideTemp}
                   onChange={(e) => setNewInsideTemp(e.target.value)}
                   required
@@ -312,13 +335,13 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Outside temperature:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.OutsideTemperature")}:</label>
                 <input
                   type="number"
                   step="0.01"
                   min="-20"
                   max="60"
-                  placeholder="°C (-20 to 60)"
+                  placeholder={t("ReportsAdmin.TemperaturePlaceholder")}
                   value={newOutsideTemp}
                   onChange={(e) => setNewOutsideTemp(e.target.value)}
                   required
@@ -327,13 +350,13 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Humidity (per afdeling):</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Humidity")}:</label>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   max="100"
-                  placeholder="% (0 to 100)"
+                  placeholder={t("ReportsAdmin.HumidityPlaceholder")}
                   value={newHumidity}
                   onChange={(e) => setNewHumidity(e.target.value)}
                   required
@@ -342,13 +365,13 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Light (per afdeling):</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Light")}:</label>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   max="100000"
-                  placeholder="Lux / W/m² (0 to 100000)"
+                  placeholder={t("ReportsAdmin.LightPlaceholder")}
                   value={newLight}
                   onChange={(e) => setNewLight(e.target.value)}
                   required
@@ -357,9 +380,9 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">Notes:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Notes")}:</label>
                 <textarea
-                  placeholder="Additional observations or notes..."
+                  placeholder={t("ReportsAdmin.NotesPlaceholder")}
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
                   className="reports-admin-vireo-textarea"
@@ -367,27 +390,27 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <button type="submit" className="reports-admin-vireo-submit-btn">
-                Submit Climate Report
+                {t("ReportsAdmin.SubmitClimateReport")}
               </button>
             </form>
           </div>
 
           <div className="reports-admin-vireo-list-container">
-            <h3 className="reports-admin-vireo-list-title">Active Climaat Computer Reports</h3>
+            <h3 className="reports-admin-vireo-list-title">{t("ReportsAdmin.ActiveClimateComputerReports")}</h3>
             {climateReports.length === 0 ? (
               <div className="reports-admin-vireo-empty-state">
-                <p className="reports-admin-vireo-empty-title">No climate data available</p>
-                <span className="reports-admin-vireo-empty-subtitle">No climaat computer reports to display.</span>
+                <p className="reports-admin-vireo-empty-title">{t("ReportsAdmin.NoClimateDataAvailable")}</p>
+                <span className="reports-admin-vireo-empty-subtitle">{t("ReportsAdmin.NoClimateReports")}</span>
               </div>
             ) : (
               climateReports.map((report) => (
                 <div key={report.id} className="reports-admin-vireo-report-card">
-                  <h4 className="reports-admin-vireo-card-title">Nursery: {report.nursery} (Computer: {report.computer_number})</h4>
-                  <p className="reports-admin-vireo-card-text"><strong>Afdeling:</strong> {report.afdeling}</p>
-                  <p className="reports-admin-vireo-card-text"><strong>Inside Temp:</strong> {report.inside_temperature}°C | <strong>Outside Temp:</strong> {report.outside_temperature}°C</p>
-                  <p className="reports-admin-vireo-card-text"><strong>Humidity:</strong> {report.humidity}% | <strong>Light Level:</strong> {report.light}</p>
-                  {report.notes && <p className="reports-admin-vireo-card-text"><strong>Notes:</strong> {report.notes}</p>}
-                  <p className="reports-admin-vireo-card-date">Logged on: {report.date}</p>
+                  <h4 className="reports-admin-vireo-card-title">{t("ReportsAdmin.Nursery")}: {report.nursery} ({t("ReportsAdmin.Computer")}: {report.computer_number})</h4>
+                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.Department")}:</strong> {report.afdeling}</p>
+                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.InsideTemp")}:</strong> {report.inside_temperature} C | <strong>{t("ReportsAdmin.OutsideTemp")}:</strong> {report.outside_temperature} C</p>
+                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.HumidityLabel")}:</strong> {report.humidity}% | <strong>{t("ReportsAdmin.LightLevel")}:</strong> {report.light}</p>
+                  {report.notes && <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.Notes")}:</strong> {report.notes}</p>}
+                  <p className="reports-admin-vireo-card-date">{t("ReportsAdmin.LoggedOn")}: {report.date}</p>
                 </div>
               ))
             )}
@@ -400,3 +423,6 @@ const ReportsAdmin = ({ userData }) => {
 }
 
 export default ReportsAdmin
+
+
+
