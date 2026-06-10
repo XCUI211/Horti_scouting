@@ -5,6 +5,7 @@ import ScoutReportModal from './Forms/ScoutReportModal';
 import { useTranslation } from "react-i18next";
 import MapMultiSelectToolbar from './MapMultiSelectToolbar';
 import { useMapMultiSelect } from './useMapMultiSelect';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -201,9 +202,24 @@ const HW1015Map = ({ focusedReport, mapName = "HW 10.15" }) => {
         />
       )}
       <div className="map-viewport">
-        <div className="merged-grid-container" style={{ display: 'grid', gridTemplateColumns: `repeat(${mapData[0].length}, minmax(22px, 1fr))`, gridAutoRows: 'minmax(45px, auto)' }}>
-          {gridElements}
-        </div>
+        <TransformWrapper
+          initialScale={1}
+          minScale={0.4}
+          maxScale={2.5}
+          centerOnInit
+          limitToBounds={false}
+          doubleClick={{ disabled: true }}
+          wheel={{ disabled: false, step: 0.0004 }}
+          pinch={{ disabled: false, step: 0.05, allowPanning: true }}
+          panning={{ disabled: false, velocityDisabled: true }}
+          autoAlignment={{ disabled: true }}
+          velocityAnimation={{ disabled: true }}>
+          <TransformComponent wrapperClass="map-transform-wrapper" contentClass="map-transform-content">
+            <div className="merged-grid-container" style={{ display: 'grid', gridTemplateColumns: `repeat(${mapData[0].length}, minmax(22px, 1fr))`, gridAutoRows: 'minmax(45px, auto)' }}>
+              {gridElements}
+            </div>
+        </TransformComponent>
+        </TransformWrapper>
       </div>
       <ScoutReportModal
         isOpen={!!modalCell}

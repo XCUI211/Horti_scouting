@@ -25,9 +25,19 @@
 /* THE VIEWPORT: Allows swiping on mobile */
 .map-viewport {
   flex: 1;
-  overflow: auto; 
+  overflow: hidden;
   padding: 20px;
-  -webkit-overflow-scrolling: touch;
+  touch-action: none;
+}
+
+.map-transform-wrapper {
+  width: 100% !important;
+  min-height: 70vh;
+}
+
+.map-transform-content {
+  width: max-content !important;
+  margin: 0 auto;
 }
 
 /* THE GRID CONTAINER */

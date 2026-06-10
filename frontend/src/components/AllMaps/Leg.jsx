@@ -5,6 +5,7 @@ import ScoutReportModal from './Forms/ScoutReportModal';
 import MapMultiSelectToolbar from './MapMultiSelectToolbar';
 import { useMapMultiSelect } from './useMapMultiSelect';
 import { getFocusedReportForCell } from './mapSelection';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 // Declare unclickable cells
 const STATIC_CELLS = ["PAD", "VERWERKINGSHAL", "Legmeerdijk", "Rijsenhout", "Oppotruimte", "Raap plein", "Magazijn", "KAS 2", "KAS 3", "KAS 4", "silo", "ketel", "wkk", "water ruimte", "Afdeling 3", "Afdeling 4", "Afdeling 2.2", "Afdeling 2.1", "Ketel en WWK", "WC", "Verwerkingshal // Buffer", "kantine"];
@@ -141,12 +142,24 @@ const Leg = ({ focusedReport }) => {
         />
       )}
       <div className="map-viewport">
-        <div
-          className="merged-grid-container"
-          style={{ gridTemplateColumns: `repeat(${mapData[0].length}, 15px)`, gridAutoRows: '20px' }}
-        >
-          {gridElements}
-        </div>
+        <TransformWrapper
+          initialScale={1}
+          minScale={0.4}
+          maxScale={2.5}
+          centerOnInit
+          limitToBounds={false}
+          doubleClick={{ disabled: true }}
+          wheel={{ disabled: false, step: 0.0004 }}
+          pinch={{ disabled: false, step: 0.05, allowPanning: true }}
+          panning={{ disabled: false, velocityDisabled: true }}
+          autoAlignment={{ disabled: true }}
+          velocityAnimation={{ disabled: true }}>
+          <TransformComponent wrapperClass="map-transform-wrapper" contentClass="map-transform-content">
+            <div className="merged-grid-container" style={{ gridTemplateColumns: `repeat(${mapData[0].length}, 15px)`, gridAutoRows: '20px' }}>
+              {gridElements}
+            </div>
+        </TransformComponent>
+        </TransformWrapper>
       </div>
       <ScoutReportModal
         // Pop-up from
