@@ -66,9 +66,23 @@ const HW1012Map = ({ focusedReport }) => {
     }
   }, [focusedReport]);
 
+  const spanOverrides = {"Tranportbaan": { width: 2, height: 3 },
+                                                 "1100": { width: 10, height: 3 }};
+
+  const isBlank = (value) =>
+  value === null || value === undefined || value === "";
+
+  const columnSizes = mapData[0].map((_, c) => {const hasContent = mapData.some(row => !isBlank(row[c]));
+                                                       return hasContent ? "43px" : "0px"});
+
+  const rowSizes = mapData.map(row => {const hasContent = row.some(cell => !isBlank(cell));
+                                       return hasContent ? "35px" : "0px"});
+
   const getCellSpan = (row, col, label) => {
     let width = 1, height = 1;
     if (!label) return { width, height };
+    const override = spanOverrides[String(label)];
+    if (override) return override;
     while (col + width < mapData[row].length && mapData[row][col + width] === label) width++;
     while (row + height < mapData.length && mapData[row + height][col] === label) height++;
     return { width, height };
@@ -105,8 +119,8 @@ const HW1012Map = ({ focusedReport }) => {
             key={`${r}-${c}`}
             className={`grid-cell merged-block ${isStatic ? 'static-block' : 'clickable-block'} ${statusClass} ${isSelected ? 'selected' : ''} ${isMultiSelected ? 'multi-selected' : ''}`}
             style={{
-              gridRow: `span ${height}`,
-              gridColumn: `span ${width}`,
+              gridRow: `${r + 1} / span ${height}`,
+              gridColumn: `${c + 1} / span ${width}`,
               backgroundColor: typeof label === 'number' && !isStatic ? '#e8f5e9' : undefined
             }}
             onClick={isStatic ? null : () => handleSelectableCellClick(cellInfo, setSelectedCell)}
@@ -145,15 +159,11 @@ const HW1012Map = ({ focusedReport }) => {
       <div className="map-viewport">
         <div
           className="merged-grid-container"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${mapData[0].length}, minmax(40px, 1fr))`
-          }}
+          style={{display: "grid", gridTemplateColumns: columnSizes.join(" "), gridTemplateRows: rowSizes.join(" "),}}
         >
           {gridElements}
         </div>
       </div>
-
       <ScoutReportModal
         isOpen={!!modalCell}
         cellInfo={modalCell}

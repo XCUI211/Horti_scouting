@@ -143,7 +143,7 @@ const Leg = ({ focusedReport }) => {
       <div className="map-viewport">
         <div
           className="merged-grid-container"
-          style={{ gridTemplateColumns: `repeat(${mapData[0].length}, 60px)`, gridAutoRows: '25px' }}
+          style={{ gridTemplateColumns: `repeat(${mapData[0].length}, 15px)`, gridAutoRows: '20px' }}
         >
           {gridElements}
         </div>
