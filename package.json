@@ -4,17 +4,15 @@
     "frontend",
     "server"
   ],
-  "devDependencies": {    
+  "devDependencies": {
+    "concurrently": "^10.0.3",
     "jest": "^30.3.0",
-    "vitest": "^4.1.4",
-    "concurrently": "^9.2.1"  
+    "vitest": "^4.1.4"
   },
   "scripts": {
     "test": "npm run test:server && npm run test:frontend",
-
     "test:server": "npm test --workspace=server",
     "test:frontend": "npm test --workspace=frontend -- --run",
-    
     "audit": "npm audit --audit-level=high --workspaces --include-workspace-root",
     "ci-check": "npm run audit && npm run test && npm run test:server && npm run test:frontend",
     "startup": "concurrently \"npm run dev --workspace frontend\" \"npm run start --workspace server\""
