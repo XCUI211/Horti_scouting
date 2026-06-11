@@ -165,7 +165,7 @@ const HW1012Map = ({ focusedReport }) => {
           centerOnInit
           limitToBounds={false}
           doubleClick={{ disabled: true }}
-          wheel={{ disabled: false, step: 0.0004 }}
+          wheel={{ disabled: false, step: 0.004 }}
           pinch={{ disabled: false, step: 2.5, allowPanning: true }}
           panning={{ disabled: false, velocityDisabled: true }}
           autoAlignment={{ disabled: true }}

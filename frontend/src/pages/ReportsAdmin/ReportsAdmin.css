@@ -39,7 +39,7 @@
 .reports-admin-dashboard-btn {
     align-self: flex-start;
     transform: translateY(8px);
-    background: #2e7d32;
+    background: #57b021;
     color: #ffffff;
     border: none;
     padding: 10px 14px;
@@ -50,7 +50,7 @@
 }
 
 .reports-admin-dashboard-btn:hover {
-    background: #256628;
+    background: #49941b;
 }
 /* END Admin dashboard button */
 
