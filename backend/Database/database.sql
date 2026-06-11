@@ -78,13 +78,16 @@ CREATE TABLE climate_computer (
     inside_temperature   DECIMAL(10,2),                                                          -- inside temperature for this afdeling
     outside_temperature  DECIMAL(10,2),                                                          -- outside temperature
     humidity             DECIMAL(10,2),                                                          -- humidity for this afdeling
-    light                DECIMAL(10,2)                                                          -- light level for this afdeling
+    light                DECIMAL(10,2),                                                          -- light level for this afdeling
+    last_updated_at      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP                       -- time recorded
 );
 
 CREATE TABLE roof_painting (
-    rpid             SERIAL      PRIMARY KEY,                                        -- unique roof painting entry ID number
-    mid              INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,    -- foreign key to maps table; one map can have multiple roof painting records
-    painted_on_week  DATE        NOT NULL,                                           -- week number the roof was painted                                                   -- optional person or company that painted the roof
-    notes            TEXT,                                                           -- optional notes about the roof painting
-    created_at       TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP                  -- when the record was added
+    rpid             SERIAL      PRIMARY KEY,                                                                    -- unique roof painting entry ID number
+    mid              INT         NOT NULL REFERENCES maps(mid) ON DELETE CASCADE,                                -- foreign key to maps table; one map can have multiple roof painting records
+    activity         VARCHAR(50) NOT NULL CHECK (activity IN ('Painting', 'Cleaning', 'PaintingAndCleaning')),   -- kind of activity being done to the roof
+    status           VARCHAR(20) NOT NULL CHECK (status IN ('Done', 'ToBeDone')),                                -- if the activity was completed or is scheduled
+    activity_date    DATE        NOT NULL,                                                                       -- week number the roof was painted
+    notes            TEXT,                                                                                       -- optional notes about the roof painting
+    created_at       TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP                                              -- when the record was added
 );
