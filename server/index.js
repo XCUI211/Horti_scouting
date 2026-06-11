@@ -149,6 +149,7 @@ app.get('/api/reports', async (req, res) => {
                    fr.pest_types       AS pest_types,
                    to_char(fr.report_time, 'YYYY-MM-DD') AS entry_date,
                    fr.approval_status  AS status,
+                   fr.pests_found      AS pests_found,
                    u.username          AS reporter_name,
                    fr.comment          AS admin_comment,
                    fr.report_batch_id  AS report_batch_id,

@@ -48,12 +48,16 @@ const HW1017Map = ({ focusedReport, mapName = "HW 10.17" }) => {
       .then(data => {
         if (data.status === 'success') {
           const statusMap = {};
+          const seenCells = new Set();
           data.data.forEach(report => {
-            const currentStatus = statusMap[report.cell_name];
-            if (report.status === 'approved') {
-              statusMap[report.cell_name] = 'approved';
-            } else if (report.status === 'pending' && currentStatus !== 'approved') {
-              statusMap[report.cell_name] = 'pending';
+            const key = report.block_key || report.cell_name;
+            if (seenCells.has(key)) return;
+            if (report.status === 'rejected') return;
+            seenCells.add(key);
+            if (report.status === 'pending') {
+              statusMap[key] = 'pending';
+            } else if (report.status === 'approved' && report.pests_found) {
+              statusMap[key] = 'approved';
             }
           });
           setCellStatuses(statusMap);

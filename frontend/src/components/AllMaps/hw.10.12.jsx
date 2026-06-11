@@ -39,19 +39,21 @@ const HW1012Map = ({ focusedReport }) => {
 
   // 1. 获取状态：支持 block_key 精准匹配
   useEffect(() => {
-    fetch(`http://localhost:8000/api/reports?map_id=${encodeURIComponent(mapId)}`)
+    fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent(mapId)}`)
       .then(res => res.json())
       .then(data => {
         if (data.status !== 'success') return;
         const statuses = {};
+        const seenCells = new Set();
         data.data.forEach(report => {
           const key = report.block_key || report.cell_name;
-          const currentStatus = statuses[key];
-
-          if (report.status === 'approved') {
-            statuses[key] = 'status-approved';
-          } else if (report.status === 'pending' && currentStatus !== 'status-approved') {
+          if (seenCells.has(key)) return;
+          if (report.status === 'rejected') return;
+          seenCells.add(key);
+          if (report.status === 'pending') {
             statuses[key] = 'status-pending';
+          } else if (report.status === 'approved' && report.pests_found) {
+            statuses[key] = 'status-approved';
           }
         });
         setCellStatuses(statuses);

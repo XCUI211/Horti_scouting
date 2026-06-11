@@ -35,13 +35,16 @@ const Plattergrond29 = ({ focusedReport }) => {
       .then(data => {
         if (data.status !== 'success') return;
         const statusMap = {};
+        const seenCells = new Set();
         data.data.forEach(report => {
           const key = report.block_key || report.cell_name;
-          const currentStatus = statusMap[key];
-          if (report.status === 'approved') {
-            statusMap[key] = 'approved';
-          } else if (report.status === 'pending' && currentStatus !== 'approved') {
+          if (seenCells.has(key)) return;
+          if (report.status === 'rejected') return;
+          seenCells.add(key);
+          if (report.status === 'pending') {
             statusMap[key] = 'pending';
+          } else if (report.status === 'approved' && report.pests_found) {
+            statusMap[key] = 'approved';
           }
         });
         setCellStatuses(statusMap);

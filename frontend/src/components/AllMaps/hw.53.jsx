@@ -54,9 +54,16 @@ const HW53Map = ({ focusedReport }) => {
       .then(data => {
         if (data.status !== 'success') return;
         const statuses = {};
+        const seenCells = new Set();
         data.data.forEach(report => {
-          if (report.status === 'approved' || !statuses[report.cell_name]) {
-            statuses[report.cell_name] = report.status;
+          const key = report.block_key || report.cell_name;
+          if (seenCells.has(key)) return;
+          if (report.status === 'rejected') return;
+          seenCells.add(key);
+          if (report.status === 'pending') {
+            statuses[key] = 'status-pending';
+          } else if (report.status === 'approved' && report.pests_found) {
+            statuses[key] = 'status-approved';
           }
         });
         setCellStatuses(statuses);
