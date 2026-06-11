@@ -1,16 +1,21 @@
 {
   "private": true,
+  "type": "module",
   "workspaces": [
     "frontend",
     "server"
   ],
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "concurrently": "^10.0.3",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
     "jest": "^30.3.0",
     "jsdom": "^29.1.1",
     "vitest": "^4.1.4"
   },
   "scripts": {
+    "lint": "eslint .",
     "test": "npm run test:server && npm run test:frontend",
     "test:server": "npm test --workspace=server",
     "test:frontend": "npm test --workspace=frontend -- --run",
