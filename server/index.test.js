@@ -1369,3 +1369,89 @@ describe("GET /api/users", () => {
     errorSpy.mockRestore();
   });
 });
+
+// ---------- Login role enforcement (Issue 3) ----------
+describe("POST /api/login role enforcement", () => {
+  it("returns 403 when a scout user tries to log in via the admin entry", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        {
+          uid: 2,
+          username: "scoutuser",
+          role: "scout",
+          password_hash: "hashed-password",
+        },
+      ],
+    });
+
+    const res = await request(app).post("/api/login").send({
+      username: "scoutuser",
+      password: "password123",
+      role: "admin",
+    });
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body).toEqual({
+      message: "Access denied. You are not a(n) admin.",
+    });
+  });
+
+  it("allows admin login when role matches", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        {
+          uid: 1,
+          username: "adminuser",
+          role: "admin",
+          password_hash: "hashed-password",
+          email: "a@x.nl",
+          must_change_password: false,
+          language: "nl",
+        },
+      ],
+    });
+    mockCompare.mockResolvedValueOnce(true);
+
+    const res = await request(app).post("/api/login").send({
+      username: "adminuser",
+      password: "password123",
+      role: "admin",
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.user.role).toBe("admin");
+  });
+});
+
+// ---------- /api/reports response shape (Issue 4 backend) ----------
+describe("GET /api/reports", () => {
+  it("includes pests_found in the response data", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        {
+          report_id: 1,
+          cell_name: "baan 1",
+          map_id: "Rijsenhout",
+          status: "approved",
+          pests_found: true,
+        },
+      ],
+    });
+
+    const res = await request(app).get("/api/reports");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.status).toBe("success");
+    expect(res.body.data[0]).toHaveProperty("pests_found", true);
+  });
+
+  it("filters by map_id query param", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    await request(app).get("/api/reports?map_id=HW%2013");
+
+    const [calledSql, calledParams] = mockQuery.mock.calls[0];
+    expect(calledSql).toContain("m.name = $1");
+    expect(calledParams).toContain("HW 13");
+  });
+});
