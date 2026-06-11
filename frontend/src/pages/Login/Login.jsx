@@ -15,7 +15,6 @@ function Login() {
       <button className="admin" onClick={() => navigate("/login_admin")}>{t("Login.Admin")}</button>
       <button className="scout" onClick={() => navigate("/login_scout")}>{t("Login.Scout")} </button>
 
-      <button className="help" onClick={() => navigate("/help")}>{t("Login.Help")}</button>
     </div>
   );
 }

@@ -97,7 +97,6 @@ function LoginAdmin() {
                 <button type="submit" className="login-submit">{t("LoginAdmin.LoginButton")}</button>
             </form>
 
-            <a href="#" className="forgot-password">{t("LoginAdmin.ForgotPassword")}</a>
 
             {/* This button uses navigate to return the previous page */}
             <button

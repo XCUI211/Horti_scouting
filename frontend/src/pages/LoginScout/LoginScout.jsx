@@ -97,7 +97,6 @@ function LoginScout() {
                 <button type="submit" className="login-submit">{t("LoginScout.LoginButton")}</button>
             </form>
 
-            <a href="#" className="forgot-password">{t("LoginScout.ForgotPassword")}</a>
 
             {/* This button uses navigate to return the previous page */}
             <button
