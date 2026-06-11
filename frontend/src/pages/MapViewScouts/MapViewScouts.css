@@ -1,5 +1,7 @@
-.mapview-toolbar {
+.scout-mobile-wrapper .mapview-toolbar {
   display: flex;
+  flex-shrink: 0;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
@@ -8,44 +10,74 @@
   top: 0;
   z-index: 5;
   flex-wrap: wrap;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-.mapview-tabs {
+.scout-mobile-wrapper .mapview-tabs {
   display: flex;
   gap: 4px;
 }
 
-.mapview-tab {
+.scout-mobile-wrapper .mapview-tab {
+  display: inline-flex;
+  align-items: center;
   padding: 6px 12px;
   background: transparent;
   color: #fff;
   border: none;
   border-radius: 4px 4px 0 0;
-  cursor: pointer;
   font-weight: bold;
   font-size: 13px;
 }
 
-.mapview-tab.active {
+.scout-mobile-wrapper .mapview-tab.active {
   background: #fff;
   color: #2e7d32;
 }
 
-.mapview-select {
+.scout-mobile-wrapper .mapview-select {
+  position: static;
+  right: auto;
   margin-left: auto;
+  min-width: 0;
+  max-width: 100%;
   padding: 6px 8px;
   font-size: 13px;
   border-radius: 4px;
   border: 1px solid #ccc;
 }
 
-.mapview-content {
+.scout-mobile-wrapper .mapview-content {
   flex: 1;
-  overflow: auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   background: #f4f4f4;
+  box-sizing: border-box;
 }
 
-.mapview-content .map-container h2 {
+.scout-mobile-wrapper .mapview-content .map-container {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.scout-mobile-wrapper .mapview-content .map-container h2 {
   font-size: 16px;
   margin: 0 0 10px 0;
+}
+
+@media (min-width: 768px) {
+  .scout-mobile-wrapper .mapview-toolbar,
+  .scout-mobile-wrapper .mapview-content {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .scout-mobile-wrapper .mapview-content {
+    padding: 30px;
+  }
 }

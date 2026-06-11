@@ -13,6 +13,9 @@ const ScoutLayout = ({ children, title }) => {
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
+  const navigateTo = (path) => {
+    if (!isActive(path)) navigate(path);
+  };
   const { t } = useTranslation();
   const { user } = useAuth();
 
@@ -35,13 +38,13 @@ const ScoutLayout = ({ children, title }) => {
 
           {/* Inline desktop navigation header items */}
           <div className="desktop-nav-links">
-            <button className={`desktop-nav-item ${isActive('/scout_home') ? 'active' : ''}`} onClick={() => navigate('/scout_home')}>
+            <button className={`desktop-nav-item ${isActive('/scout_home') ? 'active' : ''}`} onClick={() => navigateTo('/scout_home')}>
               {t("ScoutLayout.Home")}
             </button>
-            <button className={`desktop-nav-item ${isActive('/scout_maps') ? 'active' : ''}`} onClick={() => navigate('/scout_maps')}>
+            <button className={`desktop-nav-item ${isActive('/scout_maps') ? 'active' : ''}`} onClick={() => navigateTo('/scout_maps')}>
               {t("ScoutLayout.Maps")}
             </button>
-            <button className={`desktop-nav-item ${isActive('/tasks') ? 'active' : ''}`} onClick={() => navigate('/tasks')}>
+            <button className={`desktop-nav-item ${isActive('/tasks') ? 'active' : ''}`} onClick={() => navigateTo('/tasks')}>
               {t("ScoutLayout.Tasks")}
             </button>
           </div>
@@ -49,7 +52,7 @@ const ScoutLayout = ({ children, title }) => {
           {/* Profile Button - highlighted green only if on Account page */}
           <button
             className={`profile-btn ${isActive('/account_management_scout') ? 'active-profile' : ''}`}
-            onClick={() => navigate('/account_management_scout')}
+            onClick={() => navigateTo('/account_management_scout')}
           >
             <UserCircle size={28} />
           </button>
@@ -62,11 +65,11 @@ const ScoutLayout = ({ children, title }) => {
 
         {/* Bottom Navigation Bar */}
         <nav className="pwa-nav">
-          <button className={`nav-item ${isActive('/scout_home') ? 'active' : ''}`} onClick={() => navigate('/scout_home')}>
+          <button className={`nav-item ${isActive('/scout_home') ? 'active' : ''}`} onClick={() => navigateTo('/scout_home')}>
             <Home size={22} />
             <span>{t("ScoutLayout.Home")}</span>
           </button>
-          <button className={`nav-item ${isActive('/scout_maps') ? 'active' : ''}`} onClick={() => navigate('/scout_maps')}>
+          <button className={`nav-item ${isActive('/scout_maps') ? 'active' : ''}`} onClick={() => navigateTo('/scout_maps')}>
             <MapPin size={22} />
             <span>{t("ScoutLayout.Maps")}</span>
           </button>
@@ -74,7 +77,7 @@ const ScoutLayout = ({ children, title }) => {
 {/* <Bell size={22} /> */}
 {/* <span>{t("ScoutLayout.Notifications")}</span> */}
 {/* </button> */}
-          <button className={`nav-item ${isActive('/tasks') ? 'active' : ''}`} onClick={() => navigate('/tasks')}>
+          <button className={`nav-item ${isActive('/tasks') ? 'active' : ''}`} onClick={() => navigateTo('/tasks')}>
             <ClipboardList size={22} />
             <span>{t("ScoutLayout.Tasks")}</span>
           </button>
