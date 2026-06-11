@@ -6,17 +6,24 @@ import { MAP_ORDER } from '../../constants/mapOrder'
 import axios from 'axios'
 import './ReportsAdmin.css'
 
-const ReportsAdmin = ({ userData }) => {
+const ReportsAdmin = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
+  const [allUsers, setAllUsers] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeTab, setActiveTab] = useState(null) // hidden by default
+
   const [roofReports, setRoofReports] = useState([])
+  const [selectedFilter, setSelectedFilter] = useState('All') // Filter state for roof reports list
   const [newLocation, setNewLocation] = useState(MAP_ORDER[0] || '')
-  const [newCondition, setNewCondition] = useState('Needs to be painted')
+  const [activity, setActivity] = useState('Painting') // Isolated activity state
+  const [status, setStatus] = useState('ToBeDone') // Isolated status state
   const [newDate, setNewDate] = useState('')
   const [newDescription, setNewDescription] = useState('')
 
   const [climateReports, setClimateReports] = useState([])
+  const [selectedClimateFilter, setSelectedClimateFilter] = useState('All') // Filter state for climate reports list
   const [newNursery, setNewNursery] = useState(MAP_ORDER[0] || '')
   const [newComputerNum, setNewComputerNum] = useState('')
   const [newAfdeling, setNewAfdeling] = useState('')
@@ -24,22 +31,34 @@ const ReportsAdmin = ({ userData }) => {
   const [newOutsideTemp, setNewOutsideTemp] = useState('')
   const [newHumidity, setNewHumidity] = useState('')
   const [newLight, setNewLight] = useState('')
-  const [newNotes, setNewNotes] = useState('')
 
-  // Fetch existing roof reports
+  // Fetch users on mount
   useEffect(() => {
-    axios.get('http://localhost:5000/api/reports/roof')
+    axios.get('http://localhost:5000/api/users')
+      .then(res => {
+        const scoutsOnly = res.data.filter(user => user.role === 'scout')
+        setAllUsers(scoutsOnly)
+      })
+      .catch(err => console.error(err))
+  }, [])
+
+  // Fetch roof reports dynamically based on selection filter
+  useEffect(() => {
+    axios.get(`http://localhost:5000/api/reports/roof?location=${selectedFilter}`)
       .then(res => {
         setRoofReports(res.data)
       })
       .catch(err => console.error(err))
+  }, [selectedFilter])
 
-    axios.get('http://localhost:5000/api/reports/climate')
+  // Fetch climate reports dynamically based on selection filter
+  useEffect(() => {
+    axios.get(`http://localhost:5000/api/reports/climate?location=${selectedClimateFilter}`)
       .then(res => {
         setClimateReports(res.data)
       })
       .catch(err => console.error(err))
-  }, [])
+  }, [selectedClimateFilter])
 
   // Sanitize the input to prevent injections and remove harmful characters
   const sanitizeInput = (text) => {
@@ -56,34 +75,36 @@ const ReportsAdmin = ({ userData }) => {
     const cleanDescription = sanitizeInput(newDescription)
     const cleanDate = sanitizeInput(newDate)
 
-    if (!cleanDescription) {
-      alert(t("ReportsAdmin.InvalidDescription"))
-      return
-    }
-
     const newReport = {
       location: newLocation,
-      condition: newCondition,
-      description: cleanDescription,
-      date: cleanDate || new Date().toLocaleDateString()
+      activity: activity,
+      status: status,
+      description: cleanDescription, // Optional field description
+      date: cleanDate || new Date().toISOString().split('T')[0]
     }
 
     axios.post('http://localhost:5000/api/reports/roof', newReport)
       .then(() => {
-        setRoofReports([...roofReports, { ...newReport, id: Date.now() }])
         setNewDescription('')
         setNewDate('')
+
+        // Dynamic re-fetch or switch fallback to let the new entry show immediately
+        if (selectedFilter === 'All' || selectedFilter === newLocation) {
+          axios.get(`http://localhost:5000/api/reports/roof?location=${selectedFilter}`)
+            .then(res => setRoofReports(res.data))
+        } else {
+          setSelectedFilter('All')
+        }
       })
       .catch(err => console.error(err))
   }
 
-  // Formet new roof report
+  // Format new climate report submission
   const handleSubmitClimateReport = (e) => {
     e.preventDefault()
 
     const cleanComputerNum = sanitizeInput(newComputerNum)
     const cleanAfdeling = sanitizeInput(newAfdeling)
-    const cleanNotes = sanitizeInput(newNotes)
 
     if (!cleanComputerNum || !cleanAfdeling) {
       alert(t("ReportsAdmin.InvalidClimateInputs"))
@@ -113,45 +134,58 @@ const ReportsAdmin = ({ userData }) => {
 
     const newReport = {
       nursery: newNursery,
-      computer_number: cleanComputerNum,
+      hoogendoornnummer: cleanComputerNum,
       afdeling: cleanAfdeling,
       inside_temperature: inside,
       outside_temperature: outside,
       humidity: humid,
-      light: lightVal,
-      notes: cleanNotes,
-      date: new Date().toLocaleDateString()
+      light: lightVal
     }
 
     axios.post('http://localhost:5000/api/reports/climate', newReport)
       .then(() => {
-        setClimateReports([...climateReports, { ...newReport, id: Date.now() }])
         setNewComputerNum('')
         setNewAfdeling('')
         setNewInsideTemp('')
         setNewOutsideTemp('')
         setNewHumidity('')
         setNewLight('')
-        setNewNotes('')
+
+        // Dynamic re-fetch strategy for climate reporting context view tracking
+        if (selectedClimateFilter === 'All' || selectedClimateFilter === newNursery) {
+          axios.get(`http://localhost:5000/api/reports/climate?location=${selectedClimateFilter}`)
+            .then(res => setClimateReports(res.data))
+        } else {
+          setSelectedClimateFilter('All')
+        }
       })
       .catch(err => console.error(err))
   }
 
-  // Fire reporter (or rehire if already fired)
-  // CONNECT TO THE SERVER!!
-  const handleFireEmployee = (userId) => {
-    axios.post(`http://localhost:5000/api/users/${userId}/fire`)
+  // Change employee status (fire or rehire)
+  const handleFireEmployee = (userId, currentStatus) => {
+    const nextStatus = !currentStatus;
+
+    axios.post(`http://localhost:5000/api/users/${userId}/employment`, { is_employed: nextStatus })
       .then(() => {
-        window.location.reload();
+        // Update local state dynamically
+        setAllUsers(allUsers.map(user =>
+          user.uid === userId ? { ...user, is_employed: nextStatus } : user
+        ))
       })
       .catch(err => console.error(err));
   };
 
-  const getRoofConditionLabel = (condition) => ({
-    'Needs to be painted': t("ReportsAdmin.NeedsToBePainted"),
-    'Needs to be cleaned': t("ReportsAdmin.NeedsToBeCleaned"),
-    'Was already painted': t("ReportsAdmin.WasAlreadyPainted"),
-  }[condition] || condition);
+  // Helper mapping helper to assist dynamic fallback rendering
+  const getLabel = (key, fallback) => t(`ReportsAdmin.${key}`) || fallback;
+
+  const filteredWorkers = allUsers.filter(worker => {
+    // If the list is hidden, don't show any workers
+    if (!activeTab) return false;
+    const matchesSearch = worker.username.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTab = activeTab === 'active' ? worker.is_employed : !worker.is_employed;
+    return matchesSearch && matchesTab;
+  });
 
   return (
     <AdminLayout title={t("ReportsAdmin.Title")}>
@@ -172,22 +206,74 @@ const ReportsAdmin = ({ userData }) => {
           </button>
         </div>
 
-        {/* Employment Management Integration */}
+        {/* Employment Management System */}
         <div className="reports-admin-vireo-section reports-admin-vireo-fullwidth">
           <div className="reports-admin-vireo-form-card">
             <h3 className="reports-admin-vireo-form-title">{t("ReportsAdmin.EmploymentManagement")}</h3>
-            <div className="reports-admin-vireo-employment-row">
-              <span className="reports-admin-vireo-employment-text">
-                {userData?.name || t("ReportsAdmin.Employee")} ({t("ReportsAdmin.Status")}: {userData?.is_employed ? t("ReportsAdmin.Employed") : t("ReportsAdmin.Fired")})
-              </span>
+
+            {/* Search Bar */}
+            <div className="reports-admin-vireo-input-group" style={{ marginBottom: '15px' }}>
+              <input
+                type="text"
+                placeholder={t("ReportsAdmin.SearchByUsername") || "Search by username..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="reports-admin-vireo-input"
+              />
+            </div>
+
+            {/* Tab Toggles */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
               <button
-                className="reports-admin-vireo-submit-btn"
-                style={{ marginTop: 0, padding: '6px 12px' }}
-                onClick={() => handleFireEmployee(userData?.uid)}
+                type="button"
+                className={`reports-admin-dashboard-btn ${activeTab === 'active' ? 'active-tab' : ''}`}
+                style={{ padding: '6px 12px', background: activeTab === 'active' ? '#4CAF50' : '#ccc', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px' }}
+                onClick={() => setActiveTab('active')}
               >
-                {userData?.is_employed ? t("ReportsAdmin.Fire") : t("ReportsAdmin.Rehire")}
+                {t("ReportsAdmin.ActiveEmployees") || "Active Employees"}
+              </button>
+              <button
+                type="button"
+                className={`reports-admin-dashboard-btn ${activeTab === 'fired' ? 'active-tab' : ''}`}
+                style={{ padding: '6px 12px', background: activeTab === 'fired' ? '#f44336' : '#ccc', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px' }}
+                onClick={() => setActiveTab('fired')}
+              >
+                {t("ReportsAdmin.FiredEmployees") || "Fired/Inactive"}
+              </button>
+              <button
+                type="button"
+                className={`reports-admin-dashboard-btn ${activeTab === null ? 'active-tab' : ''}`}
+                style={{ padding: '6px 12px', background: activeTab === null ? '#777' : '#ccc', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px' }}
+                onClick={() => setActiveTab(null)}
+              >
+                {t("ReportsAdmin.HideEmployees") || "Hide"}
               </button>
             </div>
+
+            {/* Worker List Display - Only renders if a tab is actively selected */}
+            {activeTab && (
+              <div style={{ maxHeight: '250px', overflowY: 'auto', border: '1px solid #ddd', borderRadius: '4px', padding: '10px' }}>
+                {filteredWorkers.length === 0 ? (
+                  <p style={{ color: '#666', textAlign: 'center' }}>{t("ReportsAdmin.NoWorkersFound") || "No workers found."}</p>
+                ) : (
+                  filteredWorkers.map(worker => (
+                    <div key={worker.uid} className="reports-admin-vireo-employment-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #eee' }}>
+                      <span className="reports-admin-vireo-employment-text">
+                        <strong>{worker.username}</strong> ({worker.email || t("ReportsAdmin.NoEmail") || "No email"})
+                      </span>
+                      <button
+                        type="button"
+                        className="reports-admin-vireo-submit-btn"
+                        style={{ marginTop: 0, padding: '4px 10px', background: worker.is_employed ? '#f44336' : '#4CAF50' }}
+                        onClick={() => handleFireEmployee(worker.uid, worker.is_employed)}
+                      >
+                        {worker.is_employed ? t("ReportsAdmin.Fire") : t("ReportsAdmin.Rehire")}
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -214,15 +300,27 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Status")}:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Activity")}:</label>
                 <select
-                  value={newCondition}
-                  onChange={(e) => setNewCondition(e.target.value)}
+                  value={activity}
+                  onChange={(e) => setActivity(e.target.value)}
                   className="reports-admin-vireo-select"
                 >
-                  <option value="Needs to be painted">{t("ReportsAdmin.NeedsToBePainted")}</option>
-                  <option value="Needs to be cleaned">{t("ReportsAdmin.NeedsToBeCleaned")}</option>
-                  <option value="Was already painted">{t("ReportsAdmin.WasAlreadyPainted")}</option>
+                  <option value="Painting">{t("ReportsAdmin.Painting")}</option>
+                  <option value="Cleaning">{t("ReportsAdmin.Cleaning")}</option>
+                  <option value="PaintingAndCleaning">{t("ReportsAdmin.PaintingAndCleaning")}</option>
+                </select>
+              </div>
+
+              <div className="reports-admin-vireo-input-group">
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Status")}:</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="reports-admin-vireo-select"
+                >
+                  <option value="Done">{t("ReportsAdmin.Done")}</option>
+                  <option value="ToBeDone">{t("ReportsAdmin.ToBeDone")}</option>
                 </select>
               </div>
 
@@ -237,12 +335,11 @@ const ReportsAdmin = ({ userData }) => {
               </div>
 
               <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Description")}:</label>
+                <label className="reports-admin-vireo-label">{t("ReportsAdmin.DescriptionOptional")}:</label>
                 <textarea
                   placeholder={t("ReportsAdmin.DescriptionPlaceholder")}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  required
                   className="reports-admin-vireo-textarea"
                 />
               </div>
@@ -255,6 +352,24 @@ const ReportsAdmin = ({ userData }) => {
 
           <div className="reports-admin-vireo-list-container">
             <h3 className="reports-admin-vireo-list-title">{t("ReportsAdmin.ActiveRoofStatusReports")}</h3>
+
+            {/* Map Filter Selector Dropdown */}
+            <div className="reports-admin-vireo-input-group" style={{ marginBottom: '15px' }}>
+              <label className="reports-admin-vireo-label">{t("ReportsAdmin.FilterByMap") || "Filter by Map"}:</label>
+              <select
+                value={selectedFilter}
+                onChange={(e) => setSelectedFilter(e.target.value)}
+                className="reports-admin-vireo-select"
+              >
+                <option value="All">{t("ReportsAdmin.All") || "All"}</option>
+                {MAP_ORDER.map((greenhouse) => (
+                  <option key={greenhouse} value={greenhouse}>
+                    {greenhouse}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {roofReports.length === 0 ? (
               <div className="reports-admin-vireo-empty-state">
                 <p className="reports-admin-vireo-empty-title">{t("ReportsAdmin.NoReportsAvailable")}</p>
@@ -264,8 +379,17 @@ const ReportsAdmin = ({ userData }) => {
               roofReports.map((report) => (
                 <div key={report.id} className="reports-admin-vireo-report-card">
                   <h4 className="reports-admin-vireo-card-title">{t("ReportsAdmin.Location")}: {report.location}</h4>
-                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.RoofCondition")}:</strong> {getRoofConditionLabel(report.condition)}</p>
-                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.Description")}:</strong> {report.description}</p>
+                  <p className="reports-admin-vireo-card-text">
+                    <strong>{t("ReportsAdmin.Activity") || "Activity"}:</strong> {getLabel(report.activity, report.activity)}
+                  </p>
+                  <p className="reports-admin-vireo-card-text">
+                    <strong>{t("ReportsAdmin.Status") || "Status"}:</strong> {getLabel(report.status, report.status)}
+                  </p>
+                  {report.description && (
+                    <p className="reports-admin-vireo-card-text">
+                      <strong>{t("ReportsAdmin.Description")}:</strong> {report.description}
+                    </p>
+                  )}
                   <p className="reports-admin-vireo-card-date">{t("ReportsAdmin.ReportedOn")}: {report.date}</p>
                 </div>
               ))
@@ -379,16 +503,6 @@ const ReportsAdmin = ({ userData }) => {
                 />
               </div>
 
-              <div className="reports-admin-vireo-input-group">
-                <label className="reports-admin-vireo-label">{t("ReportsAdmin.Notes")}:</label>
-                <textarea
-                  placeholder={t("ReportsAdmin.NotesPlaceholder")}
-                  value={newNotes}
-                  onChange={(e) => setNewNotes(e.target.value)}
-                  className="reports-admin-vireo-textarea"
-                />
-              </div>
-
               <button type="submit" className="reports-admin-vireo-submit-btn">
                 {t("ReportsAdmin.SubmitClimateReport")}
               </button>
@@ -397,6 +511,24 @@ const ReportsAdmin = ({ userData }) => {
 
           <div className="reports-admin-vireo-list-container">
             <h3 className="reports-admin-vireo-list-title">{t("ReportsAdmin.ActiveClimateComputerReports")}</h3>
+
+            {/* Climate Map Filter Selector Dropdown */}
+            <div className="reports-admin-vireo-input-group" style={{ marginBottom: '15px' }}>
+              <label className="reports-admin-vireo-label">{t("ReportsAdmin.FilterByMap") || "Filter by Map"}:</label>
+              <select
+                value={selectedClimateFilter}
+                onChange={(e) => setSelectedClimateFilter(e.target.value)}
+                className="reports-admin-vireo-select"
+              >
+                <option value="All">{t("ReportsAdmin.All") || "All"}</option>
+                {MAP_ORDER.map((greenhouse) => (
+                  <option key={greenhouse} value={greenhouse}>
+                    {greenhouse}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {climateReports.length === 0 ? (
               <div className="reports-admin-vireo-empty-state">
                 <p className="reports-admin-vireo-empty-title">{t("ReportsAdmin.NoClimateDataAvailable")}</p>
@@ -405,11 +537,10 @@ const ReportsAdmin = ({ userData }) => {
             ) : (
               climateReports.map((report) => (
                 <div key={report.id} className="reports-admin-vireo-report-card">
-                  <h4 className="reports-admin-vireo-card-title">{t("ReportsAdmin.Nursery")}: {report.nursery} ({t("ReportsAdmin.Computer")}: {report.computer_number})</h4>
+                  <h4 className="reports-admin-vireo-card-title">{t("ReportsAdmin.Nursery")}: {report.nursery} ({t("ReportsAdmin.ClimateComputerNumber")}: {report.hoogendoornnummer})</h4>
                   <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.Department")}:</strong> {report.afdeling}</p>
-                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.InsideTemp")}:</strong> {report.inside_temperature} C | <strong>{t("ReportsAdmin.OutsideTemp")}:</strong> {report.outside_temperature} C</p>
-                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.HumidityLabel")}:</strong> {report.humidity}% | <strong>{t("ReportsAdmin.LightLevel")}:</strong> {report.light}</p>
-                  {report.notes && <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.Notes")}:</strong> {report.notes}</p>}
+                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.InsideTemperature")}:</strong> {report.inside_temperature} C | <strong>{t("ReportsAdmin.OutsideTemperature")}:</strong> {report.outside_temperature} C</p>
+                  <p className="reports-admin-vireo-card-text"><strong>{t("ReportsAdmin.Humidity")}:</strong> {report.humidity}% | <strong>{t("ReportsAdmin.Light")}:</strong> {report.light}</p>
                   <p className="reports-admin-vireo-card-date">{t("ReportsAdmin.LoggedOn")}: {report.date}</p>
                 </div>
               ))
@@ -423,6 +554,3 @@ const ReportsAdmin = ({ userData }) => {
 }
 
 export default ReportsAdmin
-
-
-

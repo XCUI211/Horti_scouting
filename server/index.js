@@ -991,6 +991,208 @@ app.get('/api/scout/tasks/:uid', async (req, res) => {
     }
 });
 
+// POST request to change a user's employment status (Fire/Rehire)
+app.post('/api/users/:uid/employment', async (req, res) => {
+    const { uid } = req.params;
+    const { is_employed } = req.body;
+
+    try {
+        const result = await pool.query(
+            'UPDATE users SET is_employed = $1 WHERE uid = $2 RETURNING uid, username, is_employed',
+            [is_employed, uid]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'Employment status updated successfully', user: result.rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error updating employment status' });
+    }
+});
+
+// GET request to fetch filtered roof status reports (max 5)
+app.get('/api/reports/roof', async (req, res) => {
+    const { location } = req.query; // Get filter from frontend query string
+
+    try {
+        let query = `
+            SELECT rp.rpid AS id,
+                   m.name  AS location,
+                   rp.activity,
+                   rp.status,
+                   to_char(rp.activity_date, 'YYYY-MM-DD') AS date,
+                   rp.notes AS description
+            FROM roof_painting rp
+            JOIN maps m ON rp.mid = m.mid
+        `;
+
+        const params = [];
+
+        // If a specific map is requested and it's not 'All'
+        if (location && location !== 'All') {
+            params.push(location);
+            query += ` WHERE m.name = $1`;
+        }
+
+        // Apply strict ordering and maximum limit of 5
+        query += ` ORDER BY rp.created_at DESC LIMIT 5;`;
+
+        const result = await pool.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error fetching roof reports' });
+    }
+});
+
+// POST request to submit a new roof report
+app.post('/api/reports/roof', async (req, res) => {
+    const { location, activity, status, date, description } = req.body;
+
+    try {
+        // Resolve the map name (e.g., 'HW 15') to its mid integer ID
+        const mapResult = await pool.query('SELECT mid FROM maps WHERE name = $1', [location]);
+
+        if (mapResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Greenhouse location map not found' });
+        }
+
+        const mid = mapResult.rows[0].mid;
+
+        const insertQuery = `
+            INSERT INTO roof_painting (mid, activity, status, activity_date, notes)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING rpid AS id, activity, status, to_char(activity_date, 'YYYY-MM-DD') AS date, notes AS description;
+        `;
+
+        // If optional date field was empty, fallback to today's date
+        const finalDate = date || new Date().toISOString().split('T')[0];
+
+        const result = await pool.query(insertQuery, [mid, activity, status, finalDate, description || '']);
+
+        res.status(201).json({
+            message: 'Roof report created successfully!',
+            report: { ...result.rows[0], location }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error saving roof report' });
+    }
+});
+
+// GET request to fetch filtered climate computer reports (max 5)
+app.get('/api/reports/climate', async (req, res) => {
+    const { location } = req.query; // Get filter from frontend query string
+
+    try {
+        let query = `
+            SELECT cc.ccid AS id,
+                   m.name  AS nursery,
+                   cc.name AS computer_name,
+                   cc.model,
+                   cc.hoogendoornnummer,
+                   cc.afdeling,
+                   cc.inside_temperature,
+                   cc.outside_temperature,
+                   cc.humidity,
+                   cc.light,
+                   to_char(cc.last_updated_at, 'YYYY-MM-DD HH24:MI') AS date -- 1. ADD THIS LINE
+            FROM climate_computer cc
+            JOIN maps m ON cc.mid = m.mid
+        `;
+
+        const params = [];
+
+        // If a specific nursery map is requested and it's not 'All'
+        if (location && location !== 'All') {
+            params.push(location);
+            query += ` WHERE m.name = $1`;
+        }
+
+        // 2. CHANGE THIS ORDER BY TO USE YOUR TIMESTAMP
+        query += ` ORDER BY cc.last_updated_at DESC;`;
+
+        const result = await pool.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error fetching climate reports' });
+    }
+});
+
+// POST request to submit/update climate computer data using UPSERT
+app.post('/api/reports/climate', async (req, res) => {
+    const {
+        nursery,
+        hoogendoornnummer,
+        afdeling,
+        inside_temperature,
+        outside_temperature,
+        humidity,
+        light
+    } = req.body;
+
+    try {
+        // Resolve the map name (e.g., 'HW 15') to its mid integer ID
+        const mapResult = await pool.query('SELECT mid FROM maps WHERE name = $1', [nursery]);
+
+        if (mapResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Greenhouse location map not found' });
+        }
+
+        const mid = mapResult.rows[0].mid;
+
+        // Provide fallback strings for non-null table fields not gathered by the basic frontend form
+        const defaultName = `Comp-${nursery}`;
+        const defaultModel = "Hoogendoorn iSii";
+
+        // ON CONFLICT (mid) targets your UNIQUE constraint and updates the fields if a record exists
+        const upsertQuery = `
+            INSERT INTO climate_computer (
+                mid, name, model, hoogendoornnummer, afdeling,
+                inside_temperature, outside_temperature, humidity, light,
+                last_updated_at -- 1. ADD THIS COLUMN
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP) -- 2. ADD CURRENT_TIMESTAMP HERE
+            ON CONFLICT (mid) DO UPDATE SET
+                hoogendoornnummer = EXCLUDED.hoogendoornnummer,
+                afdeling = EXCLUDED.afdeling,
+                inside_temperature = EXCLUDED.inside_temperature,
+                outside_temperature = EXCLUDED.outside_temperature,
+                humidity = EXCLUDED.humidity,
+                light = EXCLUDED.light,
+                last_updated_at = CURRENT_TIMESTAMP -- 3. ADD THIS LINE TO OVERWRITE ON CONFLICT
+            RETURNING ccid AS id, name, model, hoogendoornnummer, afdeling,
+                      inside_temperature, outside_temperature, humidity, light,
+                      to_char(last_updated_at, 'YYYY-MM-DD HH24:MI') AS date; -- BONUS: RETURNS BACK TO FRONTEND STATE IMMEDIATELY
+        `;
+
+        const result = await pool.query(upsertQuery, [
+            mid,
+            defaultName,
+            defaultModel,
+            hoogendoornnummer,
+            afdeling,
+            inside_temperature,
+            outside_temperature,
+            humidity,
+            light
+        ]);
+
+        res.status(201).json({
+            message: 'Climate report synchronized successfully!',
+            report: { ...result.rows[0], nursery }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error saving climate report' });
+    }
+});
+
+
 // Export so test files can import Express app without starting server.
 module.exports = {
     app,
