@@ -1499,3 +1499,308 @@ describe("GET /api/reports", () => {
     expect(calledParams).toContain("HW 13");
   });
 });
+
+// ---------- Employment ----------
+describe("POST /api/users/:uid/employment", () => {
+  it("updates employment status", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        {
+          uid: 1,
+          username: "scoutA",
+          is_employed: false,
+        },
+      ],
+    });
+
+    const res = await request(app)
+      .post("/api/users/1/employment")
+      .send({
+        is_employed: false,
+      });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      message: "Employment status updated successfully",
+      user: {
+        uid: 1,
+        username: "scoutA",
+        is_employed: false,
+      },
+    });
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      "UPDATE users SET is_employed = $1 WHERE uid = $2 RETURNING uid, username, is_employed",
+      [false, "1"]
+    );
+  });
+
+  it("returns 404 when user is not found", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app)
+      .post("/api/users/999/employment")
+      .send({
+        is_employed: false,
+      });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({
+      message: "User not found",
+    });
+  });
+
+  it("returns 500 when update fails", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+    const res = await request(app)
+      .post("/api/users/1/employment")
+      .send({
+        is_employed: true,
+      });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      message: "Server error updating employment status",
+    });
+
+    errorSpy.mockRestore();
+  });
+});
+
+// ---------- Filter Roof Reports ----------
+describe("GET /api/reports/roof", () => {
+  it("returns roof reports", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 1,
+          location: "HW 15",
+          activity: "Painting",
+          status: "Completed",
+          date: "2026-06-12",
+          description: "Finished",
+        },
+      ],
+    });
+
+    const res = await request(app).get("/api/reports/roof");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.length).toBe(1);
+  });
+
+  it("filters by location", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).get("/api/reports/roof?location=HW 15");
+
+    expect(res.statusCode).toBe(200);
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining("WHERE m.name = $1"),
+      ["HW 15"]
+    );
+  });
+
+  it("returns 500 when query fails", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+    const res = await request(app).get("/api/reports/roof");
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      message: "Server error fetching roof reports",
+    });
+
+    errorSpy.mockRestore();
+  });
+});
+
+// ---------- Submit Roof Reports ----------
+describe("POST /api/reports/roof", () => {
+  it("creates a roof report", async () => {
+    mockQuery
+      .mockResolvedValueOnce({
+        rows: [{ mid: 5 }],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: 1,
+            activity: "Paint",
+            status: "Done",
+            date: "2026-06-12",
+            description: "",
+          },
+        ],
+      });
+
+    const res = await request(app)
+      .post("/api/reports/roof")
+      .send({
+        location: "HW 15",
+        activity: "Paint",
+        status: "Done",
+        date: "2026-06-12",
+        description: "",
+      });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.message).toBe("Roof report created successfully!");
+  });
+
+  it("returns 404 when map is not found", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [],
+    });
+
+    const res = await request(app)
+      .post("/api/reports/roof")
+      .send({
+        location: "Unknown",
+      });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({
+      message: "Greenhouse location map not found",
+    });
+  });
+
+  it("returns 500 when insert fails", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+    const res = await request(app)
+      .post("/api/reports/roof")
+      .send({
+        location: "HW 15",
+      });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      message: "Server error saving roof report",
+    });
+
+    errorSpy.mockRestore();
+  });
+});
+
+// ---------- Filter Climate Reports ----------
+describe("GET /api/reports/climate", () => {
+  it("returns climate reports", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 1,
+          nursery: "HW 15",
+        },
+      ],
+    });
+
+    const res = await request(app).get("/api/reports/climate");
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.length).toBe(1);
+  });
+
+  it("filters by location", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const res = await request(app).get("/api/reports/climate?location=HW 15");
+
+    expect(res.statusCode).toBe(200);
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining("WHERE m.name = $1"),
+      ["HW 15"]
+    );
+  });
+
+  it("returns 500 when query fails", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+    const res = await request(app).get("/api/reports/climate");
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      message: "Server error fetching climate reports",
+    });
+
+    errorSpy.mockRestore();
+  });
+});
+
+// ---------- Submit Climate Reports ----------
+describe("POST /api/reports/climate", () => {
+  it("creates or updates a climate report", async () => {
+    mockQuery
+      .mockResolvedValueOnce({
+        rows: [{ mid: 5 }],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: 1,
+            name: "Comp-HW 15",
+            model: "Hoogendoorn iSii",
+          },
+        ],
+      });
+
+    const res = await request(app)
+      .post("/api/reports/climate")
+      .send({
+        nursery: "HW 15",
+        hoogendoornnummer: "123",
+        afdeling: "A",
+        inside_temperature: 20,
+        outside_temperature: 15,
+        humidity: 60,
+        light: 500,
+      });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.message).toBe(
+      "Climate report synchronized successfully!"
+    );
+  });
+
+  it("returns 404 when map is not found", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [],
+    });
+
+    const res = await request(app)
+      .post("/api/reports/climate")
+      .send({
+        nursery: "Unknown",
+      });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toEqual({
+      message: "Greenhouse location map not found",
+    });
+  });
+
+  it("returns 500 when upsert fails", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+    const res = await request(app)
+      .post("/api/reports/climate")
+      .send({
+        nursery: "HW 15",
+      });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      message: "Server error saving climate report",
+    });
+
+    errorSpy.mockRestore();
+  });
+});
