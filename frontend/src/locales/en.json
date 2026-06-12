@@ -155,6 +155,9 @@
 
   "ScoutOverview": {
     "PageTitle": "Scout Overview",
+    "AssignMapsTitle": "Assign Scouts to Maps",
+    "AssignMapsDescription": "Choose which maps each scout is responsible for.",
+    "AssignMapsButton": "Assign Maps",
     "AwaitingApproval": "Awaiting Approval",
     "StatusApproved": "Approved",
     "StatusRejected": "Rejected",

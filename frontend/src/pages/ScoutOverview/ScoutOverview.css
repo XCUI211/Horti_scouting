@@ -2,7 +2,55 @@
     padding: 10px;
     background-color: #f8fafc;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
 }
+
+/* BEGIN scout assignment button */
+.scout-overview-map-assignment-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #f7fbf4;
+    border: 1px solid #cfe8c1;
+    border-left: 6px solid #57b021;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.scout-overview-map-assignment-title {
+    margin: 0 0 6px 0;
+    color: #152974;
+    font-size: 18px;
+}
+
+.scout-overview-map-assignment-text {
+    margin: 0;
+    color: #333333;
+    font-size: 14px;
+}
+
+.scout-overview-map-assignment-btn {
+    align-self: flex-start;
+    transform: translateY(8px);
+    background: #57b021;
+    color: #ffffff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.scout-overview-map-assignment-btn:hover {
+    background: #49941b;
+}
+/* END scout assignment button */
 
 .scout-overview-cards-list {
     display: flex;
@@ -88,6 +136,14 @@
         align-items: center !important; /* Horizontally centers the cards-list grid track */
         min-height: 100% !important;
         background-color: transparent !important;
+    }
+
+    .scout-overview-map-assignment-card {
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
     }
 
     /* Grid layout container dynamically shifts layout styles */

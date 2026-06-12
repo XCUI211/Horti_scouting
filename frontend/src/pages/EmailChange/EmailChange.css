@@ -10,6 +10,13 @@
   box-sizing: border-box;
 }
 
+.email-change-container img {
+  width: 120px;
+  height: auto;
+  max-width: 120px;
+  margin-bottom: 20px;
+}
+
 .email-change-container .current-email-hint {
   color: #666;
   margin-bottom: 20px;

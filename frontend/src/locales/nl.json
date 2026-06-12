@@ -155,6 +155,9 @@
 
   "ScoutOverview": {
     "PageTitle": "Scout Overzicht",
+    "AssignMapsTitle": "Plattegronden aan scouts toekennen",
+    "AssignMapsDescription": "Kies voor welke plattegronden elke scout verantwoordelijk is.",
+    "AssignMapsButton": "Plattegronden toekennen",
     "AwaitingApproval": "Goedkeuring afwachten",
     "StatusApproved": "Klaar",
     "StatusRejected": "Opnieuw",

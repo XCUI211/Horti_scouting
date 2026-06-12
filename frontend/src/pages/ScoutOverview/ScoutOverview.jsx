@@ -3,9 +3,11 @@ import axios from 'axios';
 import AdminLayout from '../../components/AdminLayout/AdminLayout';
 import "./ScoutOverview.css";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from 'react-router-dom';
 
 const ScoutOverview = () => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [scoutData, setScoutData] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -34,6 +36,21 @@ const ScoutOverview = () => {
     return (
         <AdminLayout title={t("ScoutOverview.PageTitle")}>
             <div className="scout-overview-page-wrapper">
+                <div className="scout-overview-map-assignment-card">
+                    <div>
+                        <h3 className="scout-overview-map-assignment-title">{t("ScoutOverview.AssignMapsTitle")}</h3>
+                        <p className="scout-overview-map-assignment-text">
+                            {t("ScoutOverview.AssignMapsDescription")}
+                        </p>
+                    </div>
+                    <button
+                        className="scout-overview-map-assignment-btn"
+                        onClick={() => navigate('/scout_maps_assign')}
+                    >
+                        {t("ScoutOverview.AssignMapsButton")}
+                    </button>
+                </div>
+
                 {loading ? (
                     <p className="scout-overview-loading">{t("ScoutOverview.Loading")}</p>
                 ) : (
