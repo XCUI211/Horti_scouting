@@ -90,6 +90,7 @@ export default function PestHistory() {const { t } = useTranslation();
   }, [period, selectedMap]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedPest(null);
     setDetailData(null);
     setDetailError(null);

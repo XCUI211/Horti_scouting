@@ -11,7 +11,7 @@ const AccountAdmin = () => {
   const [userData, setUserData] = useState(null);
   const { user, setUser, logout } = useAuth();
   const [selectedLanguage, setSelectedLanguage] = useState(user?.language || "nl");
-  const [password, setPassword] = useState("");
+  const [password] = useState("");
   const { t, i18n } = useTranslation(); //i18n for local language
 
   useEffect(() => {

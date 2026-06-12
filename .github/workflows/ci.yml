@@ -19,6 +19,8 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Installing dependencies
         run: npm install
+      - name: Static Analysis (Linter)
+        run: npm run lint
       - name: Security audit  # runs security audit on root, backend, and frontend
         run: npm run audit
       - name: Running unit tests

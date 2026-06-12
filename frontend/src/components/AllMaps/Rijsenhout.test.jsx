@@ -8,7 +8,7 @@ const renderMap = (ui = <RijsenhoutMap />) =>
   render(<AuthProvider>{ui}</AuthProvider>);
 
 const mockReports = (data) => {
-  global.fetch = vi.fn().mockResolvedValue({
+  globalThis.fetch = vi.fn().mockResolvedValue({  // fix for npm run lint
     json: () => Promise.resolve({ status: 'success', data }),
   });
 };

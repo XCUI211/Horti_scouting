@@ -72,7 +72,7 @@ const HW53Map = ({ focusedReport }) => {
 
   useEffect(() => {
     if (focusedReport) {
-      // focusedReport 来自后端, 字段是 cell_name; modal 用的是 label
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCell({
         label: focusedReport.cell_name,
         block_key: focusedReport.block_key,

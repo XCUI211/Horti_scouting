@@ -17,7 +17,7 @@ jest.mock("bcrypt", () => ({
 }));
 
 const request = require("supertest");
-const { app, pool, testDatabaseConnection } = require("./index");
+const { app, testDatabaseConnection } = require("./index");
 
 beforeEach(() => {
   jest.clearAllMocks();

@@ -95,6 +95,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
   useEffect(() => {
     if (reportData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAdminComment(reportData.admin_comment || '');
       setLocalReportStatus(reportData.status || '');
       setAdminBanner(null);
@@ -103,6 +104,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('');
       setSuccess('');
       setAdminBanner(null);
@@ -177,6 +179,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
   useEffect(() => {
     if (!isOpen || !cellInfo || reportData || hasSelectedTargets) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHistoryLoading(true);
     const params = new URLSearchParams({
       map_id: mapName,

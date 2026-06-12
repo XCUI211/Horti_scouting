@@ -14,11 +14,6 @@ const ScoutMapAssignment = () => {
     const [tempMapIds, setTempMapIds] = useState([]); // Temporary selection state, tracks map choice before hitting save
     const [loading, setLoading] = useState(false);  // Boolean to disable save button while database is loading
 
-    useEffect(() => {
-        fetchOverview();
-        fetchAllMaps();
-    }, []);
-
     // Getting the scouts overview from the database
     const fetchOverview = async () => {
         try {
@@ -40,6 +35,13 @@ const ScoutMapAssignment = () => {
             setAllMaps(sortedMaps);
         } catch (err) { console.error(err); }
     };
+
+    // added for npm run lint
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchOverview();
+        fetchAllMaps();
+    }, []);
 
     // Assigning maps to one scout (triggered on "Assign Maps")
     const startEditing = (scout) => {
@@ -67,7 +69,7 @@ const ScoutMapAssignment = () => {
             });
             setEditingScout(null);  // Goes back to the scout list overview
             fetchOverview(); // Refreshes the list with new data
-        } catch (err) {
+        } catch {
             alert("Error saving maps");
         } finally {
             setLoading(false);

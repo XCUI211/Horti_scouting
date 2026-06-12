@@ -498,7 +498,7 @@ app.post('/api/users/change-email', async (req, res) => {
 
 // POST request for changing user language
 app.post('/api/users/change-language', async (req, res) => {
-    const { uid, password, newLanguage } = req.body;
+    const { uid, newLanguage } = req.body;
 
     try {
         const userResult = await pool.query('SELECT * FROM users WHERE uid = $1', [uid]);

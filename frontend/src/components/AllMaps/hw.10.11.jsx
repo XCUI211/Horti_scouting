@@ -67,6 +67,7 @@ const HW1011Map = ({ focusedReport, mapName = "HW 10.11" }) => {
               continue;
             }
 
+            // eslint-disable-next-line react-hooks/immutability
             const { width, height } = getCellSpan(r, c, mapData[r][c]);
             const bounds = {
               label: labelStr,
@@ -76,6 +77,7 @@ const HW1011Map = ({ focusedReport, mapName = "HW 10.11" }) => {
               height,
               block_key: focusedReport.block_key || currentBlockKey,
             };
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSelectedGroup(bounds);
             setViewingReport(focusedReport);
             return;

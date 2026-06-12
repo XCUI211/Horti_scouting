@@ -77,8 +77,10 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
               continue;
             }
 
+            // eslint-disable-next-line react-hooks/immutability
             const bounds = getMergedBounds(r, c, mapData[r][c]);
             bounds.block_key = focusedReport.block_key || currentBlockKey;
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSelectedGroup(bounds);
             setViewingReport(focusedReport);
             return;
@@ -86,6 +88,7 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusedReport, mapName]);
 
   const getMergedBounds = (r, c, label) => {

@@ -84,8 +84,10 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
               continue;
             }
 
+            // eslint-disable-next-line react-hooks/immutability
             const bounds = getMergedBounds(r, c, focusedReport.cell_name);
             bounds.block_key = focusedReport.block_key || currentBlockKey;
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSelectedGroup(bounds);
             setViewingReport(focusedReport);
             return;

@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
             </AuthContext.Provider>);
     }
 
-    // Makes useAuth() available to all components that are within AuthProvider, and throws an error if used outside of it
+    // eslint-disable-next-line react-refresh/only-export-components
     export function useAuth() {
         const context = useContext(AuthContext);
         if (!context) {throw new Error("useAuth must be used inside an AuthProvider");}

@@ -10,7 +10,7 @@ let savedLanguage = "nl";
 try {
   const storedUser = JSON.parse(localStorage.getItem("user"));
   savedLanguage = storedUser?.language || "nl";
-} catch (err) {
+} catch {
   savedLanguage = "nl";
 }
 

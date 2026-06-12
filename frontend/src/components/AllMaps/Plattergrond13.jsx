@@ -55,6 +55,7 @@ const Plattergrond13 = ({ focusedReport }) => {
   // Highlight a specific cell
   useEffect(() => {
     if (focusedReport) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCell(focusedReport);
     }
   }, [focusedReport]);

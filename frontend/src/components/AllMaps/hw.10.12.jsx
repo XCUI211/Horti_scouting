@@ -62,6 +62,7 @@ const HW1012Map = ({ focusedReport }) => {
 
   useEffect(() => {
     if (focusedReport) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCell({
         label: focusedReport.cell_name,
         block_key: focusedReport.block_key

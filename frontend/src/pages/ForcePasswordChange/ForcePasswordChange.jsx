@@ -33,7 +33,7 @@ const ForcePasswordChange = () => {
       setUser(updatedUser);
 
       navigate("/scout_home");
-    } catch (err) {
+    } catch {
       setError(t("ForcePasswordChange.UpdateFailed"));
     }
   };

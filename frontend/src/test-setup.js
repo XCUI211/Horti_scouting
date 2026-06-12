@@ -4,7 +4,7 @@ import { cleanup } from '@testing-library/react';
 
 afterEach(cleanup);
 
-global.ResizeObserver = class {
+globalThis.ResizeObserver = class {
   observe() {}
   unobserve() {}
   disconnect() {}
