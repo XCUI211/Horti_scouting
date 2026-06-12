@@ -3,6 +3,29 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../context/AuthContext";
 import { formatPestNames } from "../../../constants/pestNames";
 
+const API_BASE_URL = 'http://localhost:5000';
+
+function getLocalDateString(dateValue = new Date()) {
+  const year = dateValue.getFullYear();
+  const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+  const day = String(dateValue.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function sortReportsNewestFirst(reports) {
+  return [...reports].sort((left, right) => {
+    const leftDate = left?.entry_date || '';
+    const rightDate = right?.entry_date || '';
+    if (leftDate !== rightDate) return rightDate.localeCompare(leftDate);
+
+    const leftCreatedAt = left?.created_at || '';
+    const rightCreatedAt = right?.created_at || '';
+    if (leftCreatedAt !== rightCreatedAt) return rightCreatedAt.localeCompare(leftCreatedAt);
+
+    return Number(right?.report_id || 0) - Number(left?.report_id || 0);
+  });
+}
+
 export default function ScoutReportModal({ isOpen, onClose, onReportApproved, cellInfo, reportData, mapName, selectedCells }) {
   const [targetFids, setTargetFids] = useState([]);
 
@@ -25,6 +48,8 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
   const [trapNumber, setTrapNumber] = useState('');
   const [bugCount, setBugCount] = useState('');
+  const [entryDate, setEntryDate] = useState(getLocalDateString());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [adminComment, setAdminComment] = useState('');
   const [adminBanner, setAdminBanner] = useState(null);
@@ -112,11 +137,24 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       setView(hasSelectedTargets ? 'form' : 'info');
       setTargetFids([]);
       if (!reportData) {
+        setPestsFound('');
+        setPestType([]);
+        setPestSeverity('');
         setPlantName('');
         setSupplier('');
+        setBiologyUsed('');
         setBiologyTypes([]);
         setBiologyOther('');
+        setChemicalsUsed('');
         setChemicalsTypes('');
+        setBehandelaar('');
+        setPotmaat('');
+        setOppotweek('');
+        setTeelduurWeeks('');
+        setTrapNumber('');
+        setBugCount('');
+        setEntryDate(getLocalDateString());
+        setIsSubmitting(false);
       }
     }
   }, [isOpen, cellInfo, reportData, hasSelectedTargets]);
@@ -134,7 +172,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       setTargetFids([]);
 
       if (reportTargets.length > 1) {
-        const response = await fetch('http://localhost:5000/api/floors/resolve-many', {
+        const response = await fetch(`${API_BASE_URL}/api/floors/resolve-many`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({map_name: mapName,
@@ -158,7 +196,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       });
       if (target.block_key) params.set('block_key', target.block_key);
 
-      const response = await fetch(`http://localhost:5000/api/floors/resolve?${params.toString()}`);
+      const response = await fetch(`${API_BASE_URL}/api/floors/resolve?${params.toString()}`);
       const data = await response.json().catch(() => ({}));
       if (!response.ok || data.status !== 'success' || data.fid == null) {
         throw new Error(data.message || `FloorID resolve failed for ${mapName} / ${target.label}`);
@@ -187,11 +225,14 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     });
     if (cellBlockKey) params.set('block_key', cellBlockKey);
 
-    fetch(`http://localhost:5000/api/reports?${params.toString()}`)
+    fetch(`${API_BASE_URL}/api/reports?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        if (data.status === 'success') setHistory(data.data);
-        else setHistory([]);
+        if (data.status === 'success' && Array.isArray(data.data)) {
+          setHistory(sortReportsNewestFirst(data.data));
+        } else {
+          setHistory([]);
+        }
       })
       .catch(() => setHistory([]))
       .finally(() => setHistoryLoading(false));
@@ -284,10 +325,95 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     }
   };
 
+  const validateReport = () => {
+    if (!user?.uid || !user?.username?.trim()) {
+      return t("ScoutReportModal.ValidationScoutRequired", { defaultValue: "A valid logged-in scout is required." });
+    }
+
+    if (!entryDate) {
+      return t("ScoutReportModal.ValidationDateRequired", { defaultValue: "Report date is required." });
+    }
+
+    if (entryDate > getLocalDateString()) {
+      return t("ScoutReportModal.ValidationFutureDate", { defaultValue: "Report date cannot be in the future." });
+    }
+
+    if (!plantName.trim()) {
+      return t("ScoutReportModal.ValidationPlantRequired", { defaultValue: "Plant name is required." });
+    }
+
+    if (!supplier.trim()) {
+      return t("ScoutReportModal.ValidationSupplierRequired", { defaultValue: "Supplier is required." });
+    }
+
+    if (pestsFound !== 'true' && pestsFound !== 'false') {
+      return t("ScoutReportModal.ValidationPestsFoundRequired", { defaultValue: "Please indicate whether pests were found." });
+    }
+
+    if (pestsFound === 'true') {
+      if (pestType.length === 0) {
+        return t("ScoutReportModal.ValidationPestTypeRequired", { defaultValue: "Select at least one pest type." });
+      }
+
+      const severity = Number(pestSeverity);
+      if (!Number.isInteger(severity) || severity < 1 || severity > 5) {
+        return t("ScoutReportModal.ValidationSeverityRequired", { defaultValue: "Select a pest severity from 1 to 5." });
+      }
+
+      if (biologyUsed !== 'true' && biologyUsed !== 'false') {
+        return t("ScoutReportModal.ValidationBiologyRequired", { defaultValue: "Please indicate whether biology was used." });
+      }
+
+      if (biologyUsed === 'true') {
+        if (biologyTypes.length === 0) {
+          return t("ScoutReportModal.ValidationBiologyTypeRequired", { defaultValue: "Select at least one biology type." });
+        }
+        if (biologyTypes.includes('other') && !biologyOther.trim()) {
+          return t("ScoutReportModal.ValidationBiologyOtherRequired", { defaultValue: "Enter the other biology type." });
+        }
+      }
+
+      if (chemicalsUsed !== 'true' && chemicalsUsed !== 'false') {
+        return t("ScoutReportModal.ValidationChemicalsRequired", { defaultValue: "Please indicate whether chemicals were used." });
+      }
+
+      if (chemicalsUsed === 'true' && !chemicalsTypes.trim()) {
+        return t("ScoutReportModal.ValidationChemicalTypeRequired", { defaultValue: "Chemical type is required when chemicals were used." });
+      }
+
+      if ((biologyUsed === 'true' || chemicalsUsed === 'true') && !behandelaar.trim()) {
+        return t("ScoutReportModal.ValidationBehandelaarRequired", { defaultValue: "Treatment operator is required when treatment was used." });
+      }
+    }
+
+    if (oppotweek !== '') {
+      const week = Number(oppotweek);
+      if (!Number.isInteger(week) || week < 1 || week > 53) {
+        return t("ScoutReportModal.ValidationOppotweek", { defaultValue: "Potting week must be between 1 and 53." });
+      }
+    }
+
+    if (teelduurWeeks !== '' && (!Number.isFinite(Number(teelduurWeeks)) || Number(teelduurWeeks) < 0)) {
+      return t("ScoutReportModal.ValidationCultivationWeeks", { defaultValue: "Cultivation duration cannot be negative." });
+    }
+
+    if (bugCount !== '' && (!Number.isInteger(Number(bugCount)) || Number(bugCount) < 0)) {
+      return t("ScoutReportModal.ValidationBugCount", { defaultValue: "Bug count must be a non-negative whole number." });
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    const validationError = validateReport();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     // Do not accept reports without FloorID
     const numericTargetFids = targetFids
@@ -301,29 +427,35 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     // Adjusted to work with multi-select by allowing multiple fID's to be sent to the backend, which will then create a
     // seperate report for each fID. In case multiple fID's are in the fIDs field, backend will ignore the single fID
     // and use all other report information as usual
+    setIsSubmitting(true);
+
     try {
       const reportPayload = {
-        uid: Number(user?.uid),
+        uid: Number(user.uid),
+        entry_date: entryDate,
         plant_name: plantName.trim(),
         supplier: supplier.trim(),
-        pests_found: !pestType.includes('none') && pestType.length > 0,
+        pests_found: pestsFound === 'true',
         pest_types: pestsFound === 'true' && pestType.length > 0 ? pestType : null,
-        pest_severity: pestType.includes('none') || pestSeverity === '' ? null : Number(pestSeverity),
+        pest_severity: pestsFound === 'true' ? Number(pestSeverity) : null,
         biology_used: biologyUsed === 'true',
-        biology_types: biologyUsed === 'true' && (biologyTypes.length > 0 || biologyOther !== '')
-          ? [...biologyTypes.filter(b => b !== 'other'),
-             ...(biologyTypes.includes('other') && biologyOther !== '' ? [biologyOther] : []),] : null,
+        biology_types: biologyUsed === 'true'
+          ? [
+              ...biologyTypes.filter((type) => type !== 'other'),
+              ...(biologyTypes.includes('other') ? [biologyOther.trim()] : []),
+            ]
+          : null,
         chemicals_used: chemicalsUsed === 'true',
-        chemicals_types: chemicalsUsed === 'true' ? chemicalsTypes : null,
-        behandelaar: biologyUsed === 'true' || chemicalsUsed === 'true' ? behandelaar || null : null,
-        potmaat: potmaat || null,
+        chemicals_types: chemicalsUsed === 'true' ? chemicalsTypes.trim() : null,
+        behandelaar: biologyUsed === 'true' || chemicalsUsed === 'true' ? behandelaar.trim() : null,
+        potmaat: potmaat.trim() || null,
         oppotweek: oppotweek === '' ? null : Number(oppotweek),
         teelduur_weeks: teelduurWeeks === '' ? null : Number(teelduurWeeks),
-        trap_number: trapNumber || null,
+        trap_number: trapNumber.trim() || null,
         bug_count: bugCount === '' ? null : Number(bugCount),
       };
       const isBulkSubmit = numericTargetFids.length > 1;
-      const response = await fetch(`http://localhost:5000/api/floorreports${isBulkSubmit ? '/bulk' : ''}`, {
+      const response = await fetch(`${API_BASE_URL}/api/floorreports${isBulkSubmit ? '/bulk' : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(isBulkSubmit
@@ -335,10 +467,16 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
         setSuccess('');
         setShowSubmittedPopup(true);
       } else {
-        setError(data.message || t("ScoutReportModal.CouldNotSubmitFloorReport"));
+        const detail = Array.isArray(data.detail)
+          ? data.detail.map((item) => item.msg).join(' ')
+          : data.detail;
+        const validationErrors = Array.isArray(data.errors) ? data.errors.join(' ') : '';
+        setError(validationErrors || detail || data.message || t("ScoutReportModal.CouldNotSubmitFloorReport"));
       }
     } catch (err) {
       setError(t("ScoutReportModal.NetworkError") + ': ' + err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -346,7 +484,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     setAdminBanner(null);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/reports/${reportData.report_id}/approve`, {
+      const response = await fetch(`${API_BASE_URL}/api/reports/${reportData.report_id}/approve`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, admin_comment: adminComment }),
@@ -642,34 +780,61 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>{t("ScoutReportModal.Plant")}</label>
+              <label style={styles.label}>
+                {t("ScoutReportModal.ReportDate", { defaultValue: "Report date" })} *
+              </label>
+              <input
+                style={styles.input}
+                type="date"
+                value={entryDate}
+                max={getLocalDateString()}
+                onChange={(e) => setEntryDate(e.target.value)}
+                required
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>{t("ScoutReportModal.Plant")} *</label>
               <input
                 style={styles.input}
                 type="text"
                 value={plantName}
                 onChange={(e) => setPlantName(e.target.value)}
+                required
+                maxLength={100}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>{t("ScoutReportModal.Supplier")}</label>
+              <label style={styles.label}>{t("ScoutReportModal.Supplier")} *</label>
               <input
                 style={styles.input}
                 type="text"
                 value={supplier}
                 onChange={(e) => setSupplier(e.target.value)}
+                required
+                maxLength={100}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>{t("ScoutReportModal.PestsFound")}</label>
+              <label style={styles.label}>{t("ScoutReportModal.PestsFound")} *</label>
               <select
                 style={styles.input}
                 value={pestsFound}
                 onChange={(e) => {
                   const v = e.target.value;
                   setPestsFound(v);
-                  if (v === 'false') { setPestType([]); setPestSeverity(''); }
+                  if (v === 'false') {
+                    setPestType([]);
+                    setPestSeverity('');
+                    setBiologyUsed('');
+                    setBiologyTypes([]);
+                    setBiologyOther('');
+                    setChemicalsUsed('');
+                    setChemicalsTypes('');
+                    setBehandelaar('');
+                  }
                 }}
                 required
               >
@@ -682,7 +847,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
             {pestsFound === 'true' && (
               <>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>{t("ScoutReportModal.FoundPests")}</label>
+                  <label style={styles.label}>{t("ScoutReportModal.FoundPests")} *</label>
                   <div style={styles.checkboxGroup}>
                     {pestOptions.map(p => (
                       <label key={p.value} style={styles.checkboxItem}>
@@ -698,7 +863,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
                 </div>
 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>{t("ScoutReportModal.PestSeverity")}</label>
+                  <label style={styles.label}>{t("ScoutReportModal.PestSeverity")} *</label>
                   <select
                     style={styles.input}
                     value={pestSeverity}
@@ -715,7 +880,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
                 </div>
 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>{t("ScoutReportModal.BiologyUsed")}</label>
+                  <label style={styles.label}>{t("ScoutReportModal.BiologyUsed")} *</label>
                   <select
                     style={styles.input}
                     value={biologyUsed}
@@ -738,7 +903,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
                 {biologyUsed === 'true' && (
                   <div style={styles.formGroup}>
-                    <label style={styles.label}>{t("ScoutReportModal.BiologyType")}</label>
+                    <label style={styles.label}>{t("ScoutReportModal.BiologyType")} *</label>
                     <div style={styles.checkboxGroup}>
                       {biologyOptions.map(b => (
                         <label key={b.value} style={styles.checkboxItem}>
@@ -773,13 +938,15 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
                         value={biologyOther}
                         onChange={(e) => setBiologyOther(e.target.value)}
                         placeholder={t("ScoutReportModal.Other")}
+                        required
+                        maxLength={100}
                       />
                     )}
                   </div>
                 )}
 
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>{t("ScoutReportModal.ChemicalsUsed")}</label>
+                  <label style={styles.label}>{t("ScoutReportModal.ChemicalsUsed")} *</label>
                   <select
                     style={styles.input}
                     value={chemicalsUsed}
@@ -801,24 +968,28 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
                 {chemicalsUsed === 'true' && (
                   <div style={styles.formGroup}>
-                    <label style={styles.label}>{t("ScoutReportModal.ChemicalsType")}</label>
+                    <label style={styles.label}>{t("ScoutReportModal.ChemicalsType")} *</label>
                     <input
                       style={styles.input}
                       type="text"
                       value={chemicalsTypes}
                       onChange={(e) => setChemicalsTypes(e.target.value)}
+                      required
+                      maxLength={250}
                     />
                   </div>
                 )}
 
                 {(biologyUsed === 'true' || chemicalsUsed === 'true') && (
                   <div style={styles.formGroup}>
-                    <label style={styles.label}>{t("ScoutReportModal.Behandelaar")}</label>
+                    <label style={styles.label}>{t("ScoutReportModal.Behandelaar")} *</label>
                     <input
                       style={styles.input}
                       type="text"
                       value={behandelaar}
                       onChange={(e) => setBehandelaar(e.target.value)}
+                      required
+                      maxLength={100}
                     />
                   </div>
                 )}
@@ -832,22 +1003,22 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
             <div style={styles.formGroup}>
               <label style={styles.label}>{t("ScoutReportModal.Oppotweek")}</label>
-              <input style={styles.input} type="number" value={oppotweek} onChange={(e) => setOppotweek(e.target.value)} />
+              <input style={styles.input} type="number" min="1" max="53" step="1" value={oppotweek} onChange={(e) => setOppotweek(e.target.value)} />
             </div>
 
             <div style={styles.formGroup}>
               <label style={styles.label}>{t("ScoutReportModal.TeelduurWeeks")}</label>
-              <input style={styles.input} type="number" value={teelduurWeeks} onChange={(e) => setTeelduurWeeks(e.target.value)} />
+              <input style={styles.input} type="number" min="0" step="1" value={teelduurWeeks} onChange={(e) => setTeelduurWeeks(e.target.value)} />
             </div>
 
             <div style={styles.formGroup}>
               <label style={styles.label}>{t("ScoutReportModal.TrapNumber")}</label>
-              <input style={styles.input} type="date" value={trapNumber} onChange={(e) => setTrapNumber(e.target.value)} />
+              <input style={styles.input} type="text" maxLength={50} value={trapNumber} onChange={(e) => setTrapNumber(e.target.value)} />
             </div>
 
             <div style={styles.formGroup}>
               <label style={styles.label}>{t("ScoutReportModal.BugCount")}</label>
-              <input style={styles.input} type="number" value={bugCount} onChange={(e) => setBugCount(e.target.value)} />
+              <input style={styles.input} type="number" min="0" step="1" value={bugCount} onChange={(e) => setBugCount(e.target.value)} />
             </div>
           </div>
 
@@ -855,7 +1026,15 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
             <button type="button" style={styles.btnSecondary} onClick={() => hasSelectedTargets ? onClose() : setView('info')}>
               {hasSelectedTargets ? t("ScoutReportModal.Close") : t("ScoutReportModal.Back")}
             </button>
-            <button type="submit" style={styles.btnPrimary} disabled={targetFids.length === 0}>{t("ScoutReportModal.SubmitReport")}</button>
+            <button
+              type="submit"
+              style={{ ...styles.btnPrimary, opacity: targetFids.length === 0 || isSubmitting ? 0.65 : 1 }}
+              disabled={targetFids.length === 0 || isSubmitting}
+            >
+              {isSubmitting
+                ? t("ScoutReportModal.Submitting", { defaultValue: "Submitting..." })
+                : t("ScoutReportModal.SubmitReport")}
+            </button>
           </div>
         </form>
       </div>

@@ -250,6 +250,37 @@
   font-size: 14px;
 }
 
+.pest-history-date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.pest-history-date-filter input {
+  min-width: 150px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+}
+
+.pest-history-range {
+  width: 100%;
+  box-sizing: border-box;
+  margin: -10px 0 16px;
+  padding: 9px 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .pest-history-chart-wrap {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -390,5 +421,28 @@
   .pest-history-controls {
     width: auto;
     justify-content: flex-end;
+  }
+}
+
+@media (max-width: 599px) {
+  .pest-history-controls,
+  .pest-history-map-filter,
+  .pest-history-date-filter {
+    width: 100%;
+  }
+
+  .pest-history-map-filter select,
+  .pest-history-date-filter input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pest-history-periods {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .pest-history-period-btn {
+    flex: 1 1 calc(50% - 10px);
   }
 }

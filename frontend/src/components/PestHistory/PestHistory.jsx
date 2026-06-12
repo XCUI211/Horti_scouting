@@ -6,7 +6,63 @@ import './PestHistory.css';
 import { useTranslation } from "react-i18next";
 import { MAP_ORDER } from '../../constants/mapOrder';
 
+const API_BASE_URL = 'http://localhost:5000';
+
+function formatLocalDate(dateValue) {
+  const year = dateValue.getFullYear();
+  const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+  const day = String(dateValue.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseLocalDate(value) {
+  const [year, month, day] = String(value).split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function getDateRange(period, referenceDate) {
+  if (period === 'all') {
+    return { startDate: null, endDate: null };
+  }
+
+  const selected = parseLocalDate(referenceDate);
+  if (Number.isNaN(selected.getTime())) {
+    return { startDate: null, endDate: null };
+  }
+
+  if (period === 'day') {
+    const day = formatLocalDate(selected);
+    return { startDate: day, endDate: day };
+  }
+
+  if (period === 'week') {
+    const mondayOffset = (selected.getDay() + 6) % 7;
+    const start = new Date(selected);
+    start.setDate(selected.getDate() - mondayOffset);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    return { startDate: formatLocalDate(start), endDate: formatLocalDate(end) };
+  }
+
+  if (period === 'month') {
+    const start = new Date(selected.getFullYear(), selected.getMonth(), 1);
+    const end = new Date(selected.getFullYear(), selected.getMonth() + 1, 0);
+    return { startDate: formatLocalDate(start), endDate: formatLocalDate(end) };
+  }
+
+  const start = new Date(selected.getFullYear(), 0, 1);
+  const end = new Date(selected.getFullYear(), 11, 31);
+  return { startDate: formatLocalDate(start), endDate: formatLocalDate(end) };
+}
+
+function formatValueList(value) {
+  if (Array.isArray(value)) return value.length > 0 ? value.join(', ') : '-';
+  if (typeof value === 'string' && value.trim()) return value;
+  return '-';
+}
+
 const PERIOD_KEYS = [
+    { key: 'day', labelKey: 'PestHistory.Periods.Day' },
     { key: 'week', labelKey: 'PestHistory.Periods.Week' },
     { key: 'month', labelKey: 'PestHistory.Periods.Month' },
     { key: 'year', labelKey: 'PestHistory.Periods.Year' },
@@ -27,8 +83,10 @@ function PestHistoryTooltip({ active, payload }) {
 
 // Main part that takes care of getting the data for the bar plot, actually creating the plot, and showing the details
 // of the pest when overing over one of the options in the bar plot.
-export default function PestHistory() {const { t } = useTranslation();
-                                       const [period, setPeriod] = useState('month');
+export default function PestHistory() {
+  const { t } = useTranslation();
+  const [period, setPeriod] = useState('month');
+  const [referenceDate, setReferenceDate] = useState(formatLocalDate(new Date()));
                                        const [selectedMap, setSelectedMap] = useState('all');
                                        const [data, setData] = useState([]);
                                        const [loading, setLoading] = useState(true);
@@ -41,6 +99,19 @@ export default function PestHistory() {const { t } = useTranslation();
                                        const [comparisonLoading, setComparisonLoading] = useState(true);
                                        const [comparisonError, setComparisonError] = useState(null);
 
+  const dateRange = useMemo(
+    () => getDateRange(period, referenceDate),
+    [period, referenceDate]
+  );
+
+  const requestDateParams = useMemo(() => {
+    if (!dateRange.startDate || !dateRange.endDate) return {};
+    return {
+      start_date: dateRange.startDate,
+      end_date: dateRange.endDate,
+    };
+  }, [dateRange]);
+
   // Whenever the selected time period or map changes, retrieve the reports for that specific filter
   useEffect(() => {
     const controller = new AbortController();
@@ -50,12 +121,13 @@ export default function PestHistory() {const { t } = useTranslation();
         setLoading(true);
 
         const response = await axios.get(
-          'http://localhost:5000/api/analytics/pest-history',
+          `${API_BASE_URL}/api/analytics/pest-history`,
           {
             signal: controller.signal,
             params: {
               period,
               map_id: selectedMap,
+              ...requestDateParams,
             },
           }
         );
@@ -87,14 +159,14 @@ export default function PestHistory() {const { t } = useTranslation();
     fetchHistory();
 
     return () => controller.abort();
-  }, [period, selectedMap]);
+  }, [period, selectedMap, requestDateParams]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedPest(null);
     setDetailData(null);
     setDetailError(null);
-  }, [period, selectedMap]);
+  }, [period, selectedMap, referenceDate]);
 
   const totalCount = useMemo(() => data.reduce((sum, item) => sum + item.value, 0), [data]);
   const chartHeight = Math.max(260, data.length * 44 + 40);
@@ -111,13 +183,14 @@ export default function PestHistory() {const { t } = useTranslation();
         setDetailLoading(true);
 
         const response = await axios.get(
-          'http://localhost:5000/api/analytics/pest-history-details',
+          `${API_BASE_URL}/api/analytics/pest-history-details`,
           {
             signal: controller.signal,
             params: {
               period,
               pest_type: selectedPest.internalName,
               map_id: selectedMap,
+              ...requestDateParams,
             },
           }
         );
@@ -143,7 +216,7 @@ export default function PestHistory() {const { t } = useTranslation();
     fetchDetails();
 
     return () => controller.abort();
-  }, [selectedPest, period, selectedMap]);
+  }, [selectedPest, period, selectedMap, requestDateParams]);
 
     useEffect(() => {
     const controller = new AbortController();
@@ -153,11 +226,12 @@ export default function PestHistory() {const { t } = useTranslation();
         setComparisonLoading(true);
 
         const response = await axios.get(
-          'http://localhost:5000/api/analytics/pest-week-comparison',
+          `${API_BASE_URL}/api/analytics/pest-week-comparison`,
           {
             signal: controller.signal,
             params: {
               map_id: selectedMap,
+              reference_date: referenceDate,
             },
           }
         );
@@ -183,7 +257,7 @@ export default function PestHistory() {const { t } = useTranslation();
     fetchComparison();
 
     return () => controller.abort();
-  }, [selectedMap]);
+  }, [selectedMap, referenceDate]);
     const getComparisonStatusLabel = (status) => {
     if (status === 'improved') return 'Improved';
     if (status === 'worse') return 'Worse';
@@ -223,6 +297,18 @@ export default function PestHistory() {const { t } = useTranslation();
               </select>
             </label>
 
+            {period !== 'all' && (
+              <label className="pest-history-date-filter">
+                <span>{t('PestHistory.ReferenceDate', { defaultValue: 'Date' })}</span>
+                <input
+                  type="date"
+                  value={referenceDate}
+                  max={formatLocalDate(new Date())}
+                  onChange={(event) => setReferenceDate(event.target.value)}
+                />
+              </label>
+            )}
+
             <div className="pest-history-periods" role="tablist" aria-label={t?.('PestHistory.Periods.Label', 'Pest history period')}>
               {PERIOD_KEYS.map((item) => {
                 const label = t(item.labelKey, { defaultValue: item.key.charAt(0).toUpperCase() + item.key.slice(1) });
@@ -241,6 +327,13 @@ export default function PestHistory() {const { t } = useTranslation();
             </div>
           </div>
         </div>
+
+        {period !== 'all' && dateRange.startDate && dateRange.endDate && (
+          <div className="pest-history-range" role="status">
+            {t('PestHistory.ShowingRange', { defaultValue: 'Showing' })}: {dateRange.startDate}
+            {dateRange.startDate !== dateRange.endDate ? ` — ${dateRange.endDate}` : ''}
+          </div>
+        )}
 
         {/* Show different states: loading, error, empty, or the actual bar graph and details */}
         {loading ? (
@@ -342,7 +435,7 @@ export default function PestHistory() {const { t } = useTranslation();
                                       <strong>Biology:</strong> {item.biology_used ? 'Yes' : 'No'}
                                     </div>
                                     <div className="pest-history-detail-meta">
-                                      <strong>Type(s):</strong> {item.biology_types && item.biology_types.length > 0 ? item.biology_types.join(', ') : '-'}
+                                      <strong>Type(s):</strong> {formatValueList(item.biology_types)}
                                     </div>
                                   </div>
                                   <div className="pest-history-chemicals-section">
@@ -350,7 +443,7 @@ export default function PestHistory() {const { t } = useTranslation();
                                       <strong>Chemicals:</strong> {item.chemicals_used ? 'Yes' : 'No'}
                                     </div>
                                     <div className="pest-history-detail-meta">
-                                      <strong>Type(s):</strong> {item.chemicals_types && item.chemicals_types.length > 0 ? item.chemicals_types.join(', ') : '-'}
+                                      <strong>Type(s):</strong> {formatValueList(item.chemicals_types)}
                                     </div>
                                   </div>
                                 </div>
@@ -369,7 +462,7 @@ export default function PestHistory() {const { t } = useTranslation();
                 <div>
                   <div className="pest-history-detail-kicker">Week comparison</div>
                   <h3 className="pest-history-detail-title">
-                    This week vs last week
+                    Selected week vs previous week
                   </h3>
                 </div>
 
@@ -379,7 +472,7 @@ export default function PestHistory() {const { t } = useTranslation();
               </div>
 
               <p className="pest-history-subtitle">
-                Compares approved pest reports on the same map and floor. This helps highlight whether treatment may have reduced the issue.
+                Compares the week containing the selected date with the previous week for the same map and floor.
               </p>
 
               {comparisonLoading ? (

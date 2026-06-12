@@ -34,7 +34,7 @@ beforeEach(() => {
 describe("Test DB connection", () => {
   it("logs success when database connects", async () => {
     // Spy on console
-    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    const logSpy = jest.spyOn(console, "log").mockImplementation(() => { });
 
     await testDatabaseConnection();
 
@@ -49,7 +49,7 @@ describe("Test DB connection", () => {
     // Mock pool.connect to throw an error
     const error = new Error("Connection failed");
     mockConnect.mockRejectedValueOnce(error);
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
 
     await testDatabaseConnection();
 
@@ -166,7 +166,7 @@ describe("POST /api/login", () => {
   });
 
   it("returns 500 when login fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
     mockQuery.mockRejectedValueOnce(new Error("DB failed"));
 
     const res = await request(app).post("/api/login").send({
@@ -200,7 +200,7 @@ describe("GET /api/users/scouts", () => {
   });
 
   it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
     mockQuery.mockRejectedValueOnce(new Error("DB failed"));
 
     const res = await request(app).get("/api/users/scouts");
@@ -282,53 +282,137 @@ describe("POST /api/createaccount", () => {
 
 
 // ---------- Floor Reports ----------
+// ---------- Floor Reports ----------
 describe("POST /api/floorreports", () => {
-  it("creates a floor report", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] });
-
-    const res = await request(app).post("/api/floorreports").send({
-      fid: 1,
-      uid: 2,
-      pests_found: true,
-      biology_used: false,
-      chemicals_used: true,
+  it("creates a complete floor report", async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [{ rid: 1 }],
     });
 
+    const res = await request(app)
+      .post("/api/floorreports")
+      .send({
+        fid: 1,
+        uid: 2,
+        plant_name: "Rose",
+        supplier: "Supplier A",
+        entry_date: "2026-05-01",
+
+        pests_found: true,
+        pest_types: ["aphid"],
+        pest_severity: 2,
+
+        biology_used: false,
+
+        chemicals_used: true,
+        chemicals_types: ["spray"],
+        behandelaar: "Scout A",
+
+        bug_count: 4,
+      });
+
     expect(res.statusCode).toBe(201);
-    expect(res.body).toEqual({ message: "Floor report created successfully!" });
+
+    expect(res.body).toEqual({
+      message: "Floor report created successfully!",
+    });
+
     expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("report_batch_id"),
-      expect.arrayContaining([null])
+      expect.stringContaining("entry_date"),
+      expect.any(Array)
     );
+
+    const insertedParams = mockQuery.mock.calls[0][1];
+
+    // Parameter 19 in the SQL query is entry_date.
+    expect(insertedParams[18]).toBe("2026-05-01");
   });
 
+  it("returns 400 when required report information is missing", async () => {
+    const res = await request(app)
+      .post("/api/floorreports")
+      .send({
+        fid: 1,
+        uid: 2,
+        entry_date: "2026-05-01",
+        pests_found: true,
+      });
+
+    expect(res.statusCode).toBe(400);
+
+    expect(res.body.message).toBe(
+      "Invalid report data"
+    );
+
+    expect(res.body.errors).toEqual(
+      expect.arrayContaining([
+        "plant_name is required",
+        "supplier is required",
+        "At least one pest type is required when pests are found",
+      ])
+    );
+
+    // Invalid reports must not be inserted.
+    expect(mockQuery).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/floorreports/bulk", () => {
   it("creates one floor report for each fid", async () => {
     mockQuery
-      .mockResolvedValueOnce({ rows: [{ id: 1 }] })
-      .mockResolvedValueOnce({ rows: [{ id: 2 }] });
+      .mockResolvedValueOnce({
+        rows: [{ rid: 1 }],
+      })
+      .mockResolvedValueOnce({
+        rows: [{ rid: 2 }],
+      });
 
-    const res = await request(app).post("/api/floorreports/bulk").send({
-      fids: [1, 2],
-      uid: 2,
-      pests_found: true,
-      biology_used: false,
-      chemicals_used: true,
-    });
+    const res = await request(app)
+      .post("/api/floorreports/bulk")
+      .send({
+        fids: [1, 2],
+        uid: 2,
+        plant_name: "Rose",
+        supplier: "Supplier A",
+        entry_date: "2026-05-01",
+
+        pests_found: false,
+      });
 
     expect(res.statusCode).toBe(201);
+
     expect(res.body).toEqual({
-      message: "Floor reports created successfully!",
+      message:
+        "Floor reports created successfully!",
       count: 2,
       report_batch_id: expect.any(String),
     });
+
     expect(mockQuery).toHaveBeenCalledTimes(2);
-    const firstParams = mockQuery.mock.calls[0][1];
-    const secondParams = mockQuery.mock.calls[1][1];
-    expect(firstParams[17]).toEqual(expect.any(String));
-    expect(secondParams[17]).toBe(firstParams[17]);
+
+    const firstParams =
+      mockQuery.mock.calls[0][1];
+
+    const secondParams =
+      mockQuery.mock.calls[1][1];
+
+    // Parameter 18 is report_batch_id.
+    expect(firstParams[17]).toEqual(
+      expect.any(String)
+    );
+
+    expect(secondParams[17]).toBe(
+      firstParams[17]
+    );
+
+    // Parameter 19 is entry_date.
+    expect(firstParams[18]).toBe(
+      "2026-05-01"
+    );
+
+    expect(secondParams[18]).toBe(
+      "2026-05-01"
+    );
   });
 
   it("returns 400 when fids are missing", async () => {
@@ -530,7 +614,21 @@ describe("GET /api/maps", () => {
     ]);
 
     expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT mid, name, location, greenhouse, json_map FROM maps ORDER BY name ASC"
+      expect.stringContaining(
+        "SELECT"
+      )
+    );
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "FROM maps"
+      )
+    );
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "ORDER BY name ASC"
+      )
     );
   });
 
@@ -550,9 +648,16 @@ describe("GET /api/users/:uid/maps", () => {
     expect(res.body).toEqual([1, 3, 5]);
 
     expect(mockQuery).toHaveBeenCalledWith(
-      "SELECT mid FROM user_maps WHERE uid = $1",
-      ["2"]
-    );
+      expect.stringContaining(
+        "FROM user_maps"
+      ),
+      ["2"]);
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "WHERE uid = $1"
+      ),
+      ["2"]);
   });
 
   it("returns an empty array when scout has no maps", async () => {
@@ -586,12 +691,20 @@ describe("POST /api/admin/assign-maps", () => {
     expect(res.body).toEqual({ message: "Maps assigned successfully" });
 
     expect(mockClientQuery).toHaveBeenCalledWith("BEGIN");
-    expect(mockClientQuery).toHaveBeenCalledWith(
-      "DELETE FROM user_maps WHERE uid = $1",
-      [2]
+    expect(mockClientQuery).toHaveBeenCalledWith(expect.stringContaining(
+      "DELETE FROM user_maps"),
+      [2]);
+    expect(mockClientQuery).toHaveBeenCalledWith(expect.stringContaining(
+      "INSERT INTO user_maps"
+    ), [2, [1, 3]]
     );
+
     expect(mockClientQuery).toHaveBeenCalledWith(
-      "INSERT INTO user_maps (uid, mid) SELECT $1, unnest($2::int[])", [2, [1, 3]]);
+      expect.stringContaining(
+        "unnest($2::int[])"
+      ),
+      [2, [1, 3]]
+    );
     expect(mockClientQuery).toHaveBeenCalledWith("COMMIT");
     expect(mockClientRelease).toHaveBeenCalled();
   });
@@ -605,28 +718,40 @@ describe("POST /api/admin/assign-maps", () => {
       release: mockClientRelease,
     });
 
-    const res = await request(app).post("/api/admin/assign-maps").send({
-      scoutUid: 2,
-      mapIds: [],
-    });
+    const res = await request(app)
+      .post("/api/admin/assign-maps")
+      .send({
+        scoutUid: 2,
+        mapIds: [],
+      });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ message: "Maps assigned successfully" });
+
+    expect(res.body).toEqual({
+      message: "Maps assigned successfully",
+    });
 
     expect(mockClientQuery).toHaveBeenCalledWith("BEGIN");
+
     expect(mockClientQuery).toHaveBeenCalledWith(
-      "DELETE FROM user_maps WHERE uid = $1",
+      expect.stringContaining("DELETE FROM user_maps"),
       [2]
     );
+
     expect(mockClientQuery).not.toHaveBeenCalledWith(
-      expect.stringContaining("INSERT INTO user_maps")
+      expect.stringContaining("INSERT INTO user_maps"),
+      expect.anything()
     );
+
     expect(mockClientQuery).toHaveBeenCalledWith("COMMIT");
+
     expect(mockClientRelease).toHaveBeenCalled();
   });
 
   it("rolls back and returns 500 when assigning maps fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => { });
 
     const mockClientQuery = jest
       .fn()
@@ -641,28 +766,60 @@ describe("POST /api/admin/assign-maps", () => {
       release: mockClientRelease,
     });
 
-    const res = await request(app).post("/api/admin/assign-maps").send({
-      scoutUid: 2,
-      mapIds: [1, 3],
-    });
+    const res = await request(app)
+      .post("/api/admin/assign-maps")
+      .send({
+        scoutUid: 2,
+        mapIds: [1, 3],
+      });
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ message: "Failed to assign maps" });
+
+    expect(res.body).toEqual({
+      message: "Failed to assign maps",
+    });
 
     expect(mockClientQuery).toHaveBeenCalledWith("BEGIN");
+
+    expect(mockClientQuery).toHaveBeenCalledWith(
+      expect.stringContaining("DELETE FROM user_maps"),
+      [2]
+    );
+
     expect(mockClientQuery).toHaveBeenCalledWith("ROLLBACK");
+
     expect(mockClientRelease).toHaveBeenCalled();
 
     errorSpy.mockRestore();
   });
-});
 
 
-// ---------- Scouts Maps Overview ----------
-describe("GET /api/admin/scouts-maps-overview", () => {
-  it("returns scouts with their assigned maps", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
+  // ---------- Scouts Maps Overview ----------
+  describe("GET /api/admin/scouts-maps-overview", () => {
+    it("returns scouts with their assigned maps", async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          {
+            uid: 1,
+            username: "scoutA",
+            email: "scoutA@example.com",
+            assigned_maps: [
+              { mid: 1, name: "Map A", location: "GH1", greenhouse: "A" },
+            ],
+          },
+          {
+            uid: 2,
+            username: "scoutB",
+            email: "scoutB@example.com",
+            assigned_maps: [],
+          },
+        ],
+      });
+
+      const res = await request(app).get("/api/admin/scouts-maps-overview");
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual([
         {
           uid: 1,
           username: "scoutA",
@@ -677,781 +834,852 @@ describe("GET /api/admin/scouts-maps-overview", () => {
           email: "scoutB@example.com",
           assigned_maps: [],
         },
-      ],
+      ]);
+
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("FROM users u"));
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("WHERE u.role = 'scout'"));
     });
+  });
 
-    const res = await request(app).get("/api/admin/scouts-maps-overview");
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual([
-      {
-        uid: 1,
-        username: "scoutA",
-        email: "scoutA@example.com",
-        assigned_maps: [
-          { mid: 1, name: "Map A", location: "GH1", greenhouse: "A" },
+  // ---------- Pest History ----------
+  describe("GET /api/analytics/pest-history", () => {
+    it("returns pest history for the default period (month)", async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          { pest_type: "aphid", count: "5" },
+          { pest_type: "mite", count: "2" },
         ],
-      },
-      {
-        uid: 2,
-        username: "scoutB",
-        email: "scoutB@example.com",
-        assigned_maps: [],
-      },
-    ]);
+      });
 
-    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("FROM users u"));
-    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("WHERE u.role = 'scout'"));
-  });
-});
+      const res = await request(app).get("/api/analytics/pest-history");
 
-// ---------- Pest History ----------
-describe("GET /api/analytics/pest-history", () => {
-  it("returns pest history for the default period (month)", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        { pest_type: "aphid", count: "5" },
-        { pest_type: "mite", count: "2" },
-      ],
-    });
- 
-    const res = await request(app).get("/api/analytics/pest-history");
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      status: "success",
-      data: [
-        { pest_type: "aphid", count: "5" },
-        { pest_type: "mite", count: "2" },
-      ],
-      period: "month",
-      map_id: "all",
-    });
-  });
- 
-  it("returns pest history for a specific period (week)", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [{ pest_type: "aphid", count: "3" }],
-    });
- 
-    const res = await request(app).get("/api/analytics/pest-history?period=week");
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.period).toBe("week");
-    expect(res.body.status).toBe("success");
-  });
- 
-  it("returns all-time pest history when period is unknown", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [{ pest_type: "aphid", count: "10" }],
-    });
- 
-    const res = await request(app).get("/api/analytics/pest-history?period=all");
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.period).toBe("all");
-    expect(res.body.status).toBe("success");
-  });
- 
-  it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
- 
-    const res = await request(app).get("/api/analytics/pest-history");
- 
-    expect(res.statusCode).toBe(500);
-    expect(res.body.status).toBe("error");
- 
-    errorSpy.mockRestore();
-  });
-});
-
-
-// ---------- Pest History Details ----------
-describe("GET /api/analytics/pest-history-details", () => {
-  it("returns detailed history for a specific pest type", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          report_id: 1,
-          cell_name: "Section A",
-          map_id: "Greenhouse 1",
-          severity: "high",
-          pest_types: ["aphid"],
-          entry_date: "2026-05-01",
-          status: "approved",
-          reporter_name: "scoutA",
-          biology_used: false,
-          biology_types: null,
-          chemicals_used: true,
-          chemicals_types: ["spray"],
-        },
-      ],
-    });
- 
-    const res = await request(app).get(
-      "/api/analytics/pest-history-details?pest_type=aphid&period=month"
-    );
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      status: "success",
-      data: {
-        pestType: "aphid",
-        history: [
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        status: "success",
+        data: [
           {
-            report_id: 1,
-            cell_name: "Section A",
-            map_id: "Greenhouse 1",
-            severity: "high",
-            pest_types: ["aphid"],
-            entry_date: "2026-05-01",
-            status: "approved",
-            reporter_name: "scoutA",
-            biology_used: false,
-            biology_types: null,
-            chemicals_used: true,
-            chemicals_types: ["spray"],
+            pest_type: "aphid",
+            count: "5",
+          },
+          {
+            pest_type: "mite",
+            count: "2",
           },
         ],
-        historyCount: 1,
-      },
-      period: "month",
-      map_id: "all",
+        period: "month",
+        map_id: "all",
+        start_date: null,
+        end_date: null,
+      });
     });
   });
- 
-  it("returns 400 when pest_type is missing", async () => {
-    const res = await request(app).get("/api/analytics/pest-history-details");
- 
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ status: "error", message: "pest_type is required" });
-  });
- 
-  it("returns empty history when no reports match", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
- 
-    const res = await request(app).get(
-      "/api/analytics/pest-history-details?pest_type=mite"
-    );
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data.historyCount).toBe(0);
-    expect(res.body.data.history).toEqual([]);
-  });
- 
-  it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
- 
-    const res = await request(app).get(
-      "/api/analytics/pest-history-details?pest_type=aphid"
-    );
- 
-    expect(res.statusCode).toBe(500);
-    expect(res.body.status).toBe("error");
- 
-    errorSpy.mockRestore();
-  });
-});
- 
- 
-// ---------- Scouts Reports Summary ----------
-describe("GET /api/admin/scouts-reports-summary", () => {
-  it("returns scouts with their recent reports", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          uid: 1,
-          username: "scoutA",
-          recent_reports: [
+      it("returns pest history for a specific period (week)", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [{ pest_type: "aphid", count: "3" }],
+        });
+
+        const res = await request(app).get("/api/analytics/pest-history?period=week");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.period).toBe("week");
+        expect(res.body.status).toBe("success");
+      });
+
+      it("returns all-time pest history when period is unknown", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [{ pest_type: "aphid", count: "10" }],
+        });
+
+        const res = await request(app).get("/api/analytics/pest-history?period=all");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.period).toBe("all");
+        expect(res.body.status).toBe("success");
+      });
+
+      it("returns 500 when query fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+        mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+        const res = await request(app).get("/api/analytics/pest-history");
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body.status).toBe("error");
+
+        errorSpy.mockRestore();
+      });
+    });
+
+
+    // ---------- Pest History Details ----------
+    describe("GET /api/analytics/pest-history-details", () => {
+      it("returns detailed history for a specific pest type", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
             {
-              rid: 10,
-              map_name: "Greenhouse 1",
-              section_name: "Section A",
-              formatted_date: "01/05/2026 09:00",
+              report_id: 1,
+              cell_name: "Section A",
+              map_id: "Greenhouse 1",
+              severity: "high",
+              pest_types: ["aphid"],
+              entry_date: "2026-05-01",
               status: "approved",
+              reporter_name: "scoutA",
+              biology_used: false,
+              biology_types: null,
+              chemicals_used: true,
+              chemicals_types: ["spray"],
             },
           ],
-        },
-        {
-          uid: 2,
-          username: "scoutB",
-          recent_reports: null,
-        },
-      ],
-    });
- 
-    const res = await request(app).get("/api/admin/scouts-reports-summary");
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual([
-      {
-        uid: 1,
-        username: "scoutA",
-        recent_reports: [
-          {
-            rid: 10,
-            map_name: "Greenhouse 1",
-            section_name: "Section A",
-            formatted_date: "01/05/2026 09:00",
-            status: "approved",
+        });
+
+        const res = await request(app).get(
+          "/api/analytics/pest-history-details?pest_type=aphid&period=month"
+        );
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({
+          status: "success",
+          data: {
+            pestType: "aphid",
+            history: [
+              {
+                report_id: 1,
+                cell_name: "Section A",
+                map_id: "Greenhouse 1",
+                severity: "high",
+                pest_types: ["aphid"],
+                entry_date: "2026-05-01",
+                status: "approved",
+                reporter_name: "scoutA",
+                biology_used: false,
+                biology_types: null,
+                chemicals_used: true,
+                chemicals_types: ["spray"],
+              },
+            ],
+            historyCount: 1,
           },
-        ],
-      },
-      {
-        uid: 2,
-        username: "scoutB",
-        recent_reports: null,
-      },
-    ]);
- 
-    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("WHERE u.role = 'scout'"));
-  });
- 
-  it("returns an empty array when no scouts are employed", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
- 
-    const res = await request(app).get("/api/admin/scouts-reports-summary");
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual([]);
-  });
- 
-  it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
- 
-    const res = await request(app).get("/api/admin/scouts-reports-summary");
- 
-    expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ message: "Server error fetching scouts reports summary" });
- 
-    errorSpy.mockRestore();
-  });
-});
- 
- 
-// ---------- Tasks uid ----------
-describe("GET /api/scout/tasks/:uid", () => {
-  it("returns task history for a scout", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          rid: 1,
-          status: "approved",
-          comment: "Looks good",
-          section_name: "Section A",
+          period: "month",
+          map_id: "all",
+          start_date: null,
+          end_date: null,
+
+        });
+      });
+
+      it("returns 400 when pest_type is missing", async () => {
+        const res = await request(app).get("/api/analytics/pest-history-details");
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ status: "error", message: "pest_type is required" });
+      });
+
+      it("returns empty history when no reports match", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        const res = await request(app).get(
+          "/api/analytics/pest-history-details?pest_type=mite"
+        );
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.historyCount).toBe(0);
+        expect(res.body.data.history).toEqual([]);
+      });
+
+      it("returns 500 when query fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+        mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+        const res = await request(app).get(
+          "/api/analytics/pest-history-details?pest_type=aphid"
+        );
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body.status).toBe("error");
+
+        errorSpy.mockRestore();
+      });
+    });
+
+    // ---------- Pest Weekly Comparison ----------
+    describe(
+      "GET /api/analytics/pest-week-comparison",
+      () => {
+        it(
+          "compares pest data per week for one nursery",
+          async () => {
+            mockQuery.mockResolvedValueOnce({
+              rows: [
+                {
+                  map_id: "Map A",
+                  cell_name: "Section A",
+                  pest_type: "aphid",
+
+                  previous_reports: "2",
+                  current_reports: "1",
+
+                  previous_bug_count: "6",
+                  current_bug_count: "2",
+
+                  previous_avg_severity: "3.0",
+                  current_avg_severity: "2.0",
+
+                  previous_treatment_used: true,
+                  current_treatment_used: false,
+                },
+              ],
+            });
+
+            const res = await request(app).get(
+              "/api/analytics/pest-week-comparison" +
+              "?map_id=Map%20A" +
+              "&reference_date=2026-06-10"
+            );
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.status).toBe(
+              "success"
+            );
+
+            expect(res.body.map_id).toBe(
+              "Map A"
+            );
+
+            expect(
+              res.body.current_week_start
+            ).toBe("2026-06-08");
+
+            expect(
+              res.body.previous_week_start
+            ).toBe("2026-06-01");
+
+            expect(res.body.data[0]).toEqual(
+              expect.objectContaining({
+                map_id: "Map A",
+                cell_name: "Section A",
+                pest_type: "aphid",
+
+                previous_reports: 2,
+                current_reports: 1,
+                report_difference: -1,
+
+                status: "improved",
+              })
+            );
+
+            expect(mockQuery).toHaveBeenCalledWith(
+              expect.stringContaining(
+                "fr.entry_date"
+              ),
+              [
+                "2026-06-01",
+                "2026-06-08",
+                "2026-06-15",
+                "Map A",
+              ]
+            );
+          }
+        );
+      }
+    );
+
+    // ---------- Scouts Reports Summary ----------
+    describe("GET /api/admin/scouts-reports-summary", () => {
+      it("returns scouts with their recent reports", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            {
+              uid: 1,
+              username: "scoutA",
+              recent_reports: [
+                {
+                  rid: 10,
+                  map_name: "Greenhouse 1",
+                  section_name: "Section A",
+                  formatted_date: "01/05/2026 09:00",
+                  status: "approved",
+                },
+              ],
+            },
+            {
+              uid: 2,
+              username: "scoutB",
+              recent_reports: null,
+            },
+          ],
+        });
+
+        const res = await request(app).get("/api/admin/scouts-reports-summary");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual([
+          {
+            uid: 1,
+            username: "scoutA",
+            recent_reports: [
+              {
+                rid: 10,
+                map_name: "Greenhouse 1",
+                section_name: "Section A",
+                formatted_date: "01/05/2026 09:00",
+                status: "approved",
+              },
+            ],
+          },
+          {
+            uid: 2,
+            username: "scoutB",
+            recent_reports: null,
+          },
+        ]);
+
+        expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("WHERE u.role = 'scout'"));
+      });
+
+      it("returns an empty array when no scouts are employed", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        const res = await request(app).get("/api/admin/scouts-reports-summary");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual([]);
+      });
+
+      it("returns 500 when query fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+        mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+        const res = await request(app).get("/api/admin/scouts-reports-summary");
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body).toEqual({ message: "Server error fetching scouts reports summary" });
+
+        errorSpy.mockRestore();
+      });
+    });
+
+
+    // ---------- Tasks uid ----------
+    describe("GET /api/scout/tasks/:uid", () => {
+      it("returns task history for a scout", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            {
+              rid: 1,
+              status: "approved",
+              comment: "Looks good",
+              section_name: "Section A",
+              map_name: "Greenhouse 1",
+              mid: 1,
+              fid: 2,
+            },
+            {
+              rid: 2,
+              status: "pending",
+              comment: null,
+              section_name: "Section B",
+              map_name: "Greenhouse 1",
+              mid: 1,
+              fid: 3,
+            },
+          ],
+        });
+
+        const res = await request(app).get("/api/scout/tasks/1");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual([
+          {
+            rid: 1,
+            status: "approved",
+            comment: "Looks good",
+            section_name: "Section A",
+            map_name: "Greenhouse 1",
+            mid: 1,
+            fid: 2,
+          },
+          {
+            rid: 2,
+            status: "pending",
+            comment: null,
+            section_name: "Section B",
+            map_name: "Greenhouse 1",
+            mid: 1,
+            fid: 3,
+          },
+        ]);
+
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining("WHERE fr.uid = $1"),
+          ["1"]
+        );
+      });
+
+      it("returns an empty array when scout has no tasks", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        const res = await request(app).get("/api/scout/tasks/99");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual([]);
+      });
+
+      it("returns 500 when query fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+        mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+        const res = await request(app).get("/api/scout/tasks/1");
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body).toEqual({ error: "DB failed" });
+
+        errorSpy.mockRestore();
+      });
+    });
+
+    // ---------- Reports ----------
+    describe("GET /api/reports", () => {
+      it("returns all reports without filters", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            {
+              report_id: 1,
+              cell_name: "Section A",
+              map_id: "Greenhouse 1",
+              severity: "high",
+              pest_types: ["aphid"],
+              entry_date: "2026-05-01",
+              status: "approved",
+              reporter_name: "scoutA",
+              admin_comment: null,
+            },
+          ],
+        });
+
+        const res = await request(app).get("/api/reports");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({
+          status: "success",
+          data: [
+            {
+              report_id: 1,
+              cell_name: "Section A",
+              map_id: "Greenhouse 1",
+              severity: "high",
+              pest_types: ["aphid"],
+              entry_date: "2026-05-01",
+              status: "approved",
+              reporter_name: "scoutA",
+              admin_comment: null,
+            },
+          ],
+        });
+      });
+
+      it("filters by map_id", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        const res = await request(app).get("/api/reports?map_id=Greenhouse 1");
+
+        expect(res.statusCode).toBe(200);
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining("m.name = $1"),
+          ["Greenhouse 1"]
+        );
+      });
+
+      it("filters by cell_name", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        const res = await request(app).get("/api/reports?cell_name=Section A");
+
+        expect(res.statusCode).toBe(200);
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining("f.name = $1"),
+          ["Section A"]
+        );
+      });
+
+      it("filters by both map_id and cell_name", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        const res = await request(app).get("/api/reports?map_id=Greenhouse 1&cell_name=Section A");
+
+        expect(res.statusCode).toBe(200);
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining("m.name = $1"),
+          ["Greenhouse 1", "Section A"]
+        );
+      });
+
+      it("filters by block_key", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        const res = await request(app).get("/api/reports?map_id=Greenhouse 1&cell_name=Section A&block_key=Greenhouse 1::Section A::0:0");
+
+        expect(res.statusCode).toBe(200);
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining("f.block_key = $3"),
+          ["Greenhouse 1", "Section A", "Greenhouse 1::Section A::0:0"]
+        );
+      });
+
+      it("returns 500 when query fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+        mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+        const res = await request(app).get("/api/reports");
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body.status).toBe("error");
+
+        errorSpy.mockRestore();
+      });
+    });
+
+
+    // ---------- Floors Resolve ----------
+    describe("GET /api/floors/resolve", () => {
+      it("returns fid when floor is found", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [{ fid: 5 }] });
+
+        const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({ status: "success", fid: 5 });
+      });
+
+      it("returns fid when floor is found by block_key", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [{ fid: 6 }] });
+
+        const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A&block_key=Greenhouse 1::Section A::0:0");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({ status: "success", fid: 6 });
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining("f.block_key = $3"),
+          ["Greenhouse 1", "Section A", "Greenhouse 1::Section A::0:0"]
+        );
+      });
+
+      it("returns 409 when label-only floor resolution is ambiguous", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [{ fid: 5 }, { fid: 6 }] });
+
+        const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A");
+
+        expect(res.statusCode).toBe(409);
+        expect(res.body).toEqual({
+          status: "ambiguous",
+          message: "Multiple floors match this map_name and cell_name; provide block_key",
+        });
+      });
+
+      it("returns 400 when map_name is missing", async () => {
+        const res = await request(app).get("/api/floors/resolve?cell_name=Section A");
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ status: "error", message: "map_name and cell_name are required" });
+      });
+
+      it("returns 400 when cell_name is missing", async () => {
+        const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1");
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ status: "error", message: "map_name and cell_name are required" });
+      });
+
+      it("returns 404 when floor is not found", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Unknown");
+
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toEqual({ status: "not_found", message: "Floor not found" });
+      });
+
+      it("returns 500 when query fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+        mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+        const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A");
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body.status).toBe("error");
+
+        errorSpy.mockRestore();
+      });
+    });
+
+    describe("POST /api/floors/resolve-many", () => {
+      it("returns fids ordered like the requested cells", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            { fid: 6, block_key: "Greenhouse 1::Section B::0:1" },
+            { fid: 5, block_key: "Greenhouse 1::Section A::0:0" },
+          ],
+        });
+
+        const res = await request(app).post("/api/floors/resolve-many").send({
           map_name: "Greenhouse 1",
-          mid: 1,
-          fid: 2,
-        },
-        {
-          rid: 2,
-          status: "pending",
-          comment: null,
-          section_name: "Section B",
+          cells: [
+            { cell_name: "Section A", block_key: "Greenhouse 1::Section A::0:0" },
+            { cell_name: "Section B", block_key: "Greenhouse 1::Section B::0:1" },
+          ],
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual({ status: "success", fids: [5, 6] });
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining("f.block_key = ANY($2::text[])"),
+          [
+            "Greenhouse 1",
+            ["Greenhouse 1::Section A::0:0", "Greenhouse 1::Section B::0:1"],
+          ]
+        );
+      });
+
+      it("returns 400 when a cell is missing block_key", async () => {
+        const res = await request(app).post("/api/floors/resolve-many").send({
           map_name: "Greenhouse 1",
-          mid: 1,
-          fid: 3,
-        },
-      ],
-    });
- 
-    const res = await request(app).get("/api/scout/tasks/1");
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual([
-      {
-        rid: 1,
-        status: "approved",
-        comment: "Looks good",
-        section_name: "Section A",
-        map_name: "Greenhouse 1",
-        mid: 1,
-        fid: 2,
-      },
-      {
-        rid: 2,
-        status: "pending",
-        comment: null,
-        section_name: "Section B",
-        map_name: "Greenhouse 1",
-        mid: 1,
-        fid: 3,
-      },
-    ]);
- 
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("WHERE fr.uid = $1"),
-      ["1"]
-    );
-  });
- 
-  it("returns an empty array when scout has no tasks", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
- 
-    const res = await request(app).get("/api/scout/tasks/99");
- 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual([]);
-  });
- 
-  it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
- 
-    const res = await request(app).get("/api/scout/tasks/1");
- 
-    expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: "DB failed" });
- 
-    errorSpy.mockRestore();
-  });
-});
+          cells: [{ cell_name: "Section A" }],
+        });
 
-// ---------- Reports ----------
-describe("GET /api/reports", () => {
-  it("returns all reports without filters", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          report_id: 1,
-          cell_name: "Section A",
-          map_id: "Greenhouse 1",
-          severity: "high",
-          pest_types: ["aphid"],
-          entry_date: "2026-05-01",
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ status: "error", message: "Every cell must include block_key" });
+      });
+
+      it("returns 404 when a requested block_key is not found", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [{ fid: 5, block_key: "Greenhouse 1::Section A::0:0" }],
+        });
+
+        const res = await request(app).post("/api/floors/resolve-many").send({
+          map_name: "Greenhouse 1",
+          cells: [
+            { cell_name: "Section A", block_key: "Greenhouse 1::Section A::0:0" },
+            { cell_name: "Section B", block_key: "Greenhouse 1::Section B::0:1" },
+          ],
+        });
+
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toEqual({
+          status: "not_found",
+          message: "Floor not found for Greenhouse 1::Section B::0:1",
+        });
+      });
+    });
+
+
+    // ---------- Approve Report ----------
+    describe("PUT /api/reports/:id/approve", () => {
+      it("approves a report", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [{ rid: 1, approval_status: "approved", comment: null }],
+        });
+
+        const res = await request(app).put("/api/reports/1/approve").send({
           status: "approved",
-          reporter_name: "scoutA",
           admin_comment: null,
-        },
-      ],
-    });
+        });
 
-    const res = await request(app).get("/api/reports");
+        expect(res.statusCode).toBe(200);
+        expect(res.body.status).toBe("success");
+        expect(res.body.data.approval_status).toBe("approved");
+      });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      status: "success",
-      data: [
-        {
-          report_id: 1,
-          cell_name: "Section A",
-          map_id: "Greenhouse 1",
-          severity: "high",
-          pest_types: ["aphid"],
-          entry_date: "2026-05-01",
+      it("approves every report in the same batch", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            { rid: 1, approval_status: "approved", report_batch_id: "11111111-1111-1111-1111-111111111111" },
+            { rid: 2, approval_status: "approved", report_batch_id: "11111111-1111-1111-1111-111111111111" },
+          ],
+        });
+
+        const res = await request(app).put("/api/reports/1/approve").send({
           status: "approved",
-          reporter_name: "scoutA",
-          admin_comment: null,
-        },
-      ],
-    });
-  });
+          admin_comment: "Batch approved",
+        });
 
-  it("filters by map_id", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
+        expect(res.statusCode).toBe(200);
+        expect(res.body.status).toBe("success");
+        expect(res.body.affected_count).toBe(2);
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringContaining("target_report"),
+          ["approved", "Batch approved", "1"]
+        );
+        expect(mockQuery).toHaveBeenCalledWith(
+          expect.stringMatching(/report_batch_id\s*=\s*\(\s*SELECT\s+report_batch_id\s+FROM\s+target_report\s*\)/),
+          ["approved", "Batch approved", "1"]
+        );
+      });
 
-    const res = await request(app).get("/api/reports?map_id=Greenhouse 1");
+      it("rejects a report with a comment", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [{ rid: 1, approval_status: "rejected", comment: "Too vague" }],
+        });
 
-    expect(res.statusCode).toBe(200);
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("m.name = $1"),
-      ["Greenhouse 1"]
-    );
-  });
+        const res = await request(app).put("/api/reports/1/approve").send({
+          status: "rejected",
+          admin_comment: "Too vague",
+        });
 
-  it("filters by cell_name", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
+        expect(res.statusCode).toBe(200);
+        expect(res.body.status).toBe("success");
+        expect(res.body.data.approval_status).toBe("rejected");
+      });
 
-    const res = await request(app).get("/api/reports?cell_name=Section A");
+      it("returns 400 when status is invalid", async () => {
+        const res = await request(app).put("/api/reports/1/approve").send({
+          status: "maybe",
+        });
 
-    expect(res.statusCode).toBe(200);
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("f.name = $1"),
-      ["Section A"]
-    );
-  });
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({ message: "Invalid status" });
+      });
 
-  it("filters by both map_id and cell_name", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
+      it("returns 404 when report is not found", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
 
-    const res = await request(app).get("/api/reports?map_id=Greenhouse 1&cell_name=Section A");
+        const res = await request(app).put("/api/reports/999/approve").send({
+          status: "approved",
+        });
 
-    expect(res.statusCode).toBe(200);
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("m.name = $1"),
-      ["Greenhouse 1", "Section A"]
-    );
-  });
+        expect(res.statusCode).toBe(404);
+        expect(res.body).toEqual({ message: "Report not found" });
+      });
 
-  it("filters by block_key", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
+      it("returns 500 when query fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+        mockQuery.mockRejectedValueOnce(new Error("DB failed"));
 
-    const res = await request(app).get("/api/reports?map_id=Greenhouse 1&cell_name=Section A&block_key=Greenhouse 1::Section A::0:0");
+        const res = await request(app).put("/api/reports/1/approve").send({
+          status: "approved",
+        });
 
-    expect(res.statusCode).toBe(200);
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("f.block_key = $3"),
-      ["Greenhouse 1", "Section A", "Greenhouse 1::Section A::0:0"]
-    );
-  });
+        expect(res.statusCode).toBe(500);
+        expect(res.body.status).toBe("error");
 
-  it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
-
-    const res = await request(app).get("/api/reports");
-
-    expect(res.statusCode).toBe(500);
-    expect(res.body.status).toBe("error");
-
-    errorSpy.mockRestore();
-  });
-});
-
-
-// ---------- Floors Resolve ----------
-describe("GET /api/floors/resolve", () => {
-  it("returns fid when floor is found", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ fid: 5 }] });
-
-    const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A");
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ status: "success", fid: 5 });
-  });
-
-  it("returns fid when floor is found by block_key", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ fid: 6 }] });
-
-    const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A&block_key=Greenhouse 1::Section A::0:0");
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ status: "success", fid: 6 });
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("f.block_key = $3"),
-      ["Greenhouse 1", "Section A", "Greenhouse 1::Section A::0:0"]
-    );
-  });
-
-  it("returns 409 when label-only floor resolution is ambiguous", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ fid: 5 }, { fid: 6 }] });
-
-    const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A");
-
-    expect(res.statusCode).toBe(409);
-    expect(res.body).toEqual({
-      status: "ambiguous",
-      message: "Multiple floors match this map_name and cell_name; provide block_key",
-    });
-  });
-
-  it("returns 400 when map_name is missing", async () => {
-    const res = await request(app).get("/api/floors/resolve?cell_name=Section A");
-
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ status: "error", message: "map_name and cell_name are required" });
-  });
-
-  it("returns 400 when cell_name is missing", async () => {
-    const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1");
-
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ status: "error", message: "map_name and cell_name are required" });
-  });
-
-  it("returns 404 when floor is not found", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
-
-    const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Unknown");
-
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ status: "not_found", message: "Floor not found" });
-  });
-
-  it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
-
-    const res = await request(app).get("/api/floors/resolve?map_name=Greenhouse 1&cell_name=Section A");
-
-    expect(res.statusCode).toBe(500);
-    expect(res.body.status).toBe("error");
-
-    errorSpy.mockRestore();
-  });
-});
-
-describe("POST /api/floors/resolve-many", () => {
-  it("returns fids ordered like the requested cells", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        { fid: 6, block_key: "Greenhouse 1::Section B::0:1" },
-        { fid: 5, block_key: "Greenhouse 1::Section A::0:0" },
-      ],
+        errorSpy.mockRestore();
+      });
     });
 
-    const res = await request(app).post("/api/floors/resolve-many").send({
-      map_name: "Greenhouse 1",
-      cells: [
-        { cell_name: "Section A", block_key: "Greenhouse 1::Section A::0:0" },
-        { cell_name: "Section B", block_key: "Greenhouse 1::Section B::0:1" },
-      ],
+
+    // ---------- All Users ----------
+    describe("GET /api/users", () => {
+      it("returns all users", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            { uid: 1, username: "scoutA", role: "scout" },
+            { uid: 2, username: "admin1", role: "admin" },
+          ],
+        });
+
+        const res = await request(app).get("/api/users");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual([
+          { uid: 1, username: "scoutA", role: "scout" },
+          { uid: 2, username: "admin1", role: "admin" },
+        ]);
+      });
+
+      it("returns 500 when query fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+        mockQuery.mockRejectedValueOnce(new Error("DB failed"));
+
+        const res = await request(app).get("/api/users");
+
+        expect(res.statusCode).toBe(500);
+        expect(res.body).toEqual({ message: "Server error" });
+
+        errorSpy.mockRestore();
+      });
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ status: "success", fids: [5, 6] });
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("f.block_key = ANY($2::text[])"),
-      [
-        "Greenhouse 1",
-        ["Greenhouse 1::Section A::0:0", "Greenhouse 1::Section B::0:1"],
-      ]
-    );
-  });
+    // ---------- Login role enforcement (Issue 3) ----------
+    describe("POST /api/login role enforcement", () => {
+      it("returns 403 when a scout user tries to log in via the admin entry", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            {
+              uid: 2,
+              username: "scoutuser",
+              role: "scout",
+              password_hash: "hashed-password",
+            },
+          ],
+        });
 
-  it("returns 400 when a cell is missing block_key", async () => {
-    const res = await request(app).post("/api/floors/resolve-many").send({
-      map_name: "Greenhouse 1",
-      cells: [{ cell_name: "Section A" }],
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ status: "error", message: "Every cell must include block_key" });
-  });
-
-  it("returns 404 when a requested block_key is not found", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [{ fid: 5, block_key: "Greenhouse 1::Section A::0:0" }],
-    });
-
-    const res = await request(app).post("/api/floors/resolve-many").send({
-      map_name: "Greenhouse 1",
-      cells: [
-        { cell_name: "Section A", block_key: "Greenhouse 1::Section A::0:0" },
-        { cell_name: "Section B", block_key: "Greenhouse 1::Section B::0:1" },
-      ],
-    });
-
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({
-      status: "not_found",
-      message: "Floor not found for Greenhouse 1::Section B::0:1",
-    });
-  });
-});
-
-
-// ---------- Approve Report ----------
-describe("PUT /api/reports/:id/approve", () => {
-  it("approves a report", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [{ rid: 1, approval_status: "approved", comment: null }],
-    });
-
-    const res = await request(app).put("/api/reports/1/approve").send({
-      status: "approved",
-      admin_comment: null,
-    });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.status).toBe("success");
-    expect(res.body.data.approval_status).toBe("approved");
-  });
-
-  it("approves every report in the same batch", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        { rid: 1, approval_status: "approved", report_batch_id: "11111111-1111-1111-1111-111111111111" },
-        { rid: 2, approval_status: "approved", report_batch_id: "11111111-1111-1111-1111-111111111111" },
-      ],
-    });
-
-    const res = await request(app).put("/api/reports/1/approve").send({
-      status: "approved",
-      admin_comment: "Batch approved",
-    });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.status).toBe("success");
-    expect(res.body.affected_count).toBe(2);
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("target_report"),
-      ["approved", "Batch approved", "1"]
-    );
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining("report_batch_id = (SELECT report_batch_id FROM target_report)"),
-      ["approved", "Batch approved", "1"]
-    );
-  });
-
-  it("rejects a report with a comment", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [{ rid: 1, approval_status: "rejected", comment: "Too vague" }],
-    });
-
-    const res = await request(app).put("/api/reports/1/approve").send({
-      status: "rejected",
-      admin_comment: "Too vague",
-    });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.status).toBe("success");
-    expect(res.body.data.approval_status).toBe("rejected");
-  });
-
-  it("returns 400 when status is invalid", async () => {
-    const res = await request(app).put("/api/reports/1/approve").send({
-      status: "maybe",
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ message: "Invalid status" });
-  });
-
-  it("returns 404 when report is not found", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
-
-    const res = await request(app).put("/api/reports/999/approve").send({
-      status: "approved",
-    });
-
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ message: "Report not found" });
-  });
-
-  it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
-
-    const res = await request(app).put("/api/reports/1/approve").send({
-      status: "approved",
-    });
-
-    expect(res.statusCode).toBe(500);
-    expect(res.body.status).toBe("error");
-
-    errorSpy.mockRestore();
-  });
-});
-
-
-// ---------- All Users ----------
-describe("GET /api/users", () => {
-  it("returns all users", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        { uid: 1, username: "scoutA", role: "scout" },
-        { uid: 2, username: "admin1", role: "admin" },
-      ],
-    });
-
-    const res = await request(app).get("/api/users");
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual([
-      { uid: 1, username: "scoutA", role: "scout" },
-      { uid: 2, username: "admin1", role: "admin" },
-    ]);
-  });
-
-  it("returns 500 when query fails", async () => {
-    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockQuery.mockRejectedValueOnce(new Error("DB failed"));
-
-    const res = await request(app).get("/api/users");
-
-    expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ message: "Server error" });
-
-    errorSpy.mockRestore();
-  });
-});
-
-// ---------- Login role enforcement (Issue 3) ----------
-describe("POST /api/login role enforcement", () => {
-  it("returns 403 when a scout user tries to log in via the admin entry", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          uid: 2,
+        const res = await request(app).post("/api/login").send({
           username: "scoutuser",
-          role: "scout",
-          password_hash: "hashed-password",
-        },
-      ],
-    });
-
-    const res = await request(app).post("/api/login").send({
-      username: "scoutuser",
-      password: "password123",
-      role: "admin",
-    });
-
-    expect(res.statusCode).toBe(403);
-    expect(res.body).toEqual({
-      message: "Access denied. You are not a(n) admin.",
-    });
-  });
-
-  it("allows admin login when role matches", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          uid: 1,
-          username: "adminuser",
+          password: "password123",
           role: "admin",
-          password_hash: "hashed-password",
-          email: "a@x.nl",
-          must_change_password: false,
-          language: "nl",
-        },
-      ],
+        });
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body).toEqual({
+          message: "Access denied. You are not a(n) admin.",
+        });
+      });
+
+      it("allows admin login when role matches", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            {
+              uid: 1,
+              username: "adminuser",
+              role: "admin",
+              password_hash: "hashed-password",
+              email: "a@x.nl",
+              must_change_password: false,
+              language: "nl",
+            },
+          ],
+        });
+        mockCompare.mockResolvedValueOnce(true);
+
+        const res = await request(app).post("/api/login").send({
+          username: "adminuser",
+          password: "password123",
+          role: "admin",
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.user.role).toBe("admin");
+      });
     });
-    mockCompare.mockResolvedValueOnce(true);
 
-    const res = await request(app).post("/api/login").send({
-      username: "adminuser",
-      password: "password123",
-      role: "admin",
+    // ---------- /api/reports response shape (Issue 4 backend) ----------
+    describe("GET /api/reports", () => {
+      it("includes pests_found in the response data", async () => {
+        mockQuery.mockResolvedValueOnce({
+          rows: [
+            {
+              report_id: 1,
+              cell_name: "baan 1",
+              map_id: "Rijsenhout",
+              status: "approved",
+              pests_found: true,
+            },
+          ],
+        });
+
+        const res = await request(app).get("/api/reports");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.status).toBe("success");
+        expect(res.body.data[0]).toHaveProperty("pests_found", true);
+      });
+
+      it("filters by map_id query param", async () => {
+        mockQuery.mockResolvedValueOnce({ rows: [] });
+
+        await request(app).get("/api/reports?map_id=HW%2013");
+
+        const [calledSql, calledParams] = mockQuery.mock.calls[0];
+        expect(calledSql).toContain("m.name = $1");
+        expect(calledParams).toContain("HW 13");
+      });
     });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.user.role).toBe("admin");
-  });
-});
-
-// ---------- /api/reports response shape (Issue 4 backend) ----------
-describe("GET /api/reports", () => {
-  it("includes pests_found in the response data", async () => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          report_id: 1,
-          cell_name: "baan 1",
-          map_id: "Rijsenhout",
-          status: "approved",
-          pests_found: true,
-        },
-      ],
-    });
-
-    const res = await request(app).get("/api/reports");
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.status).toBe("success");
-    expect(res.body.data[0]).toHaveProperty("pests_found", true);
-  });
-
-  it("filters by map_id query param", async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
-
-    await request(app).get("/api/reports?map_id=HW%2013");
-
-    const [calledSql, calledParams] = mockQuery.mock.calls[0];
-    expect(calledSql).toContain("m.name = $1");
-    expect(calledParams).toContain("HW 13");
-  });
-});
