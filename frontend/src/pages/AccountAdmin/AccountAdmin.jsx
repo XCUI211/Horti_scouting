@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminLayout from '../../components/AdminLayout/AdminLayout';
 import "./Account.css";
@@ -8,7 +8,9 @@ import { useAuth } from "../../context/AuthContext";
 
 const AccountAdmin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [userData, setUserData] = useState(null);
+  const [showScoutAdded, setShowScoutAdded] = useState(Boolean(location.state?.scoutAdded));
   const { user, setUser, logout } = useAuth();
   const [selectedLanguage, setSelectedLanguage] = useState(user?.language || "nl");
   const [password] = useState("");
@@ -30,6 +32,12 @@ const AccountAdmin = () => {
       navigate("/login_admin");
     }
   }, [user, navigate, i18n]);
+
+  useEffect(() => {
+    if (location.state?.scoutAdded) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   // Log out function
   const handleLogout = () => {
@@ -60,6 +68,19 @@ const AccountAdmin = () => {
   return (
     <AdminLayout title={t("AccountAdmin.YourAccount")}>
       <div className="account-container">
+        {showScoutAdded && (
+          <div className="account-success-banner" role="status">
+            <span>{t("CreateAccount.SuccessMessage")}</span>
+            <button
+              type="button"
+              className="account-success-banner-close"
+              onClick={() => setShowScoutAdded(false)}
+              aria-label={t("CreateAccount.DismissSuccess")}
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
         {/* This wrapper groups the sections together to form a side-by-side layout on tablets and laptops */}
         <div className="account-sections-grid">

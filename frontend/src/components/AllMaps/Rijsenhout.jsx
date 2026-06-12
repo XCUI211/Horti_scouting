@@ -5,12 +5,14 @@ import ScoutReportModal from './Forms/ScoutReportModal';
 import { useTranslation } from "react-i18next";
 import MapMultiSelectToolbar from './MapMultiSelectToolbar';
 import { useMapMultiSelect } from './useMapMultiSelect';
+import { useMapReportStatusUpdates } from './useMapReportStatusUpdates';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
+  useMapReportStatusUpdates(mapName, setCellStatuses);
 
   const { t } = useTranslation();
   const {
@@ -184,7 +186,7 @@ const RijsenhoutMap = ({ focusedReport, mapName = "Rijsenhout" }) => {
           centerOnInit
           limitToBounds={false}
           doubleClick={{ disabled: true }}
-          wheel={{ disabled: false, step: 0.0004 }}
+          wheel={{ disabled: false, step: 0.004 }}
           pinch={{ disabled: false, step: 2.5, allowPanning: true }}
           panning={{ disabled: false, velocityDisabled: true }}
           autoAlignment={{ disabled: true }}

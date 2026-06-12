@@ -42,6 +42,16 @@ const ensureReportBatchColumn = async () => {
     `);
 };
 
+const syncUsersUidSequence = async () => {
+    await pool.query(`
+        SELECT setval(
+            pg_get_serial_sequence('users', 'uid'),
+            COALESCE((SELECT MAX(uid) FROM users), 1),
+            EXISTS (SELECT 1 FROM users)
+        )
+    `);
+};
+
 // Simple confirmation that the server is working
 // if the localhost5000 opens with this message, server is working
 // if site not reachable, server is not working or something is wrong
@@ -147,6 +157,16 @@ app.get('/api/reports', async (req, res) => {
                    m.name              AS map_id,
                    fr.pest_severity    AS severity,
                    fr.pest_types       AS pest_types,
+                   fr.biology_used     AS biology_used,
+                   fr.biology_types    AS biology_types,
+                   fr.chemicals_used   AS chemicals_used,
+                   fr.chemicals_types  AS chemicals_types,
+                   fr.behandelaar      AS behandelaar,
+                   fr.potmaat          AS potmaat,
+                   fr.oppotweek        AS oppotweek,
+                   fr.teelduur_weeks   AS teelduur_weeks,
+                   fr.trap_number      AS trap_number,
+                   fr.bug_count        AS bug_count,
                    to_char(fr.report_time, 'YYYY-MM-DD') AS entry_date,
                    fr.approval_status  AS status,
                    fr.pests_found      AS pests_found,
@@ -321,7 +341,7 @@ app.get('/api/users', async (req, res) => {
 // POST request for creating a new account; checks if the username already exists, and if not, creates a new user
 // with the "Scout" role (admin accounts should NOT be created this way)
 app.post('/api/createaccount', async (req, res) => {
-    const { username, email, password, mustChangePassword } = req.body;  // get data from the frontend
+    const { username, email, password } = req.body;  // get data from the frontend
 
     try {
         // Get all usernames
@@ -337,10 +357,20 @@ app.post('/api/createaccount', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         // Creating new user; ALWAYS hardcode "Scout" role; admin accounts should NOT be created this way
-        await pool.query(
+        const insertUser = () => pool.query(
             "INSERT INTO users (username, email, password_hash, role, must_change_password) VALUES ($1, $2, $3, 'scout', $4) RETURNING *",
-            [username, email, hashedPassword, mustChangePassword || false]
+            [username, email, hashedPassword, false]
         );
+
+        try {
+            await insertUser();
+        } catch (err) {
+            const staleUidSequence = err.code === '23505' && err.constraint === 'users_pkey';
+            if (!staleUidSequence) throw err;
+
+            await syncUsersUidSequence();
+            await insertUser();
+        }
 
         // Sends success message back to frontend
         res.status(201).json({
@@ -1199,5 +1229,6 @@ module.exports = {
     pool,
     startServer,
     testDatabaseConnection,
-    ensureReportBatchColumn
+    ensureReportBatchColumn,
+    syncUsersUidSequence
 };

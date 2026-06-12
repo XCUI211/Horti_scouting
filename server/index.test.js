@@ -255,13 +255,37 @@ describe("POST /api/createaccount", () => {
       username: "newuser",
       email: "new@example.com",
       password: "password123",
-      mustChangePassword: true,
     });
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
       message: "Account created successfully!",
     });
+    expect(mockQuery.mock.calls[1][1][3]).toBe(false);
+  });
+
+  it("repairs a stale UID sequence and retries account creation", async () => {
+    const duplicateUidError = Object.assign(new Error("duplicate uid"), {
+      code: "23505",
+      constraint: "users_pkey",
+    });
+
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockRejectedValueOnce(duplicateUidError)
+      .mockResolvedValueOnce({ rows: [{ setval: 2 }] })
+      .mockResolvedValueOnce({ rows: [{ uid: 3 }] });
+
+    const res = await request(app).post("/api/createaccount").send({
+      username: "newuser",
+      email: "new@example.com",
+      password: "password123",
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(mockQuery).toHaveBeenCalledTimes(4);
+    expect(mockQuery.mock.calls[2][0]).toContain("pg_get_serial_sequence('users', 'uid')");
+    expect(mockQuery.mock.calls[3][1][3]).toBe(false);
   });
 
   it("returns 409 when username exists", async () => {
@@ -1060,6 +1084,26 @@ describe("GET /api/reports", () => {
       expect.stringContaining("m.name = $1"),
       ["Greenhouse 1"]
     );
+  });
+
+  it("selects all submitted report details for admin review", async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    await request(app).get("/api/reports");
+
+    const [calledSql] = mockQuery.mock.calls[0];
+    [
+      "fr.biology_used",
+      "fr.biology_types",
+      "fr.chemicals_used",
+      "fr.chemicals_types",
+      "fr.behandelaar",
+      "fr.potmaat",
+      "fr.oppotweek",
+      "fr.teelduur_weeks",
+      "fr.trap_number",
+      "fr.bug_count",
+    ].forEach((field) => expect(calledSql).toContain(field));
   });
 
   it("filters by cell_name", async () => {

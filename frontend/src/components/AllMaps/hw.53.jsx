@@ -5,6 +5,7 @@ import ScoutReportModal from './Forms/ScoutReportModal';
 import { useTranslation } from "react-i18next";
 import MapMultiSelectToolbar from './MapMultiSelectToolbar';
 import { useMapMultiSelect } from './useMapMultiSelect';
+import { useMapReportStatusUpdates } from './useMapReportStatusUpdates';
 import { getFocusedReportForCell } from './mapSelection';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
@@ -29,6 +30,7 @@ const HW53Map = ({ focusedReport }) => {
   const { t } = useTranslation();
 
   const mapId = "HW 53";
+  useMapReportStatusUpdates(mapId, setCellStatuses, 'status-pending');
 
   const staticCells = [
     "HW 53",
@@ -104,8 +106,8 @@ const HW53Map = ({ focusedReport }) => {
 
         const labelStr = String(label);
         const isStatic = staticCells.includes(labelStr);
-        const status = cellStatuses[labelStr];
         const blockKey = `${mapId}::${labelStr}::${r}:${c}`;
+        const status = cellStatuses[blockKey] || cellStatuses[labelStr];
         const cellInfo = { label: labelStr, startRow: r, startCol: c, width, height, block_key: blockKey };
         if (!isStatic) selectableCells.push(cellInfo);
         const isMultiSelected = !isStatic && isCellMultiSelected(cellInfo);

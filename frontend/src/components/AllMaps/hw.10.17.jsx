@@ -5,12 +5,14 @@ import ScoutReportModal from './Forms/ScoutReportModal';
 import { useTranslation } from "react-i18next";
 import MapMultiSelectToolbar from './MapMultiSelectToolbar';
 import { useMapMultiSelect } from './useMapMultiSelect';
+import { useMapReportStatusUpdates } from './useMapReportStatusUpdates';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 const HW1017Map = ({ focusedReport, mapName = "HW 10.17" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
+  useMapReportStatusUpdates(mapName, setCellStatuses);
   const {
     multiSelectEnabled,
     selectedCells,
@@ -178,8 +180,9 @@ const HW1017Map = ({ focusedReport, mapName = "HW 10.17" }) => {
       if (!isUnclickable) selectableCells.push(bounds);
 
       let statusClass = '';
-      if (cellStatuses[bounds.label] === 'pending') statusClass = 'status-pending';
-      if (cellStatuses[bounds.label] === 'approved') statusClass = 'status-approved';
+      const currentStatus = cellStatuses[bounds.block_key] || cellStatuses[bounds.label];
+      if (currentStatus === 'pending') statusClass = 'status-pending';
+      if (currentStatus === 'approved') statusClass = 'status-approved';
       const isMultiSelected = !isUnclickable && isCellMultiSelected(bounds);
 
       gridElements.push(

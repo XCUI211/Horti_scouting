@@ -25,14 +25,12 @@ function CreateAccount() {
             const response = await axios.post('http://localhost:5000/api/createaccount', {  //sends POST request for sensitive data
                 username: username,
                 email: email || null,  //sends null if email is empty (makes email optional for scouts)
-                password: password,
-                mustChangePassword: true  // makes the password only temporary (to be changed at first login by the scout)
+                password: password
             });
 
             // if successful
             console.log("Account created:", response.data);
-            alert(t("CreateAccount.SuccessMessage"));
-            navigate("/account_management_admin");
+            navigate("/account_management_admin", { state: { scoutAdded: true } });
 
             // if error
         } catch (err) {

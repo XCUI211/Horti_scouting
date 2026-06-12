@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../context/AuthContext";
 import { formatPestNames } from "../../../constants/pestNames";
+import { REPORT_SUBMITTED_EVENT } from "../useMapReportStatusUpdates";
 
 export default function ScoutReportModal({ isOpen, onClose, onReportApproved, cellInfo, reportData, mapName, selectedCells }) {
   const [targetFids, setTargetFids] = useState([]);
@@ -226,7 +227,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
     },
     infoHeader: {
-      padding: '0px 0px 25px', borderBottom: '1px solid #eee',
+      padding: '20px 0px 25px', borderBottom: '1px solid #eee',
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
       textAlign: 'center',
     },
@@ -333,6 +334,9 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
         setSuccess('');
+        window.dispatchEvent(new CustomEvent(REPORT_SUBMITTED_EVENT, {
+          detail: { mapName, targets: reportTargets },
+        }));
         setShowSubmittedPopup(true);
       } else {
         setError(data.message || t("ScoutReportModal.CouldNotSubmitFloorReport"));
@@ -422,12 +426,33 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     if (status === 'rejected') return t("ScoutReportModal.Declined");
     return status;
   };
+  const displayValue = (value) =>
+    value === null || value === undefined || value === '' ? t("ScoutReportModal.NotAvailable") : value;
+  const formatSelectedOptions = (values, options) => {
+    const normalizedValues = Array.isArray(values) ? values : values ? [values] : [];
+    if (normalizedValues.length === 0) return t("ScoutReportModal.NotAvailable");
+
+    return normalizedValues
+      .map((value) => options.find((option) => option.value === value)?.label || value)
+      .join(', ');
+  };
+  const yesNo = (value) => value ? t("ScoutReportModal.Yes") : t("ScoutReportModal.No");
+  const adminDetailRow = (label, value) => (
+    <p style={{ margin: '4px 0', fontSize: '14px' }}>
+      <strong>{label}:</strong> {displayValue(value)}
+    </p>
+  );
+  const adminSectionTitle = (label) => (
+    <h4 style={{ margin: '12px 0 8px', paddingTop: '12px', borderTop: '1px solid #ccc', color: '#333' }}>
+      {label}
+    </h4>
+  );
 
   // ---- ADMIN APPROVAL VIEW ----
   if (reportData) {
     return (
       <div style={styles.overlay}>
-        <div style={styles.modal}>
+        <div style={{ ...styles.modal, maxWidth: '620px' }}>
           <div style={styles.adminHeader}>
             <h3 style={{ margin: 0, color: '#1976d2' }}>{t("ScoutReportModal.AdminApproval")}</h3>
           </div>
@@ -449,6 +474,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
 
             <div style={{ background: '#f5f5f5', padding: '14px', borderRadius: '8px', marginBottom: '14px', border: '1px solid #ddd' }}>
               <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{t("ScoutReportModal.IssueDetails")}</h4>
+              {adminDetailRow(t("ScoutReportModal.Map"), reportData.map_id)}
               <p style={{ margin: '4px 0', fontSize: '14px' }}>
                 <strong>{t("ScoutReportModal.Location")}:</strong> {isBatchReport
                   ? t("ScoutReportModal.SelectedSections", { count: reportData.batch_count })
@@ -460,13 +486,47 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
                   {batchCellNames.length > 8 ? ` +${batchCellNames.length - 8}` : ''}
                 </p>
               )}
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Plant")}:</strong> {reportData.plant_name}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Supplier")}:</strong> {reportData.supplier}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Severity")}:</strong> {t("ScoutReportModal.Level")} {reportData.severity}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.DateReported")}:</strong> {reportData.entry_date}</p>
-              <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '10px 0' }} />
-              <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{t("ScoutReportModal.ReporterInfo")}</h4>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>{t("ScoutReportModal.Name")}:</strong> {reportData.reporter_name}</p>
+              {adminDetailRow(t("ScoutReportModal.Plant"), reportData.plant_name)}
+              {adminDetailRow(t("ScoutReportModal.Supplier"), reportData.supplier)}
+              {adminDetailRow(t("ScoutReportModal.DateReported"), reportData.entry_date)}
+
+              {adminSectionTitle(t("ScoutReportModal.PestDetails"))}
+              {adminDetailRow(t("ScoutReportModal.PestsFound"), yesNo(reportData.pests_found))}
+              {adminDetailRow(
+                t("ScoutReportModal.FoundPests"),
+                formatSelectedOptions(reportData.pest_types, pestOptions)
+              )}
+              {adminDetailRow(
+                t("ScoutReportModal.Severity"),
+                reportData.severity == null
+                  ? t("ScoutReportModal.NotAvailable")
+                  : `${t("ScoutReportModal.Level")} ${reportData.severity}`
+              )}
+
+              {adminSectionTitle(t("ScoutReportModal.TreatmentDetails"))}
+              {adminDetailRow(t("ScoutReportModal.BiologyUsed"), yesNo(reportData.biology_used))}
+              {adminDetailRow(
+                t("ScoutReportModal.BiologyType"),
+                formatSelectedOptions(reportData.biology_types, biologyOptions)
+              )}
+              {adminDetailRow(t("ScoutReportModal.ChemicalsUsed"), yesNo(reportData.chemicals_used))}
+              {adminDetailRow(
+                t("ScoutReportModal.ChemicalsType"),
+                formatSelectedOptions(reportData.chemicals_types, [])
+              )}
+              {adminDetailRow(t("ScoutReportModal.Behandelaar"), reportData.behandelaar)}
+
+              {adminSectionTitle(t("ScoutReportModal.CultivationDetails"))}
+              {adminDetailRow(t("ScoutReportModal.Potmaat"), reportData.potmaat)}
+              {adminDetailRow(t("ScoutReportModal.Oppotweek"), reportData.oppotweek)}
+              {adminDetailRow(t("ScoutReportModal.TeelduurWeeks"), reportData.teelduur_weeks)}
+
+              {adminSectionTitle(t("ScoutReportModal.TrapDetails"))}
+              {adminDetailRow(t("ScoutReportModal.TrapNumber"), reportData.trap_number)}
+              {adminDetailRow(t("ScoutReportModal.BugCount"), reportData.bug_count)}
+
+              {adminSectionTitle(t("ScoutReportModal.ReporterInfo"))}
+              {adminDetailRow(t("ScoutReportModal.Name"), reportData.reporter_name)}
             </div>
             <div style={styles.formGroup}>
               <label style={styles.label}>{t("ScoutReportModal.AdminCommentOptional")}:</label>

@@ -4,12 +4,14 @@ import './MapStyles.css';
 import ScoutReportModal from './Forms/ScoutReportModal';
 import MapMultiSelectToolbar from './MapMultiSelectToolbar';
 import { useMapMultiSelect } from './useMapMultiSelect';
+import { useMapReportStatusUpdates } from './useMapReportStatusUpdates';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 const HW1014Map = ({ focusedReport, mapName = "HW 10.14" }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [viewingReport, setViewingReport] = useState(null);
   const [cellStatuses, setCellStatuses] = useState({});
+  useMapReportStatusUpdates(mapName, setCellStatuses);
   const {
     multiSelectEnabled,
     selectedCells,

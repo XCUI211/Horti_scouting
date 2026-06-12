@@ -41,6 +41,17 @@ export default function PestHistory() {const { t } = useTranslation();
                                        const [comparisonLoading, setComparisonLoading] = useState(true);
                                        const [comparisonError, setComparisonError] = useState(null);
 
+  const formatBiologyTypes = (biologyTypes) => {
+    if (!Array.isArray(biologyTypes)) return [];
+
+    return biologyTypes.map((biologyType) => {
+      const match = /^bio(\d+)$/i.exec(String(biologyType));
+      if (!match) return biologyType;
+
+      return t(`ScoutReportModal.Bio${match[1]}`, { defaultValue: biologyType });
+    });
+  };
+
   // Whenever the selected time period or map changes, retrieve the reports for that specific filter
   useEffect(() => {
     const controller = new AbortController();
@@ -342,7 +353,9 @@ export default function PestHistory() {const { t } = useTranslation();
                                       <strong>Biology:</strong> {item.biology_used ? 'Yes' : 'No'}
                                     </div>
                                     <div className="pest-history-detail-meta">
-                                      <strong>Type(s):</strong> {item.biology_types && item.biology_types.length > 0 ? item.biology_types.join(', ') : '-'}
+                                      <strong>Type(s):</strong> {item.biology_types && item.biology_types.length > 0
+                                        ? formatBiologyTypes(item.biology_types).join(', ')
+                                        : '-'}
                                     </div>
                                   </div>
                                   <div className="pest-history-chemicals-section">
