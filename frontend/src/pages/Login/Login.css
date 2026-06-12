@@ -11,9 +11,12 @@ body {
 .login-container {
   width: 100%;
   max-width: 400px;
+  margin-inline: auto;
+  margin-top: 140px;
 
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
 
   text-align: center;
