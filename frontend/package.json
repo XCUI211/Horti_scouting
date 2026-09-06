@@ -1,8 +1,14 @@
 {
   "name": "frontend",
+  "version": "1.0.0",
+  "description": "Vireo Plant Quality Control — React frontend for the Horti Scouting app.",
+  "license": "MIT",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

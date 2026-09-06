@@ -1,6 +1,14 @@
 {
+  "name": "horti-scouting-26",
+  "version": "1.0.0",
+  "description": "Vireo — plant-quality scouting app for horticulture greenhouses (monorepo root).",
+  "license": "MIT",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0",
+    "npm": ">=10.0.0"
+  },
   "workspaces": [
     "frontend",
     "server"
@@ -21,6 +29,7 @@
     "test:frontend": "npm test --workspace=frontend -- --run",
     "audit": "npm audit --audit-level=high --workspaces --include-workspace-root",
     "ci-check": "npm run test && npm run audit",
-    "startup": "concurrently \"npm run dev --workspace frontend\" \"npm run start --workspace server\""
+    "start:dev": "concurrently \"npm run dev --workspace frontend\" \"npm run start:dev --workspace server\"",
+    "build": "npm run build --workspace=frontend"
   }
 }
