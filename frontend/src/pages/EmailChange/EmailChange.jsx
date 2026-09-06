@@ -33,7 +33,7 @@ const EmailChange = () => {
     }
 
     try { 
-      await axios.post('http://localhost:5000/api/users/change-email', {
+      await axios.post('/api/users/change-email', {
         uid: user.uid,
         password: password,
         newEmail: newEmail || null

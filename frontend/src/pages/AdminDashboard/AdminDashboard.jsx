@@ -10,7 +10,7 @@ export default function AdminDashboard({ onLocate, refreshKey = 0 }) {
   const { t } = useTranslation();
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/reports')
+    fetch('/api/reports')
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {

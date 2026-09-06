@@ -22,7 +22,7 @@ function CreateAccount() {
 
         try {
             //Sending the request to the backend
-            const response = await axios.post('http://localhost:5000/api/createaccount', {  //sends POST request for sensitive data
+            const response = await axios.post('/api/createaccount', {  //sends POST request for sensitive data
                 username: username,
                 email: email || null,  //sends null if email is empty (makes email optional for scouts)
                 password: password

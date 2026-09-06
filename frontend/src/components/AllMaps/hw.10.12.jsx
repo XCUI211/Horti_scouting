@@ -41,7 +41,7 @@ const HW1012Map = ({ focusedReport }) => {
 
   // 1. 获取状态：支持 block_key 精准匹配
   useEffect(() => {
-    fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent(mapId)}`)
+    fetch(`/api/reports?map_id=${encodeURIComponent(mapId)}`)
       .then(res => res.json())
       .then(data => {
         if (data.status !== 'success') return;

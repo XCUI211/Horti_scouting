@@ -32,7 +32,7 @@ const Plattergrond13 = ({ focusedReport }) => {
 
   // Load the data
   useEffect(() => {
-    fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent('HW 13')}`)
+    fetch(`/api/reports?map_id=${encodeURIComponent('HW 13')}`)
       .then(res => res.json())
       .then(data => {
         if (data.status !== 'success') return;

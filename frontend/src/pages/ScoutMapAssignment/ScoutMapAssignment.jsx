@@ -17,7 +17,7 @@ const ScoutMapAssignment = () => {
     // Getting the scouts overview from the database
     const fetchOverview = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/admin/scouts-maps-overview');
+            const res = await axios.get('/api/admin/scouts-maps-overview');
             setScoutOverview(res.data);
         } catch (err) { console.error(err); }
     };
@@ -25,7 +25,7 @@ const ScoutMapAssignment = () => {
     // Getting the maps overview from the database
     const fetchAllMaps = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/maps');
+            const res = await axios.get('/api/maps');
             // Sort maps by MAP_ORDER to maintain consistent ordering across the app
             const sortedMaps = res.data.sort((a, b) => {
                 const indexA = MAP_ORDER.indexOf(a.name);
@@ -63,7 +63,7 @@ const ScoutMapAssignment = () => {
         setLoading(true);  // Disables the save button while loading
         // Sending scout + assigned maps data to the backend
         try {
-            await axios.post('http://localhost:5000/api/admin/assign-maps', {
+            await axios.post('/api/admin/assign-maps', {
                 scoutUid: editingScout.uid,
                 mapIds: tempMapIds
             });

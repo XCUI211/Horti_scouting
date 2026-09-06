@@ -20,8 +20,8 @@ function MapViewScouts() {
     if (!user?.uid) return;
 
     Promise.all([
-      axios.get('http://localhost:5000/api/maps'),
-      axios.get(`http://localhost:5000/api/users/${user.uid}/maps`)
+      axios.get('/api/maps'),
+      axios.get(`/api/users/${user.uid}/maps`)
     ])
       .then(([allMapsRes, assignedRes]) => {
         const assignedMids = assignedRes.data;

@@ -15,7 +15,7 @@ const AccountScout = () => {
 
   useEffect(() => {
     if (user && user.uid) {
-      axios.get(`http://localhost:5000/api/users/${user.uid}`)
+      axios.get(`/api/users/${user.uid}`)
         .then(res => {
           const lang = res.data.language || "nl";
           setUserData(res.data);
@@ -41,7 +41,7 @@ const AccountScout = () => {
     setSelectedLanguage(newLanguage);
 
     try {
-      await axios.post('http://localhost:5000/api/users/change-language', {
+      await axios.post('/api/users/change-language', {
         uid: userData.uid,
         newLanguage: newLanguage
       });

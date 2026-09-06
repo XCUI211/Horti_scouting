@@ -32,7 +32,7 @@ const Leg = ({ focusedReport }) => {
 
   // Load the data
   useEffect(() => {
-    fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent('Legmeerdijk')}`)
+    fetch(`/api/reports?map_id=${encodeURIComponent('Legmeerdijk')}`)
       .then(res => res.json())
       .then(data => {
         if (data.status !== 'success') return;

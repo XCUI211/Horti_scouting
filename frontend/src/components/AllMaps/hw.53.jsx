@@ -51,7 +51,7 @@ const HW53Map = ({ focusedReport }) => {
   };
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/reports?map_id=${encodeURIComponent(mapId)}`)
+    fetch(`/api/reports?map_id=${encodeURIComponent(mapId)}`)
       .then(res => res.json())
       .then(data => {
         if (data.status !== 'success') return;

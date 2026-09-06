@@ -23,7 +23,7 @@ const ForcePasswordChange = () => {
 
     try {
 
-      await axios.post('http://localhost:5000/api/users/complete-force-change', {
+      await axios.post('/api/users/complete-force-change', {
         uid: user.uid,
         newPassword
       });

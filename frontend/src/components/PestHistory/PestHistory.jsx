@@ -61,7 +61,7 @@ export default function PestHistory() {const { t } = useTranslation();
         setLoading(true);
 
         const response = await axios.get(
-          'http://localhost:5000/api/analytics/pest-history',
+          '/api/analytics/pest-history',
           {
             signal: controller.signal,
             params: {
@@ -122,7 +122,7 @@ export default function PestHistory() {const { t } = useTranslation();
         setDetailLoading(true);
 
         const response = await axios.get(
-          'http://localhost:5000/api/analytics/pest-history-details',
+          '/api/analytics/pest-history-details',
           {
             signal: controller.signal,
             params: {
@@ -164,7 +164,7 @@ export default function PestHistory() {const { t } = useTranslation();
         setComparisonLoading(true);
 
         const response = await axios.get(
-          'http://localhost:5000/api/analytics/pest-week-comparison',
+          '/api/analytics/pest-week-comparison',
           {
             signal: controller.signal,
             params: {

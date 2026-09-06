@@ -32,7 +32,7 @@ const PasswordChange = () => {
       }
 
       // Sending uid, current password for verification and the new password to the backend
-      await axios.post('http://localhost:5000/api/users/change-password', {
+      await axios.post('/api/users/change-password', {
         uid: user.uid,
         currentPassword,
         newPassword

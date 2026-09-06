@@ -14,7 +14,7 @@ const ScoutOverview = () => {
     useEffect(() => {
         const fetchSummary = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/admin/scouts-reports-summary');
+                const res = await axios.get('/api/admin/scouts-reports-summary');
                 setScoutData(res.data);
             } catch (err) {
                 console.error("Error fetching data:", err);

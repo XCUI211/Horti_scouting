@@ -19,7 +19,7 @@ const ScoutPasswordReset = () => {
 
   // Loading all scouts for the dropdown list
   useEffect(() => {
-    axios.get('http://localhost:5000/api/users/scouts')
+    axios.get('/api/users/scouts')
       .then(res => setScouts(res.data))  // saves the list of scouts
       .catch(err => console.error("Error fetching scouts:", err));
   }, []);  // ensures that the request runs only once
@@ -42,7 +42,7 @@ const ScoutPasswordReset = () => {
     if (!selectedScout) return setError(t("ScoutPasswordReset.SelectValidScout"));
 
     try {
-      await axios.post('http://localhost:5000/api/admin/reset-scout-password', {
+      await axios.post('/api/admin/reset-scout-password', {
         scoutUid: selectedScout.uid,
         newPassword: newPassword
       });

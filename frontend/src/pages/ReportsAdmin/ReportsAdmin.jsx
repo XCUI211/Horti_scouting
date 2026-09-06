@@ -34,7 +34,7 @@ const ReportsAdmin = () => {
 
   // Fetch users on mount
   useEffect(() => {
-    axios.get('http://localhost:5000/api/users')
+    axios.get('/api/users')
       .then(res => {
         const scoutsOnly = res.data.filter(user => user.role === 'scout')
         setAllUsers(scoutsOnly)
@@ -44,7 +44,7 @@ const ReportsAdmin = () => {
 
   // Fetch roof reports dynamically based on selection filter
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/reports/roof?location=${selectedFilter}`)
+    axios.get(`/api/reports/roof?location=${selectedFilter}`)
       .then(res => {
         setRoofReports(res.data)
       })
@@ -53,7 +53,7 @@ const ReportsAdmin = () => {
 
   // Fetch climate reports dynamically based on selection filter
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/reports/climate?location=${selectedClimateFilter}`)
+    axios.get(`/api/reports/climate?location=${selectedClimateFilter}`)
       .then(res => {
         setClimateReports(res.data)
       })
@@ -83,14 +83,14 @@ const ReportsAdmin = () => {
       date: cleanDate || new Date().toISOString().split('T')[0]
     }
 
-    axios.post('http://localhost:5000/api/reports/roof', newReport)
+    axios.post('/api/reports/roof', newReport)
       .then(() => {
         setNewDescription('')
         setNewDate('')
 
         // Dynamic re-fetch or switch fallback to let the new entry show immediately
         if (selectedFilter === 'All' || selectedFilter === newLocation) {
-          axios.get(`http://localhost:5000/api/reports/roof?location=${selectedFilter}`)
+          axios.get(`/api/reports/roof?location=${selectedFilter}`)
             .then(res => setRoofReports(res.data))
         } else {
           setSelectedFilter('All')
@@ -142,7 +142,7 @@ const ReportsAdmin = () => {
       light: lightVal
     }
 
-    axios.post('http://localhost:5000/api/reports/climate', newReport)
+    axios.post('/api/reports/climate', newReport)
       .then(() => {
         setNewComputerNum('')
         setNewAfdeling('')
@@ -153,7 +153,7 @@ const ReportsAdmin = () => {
 
         // Dynamic re-fetch strategy for climate reporting context view tracking
         if (selectedClimateFilter === 'All' || selectedClimateFilter === newNursery) {
-          axios.get(`http://localhost:5000/api/reports/climate?location=${selectedClimateFilter}`)
+          axios.get(`/api/reports/climate?location=${selectedClimateFilter}`)
             .then(res => setClimateReports(res.data))
         } else {
           setSelectedClimateFilter('All')
@@ -166,7 +166,7 @@ const ReportsAdmin = () => {
   const handleFireEmployee = (userId, currentStatus) => {
     const nextStatus = !currentStatus;
 
-    axios.post(`http://localhost:5000/api/users/${userId}/employment`, { is_employed: nextStatus })
+    axios.post(`/api/users/${userId}/employment`, { is_employed: nextStatus })
       .then(() => {
         // Update local state dynamically
         setAllUsers(allUsers.map(user =>

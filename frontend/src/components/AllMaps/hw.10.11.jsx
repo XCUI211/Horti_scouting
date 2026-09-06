@@ -35,7 +35,7 @@ const HW1011Map = ({ focusedReport, mapName = "HW 10.11" }) => {
     /^\d+[A-Za-z]+\d+$/.test(labelStr); 
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/reports?map_id=${mapName}`)
+    fetch(`/api/reports?map_id=${mapName}`)
       .then(res => res.json())
       .then(data => {
         if (data.status !== 'success') return;

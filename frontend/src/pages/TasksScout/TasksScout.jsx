@@ -17,7 +17,7 @@ const TasksScout = () => {
         const fetchTasks = async () => {
             try {
                 if (user?.uid) {
-                    const res = await axios.get(`http://localhost:5000/api/scout/tasks/${user.uid}`);
+                    const res = await axios.get(`/api/scout/tasks/${user.uid}`);
                     setTasks(res.data);
                 }
             } catch (err) {

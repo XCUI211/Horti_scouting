@@ -45,7 +45,7 @@ const HW1016Map = ({ focusedReport, mapName = "HW 10.16" }) => {
   };
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/reports')
+    fetch('/api/reports')
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {

@@ -135,7 +135,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       setTargetFids([]);
 
       if (reportTargets.length > 1) {
-        const response = await fetch('http://localhost:5000/api/floors/resolve-many', {
+        const response = await fetch('/api/floors/resolve-many', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({map_name: mapName,
@@ -159,7 +159,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
       });
       if (target.block_key) params.set('block_key', target.block_key);
 
-      const response = await fetch(`http://localhost:5000/api/floors/resolve?${params.toString()}`);
+      const response = await fetch(`/api/floors/resolve?${params.toString()}`);
       const data = await response.json().catch(() => ({}));
       if (!response.ok || data.status !== 'success' || data.fid == null) {
         throw new Error(data.message || `FloorID resolve failed for ${mapName} / ${target.label}`);
@@ -188,7 +188,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     });
     if (cellBlockKey) params.set('block_key', cellBlockKey);
 
-    fetch(`http://localhost:5000/api/reports?${params.toString()}`)
+    fetch(`/api/reports?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') setHistory(data.data);
@@ -324,7 +324,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
         bug_count: bugCount === '' ? null : Number(bugCount),
       };
       const isBulkSubmit = numericTargetFids.length > 1;
-      const response = await fetch(`http://localhost:5000/api/floorreports${isBulkSubmit ? '/bulk' : ''}`, {
+      const response = await fetch(`/api/floorreports${isBulkSubmit ? '/bulk' : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(isBulkSubmit
@@ -350,7 +350,7 @@ export default function ScoutReportModal({ isOpen, onClose, onReportApproved, ce
     setAdminBanner(null);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/reports/${reportData.report_id}/approve`, {
+      const response = await fetch(`/api/reports/${reportData.report_id}/approve`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, admin_comment: adminComment }),
